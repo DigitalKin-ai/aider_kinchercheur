@@ -277,12 +277,10 @@ class InputOutput:
 
         prefix = "####"
         hist = ["""IMPORTANT INSTRUCTIONS: 
-                      - Don't use main.py or other scripts to create the songs, create them via text files only.
-                      - Take each band member's perspective 1 by 1 (Lyra, Rhythm, Vox, Pixel, Nova), do the work that needs to be done, and then only update their respective todolists)
-                      - When creating and improving/refining on a complete song concept, we need: music prompts (with style & instruments/sonorities & emotions), lyrics, visual prompts, & clip prompts, in a new file.
-                      - From the todolists, reflect on what needs to be done.
-                      - Regularly journal for each band member, and have them have discussions.
-                      - Then continue to work autonomously on what you think needs to be done."""]
+    - Don't use main.py or other scripts to write the SOTA, write it via text files mainly.
+    - Write the SOTA progressively, using template.md as the reference. Only do modifications one by one, leaving the () [] \{\} if they are still needed.
+    - Make sure you have downloaded and read at least 10 studies.
+    - Make sure you only reference studies that you have downloaded and read."""]
 
         hist = f"  \n{prefix} ".join(hist)
 
@@ -291,12 +289,10 @@ class InputOutput:
         self.append_chat_history(hist, linebreak=True)
         
         return """IMPORTANT INSTRUCTIONS: 
-                      - Don't use main.py or other scripts to create the songs, create them via text files only.
-                      - Take each band member's perspective 1 by 1 (Lyra, Rhythm, Vox, Pixel, Nova), do the work that needs to be done, and then only update their respective todolists)
-                      - When creating and improving/refining on a complete song concept, we need: music prompts (with style & instruments/sonorities & emotions), lyrics, visual prompts, & clip prompts, in a new file.
-                      - From the todolists, reflect on what needs to be done.
-                      - Regularly journal for each band member, and have them have discussions.
-                      - Then continue to work autonomously on what you think needs to be done."""
+    - Don't use main.py or other scripts to write the SOTA, write it via text files mainly.
+    - Write the SOTA progressively, using template.md as the reference. Only do modifications one by one, leaving the () [] \{\} if they are still needed.
+    - Make sure you have downloaded and read at least 10 studies.
+    - Make sure you only reference studies that you have downloaded and read."""
 
     # OUTPUT
 

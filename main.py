@@ -662,12 +662,10 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             if user_input.lower() == 'exit':
                 break
             coder.run(with_message="""IMPORTANT INSTRUCTIONS: 
-                      - Don't use main.py or other scripts to create the songs, create them via text files only.
-                      - Take each band member's perspective 1 by 1 (Lyra, Rhythm, Vox, Pixel, Nova), do the work that needs to be done, and then only update their respective todolists)
-                      - When creating and improving/refining on a complete song concept, we need: music prompts (with style & instruments/sonorities & emotions), lyrics, visual prompts, & clip prompts, in a new file.
-                      - From the todolists, reflect on what needs to be done.
-                      - Regularly journal for each band member, and have them have discussions.
-                      - Then continue to work autonomously on what you think needs to be done.""")
+                      - Don't use main.py or other scripts to write the SOTA, write it via text files mainly.
+                      - Write the SOTA progressively, using template.md as the reference. Only do modifications one by one, leaving the () [] \{\} if they are still needed.
+                      - Make sure you have downloaded and read at least 10 studies.
+                      - Make sure you only reference studies that you have downloaded and read.""")
         except SwitchCoder as switch:
             kwargs = dict(io=io, from_coder=coder)
             kwargs.update(switch.kwargs)
