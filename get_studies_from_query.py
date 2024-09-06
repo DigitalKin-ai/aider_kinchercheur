@@ -29,15 +29,21 @@ def get_studies_from_query(query):
         print(f"Payload: {payload}")
         try:
             response = requests.post(url, headers=headers, json=payload)
-            response.raise_for_status()  # Raise an exception for bad status codes
             print(f"Statut de la réponse: {response.status_code}")
             print(f"Contenu de la réponse: {response.text}")
+            response.raise_for_status()  # Raise an exception for bad status codes
             return response.json()
         except requests.exceptions.RequestException as e:
             print(f"Erreur lors de la requête: {e}")
             if hasattr(e, 'response'):
                 print(f"Statut de la réponse: {e.response.status_code}")
                 print(f"Contenu de la réponse: {e.response.text}")
+            else:
+                print("Pas de réponse du serveur")
+            return None
+        except json.JSONDecodeError as e:
+            print(f"Erreur lors du décodage JSON: {e}")
+            print(f"Contenu de la réponse: {response.text}")
             return None
 
     # Fonction pour obtenir le PDF d'une étude
