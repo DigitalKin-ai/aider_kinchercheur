@@ -464,14 +464,14 @@ class StudyExtractor:
 
                 # Make the API call
                 try:
-                    response = litellm.beta.chat.completions.parse(
+                    response = litellm.completion(
                         model=self.model,
                         messages=messages,
-                        response_format=StudyInfo,
+                        response_format={"type": "json_object"},
                     )
 
                     # Parse the extracted information
-                    chunk_info = response.choices[0].message.parsed
+                    chunk_info = StudyInfo.parse_raw(response.choices[0].message.content)
 
                     # Merge the chunk info into the main extracted_info
                     for field in StudyInfo.__fields__:
@@ -504,14 +504,14 @@ class StudyExtractor:
             Return the result in JSON format. Limit your response to 4000 tokens."""}
             ]
 
-            synthesis_response = litellm.beta.chat.completions.parse(
+            synthesis_response = litellm.completion(
                 model=self.model,
                 messages=synthesis_messages,
-                response_format=StudyInfo,
+                response_format={"type": "json_object"},
             )
 
             # Parse the synthesized information
-            synthesized_info = synthesis_response.choices[0].message.parsed
+            synthesized_info = StudyInfo.parse_raw(synthesis_response.choices[0].message.content)
 
             # Save the synthesized information to a markdown file
             safe_title = re.sub(r'[^\w\-_\. ]', '_', title)
