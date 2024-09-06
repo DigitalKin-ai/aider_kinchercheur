@@ -9,10 +9,9 @@ import signal
 import sys
 import subprocess
 from dotenv import load_dotenv
-from urllib.parse import quote, urlparse
+from urllib.parse import quote
 from tqdm import tqdm
 from colorama import init, Fore, Style
-import concurrent.futures
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import argparse
 from aider.llm import litellm
