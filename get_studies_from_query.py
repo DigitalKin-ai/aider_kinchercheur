@@ -6,8 +6,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Vérification de la clé API
-if not os.getenv('SEARCHAPI_TOKEN'):
-    print("Erreur : La clé SEARCHAPI_TOKEN n'a pas été trouvée dans le fichier .env")
+if not os.getenv('SEARCHAPI_KEY'):
+    print("Erreur : La clé SEARCHAPI_KEY n'a pas été trouvée dans le fichier .env")
     exit(1)
 
 def get_studies_from_query(query):
@@ -15,7 +15,7 @@ def get_studies_from_query(query):
     def google_scholar_request(query):
         url = "https://www.searchapi.io/api/v1/search"
         headers = {
-            "Authorization": f"Bearer {os.getenv('SEARCHAPI_TOKEN')}",
+            "Authorization": f"Bearer {os.getenv('SEARCHAPI_KEY')}",
             "Content-Type": "application/json"
         }
         payload = {
