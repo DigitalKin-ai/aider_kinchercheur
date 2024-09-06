@@ -23,8 +23,10 @@ MAX_WORKERS = 5
 WAIT_TIME = 2
 
 def add_to_todolist(filename):
-    with open('todolist.md', 'a') as f:
-        f.write(f"[ ] Lire, analyser et incorporer {filename}\n")
+    with open('todolist.md', 'r+') as f:
+        content = f.read()
+        f.seek(0, 0)
+        f.write(f"[ ] Lire, analyser et incorporer {filename}\n" + content)
 
 def is_study_in_folder(title, output_dir):
     safe_title = re.sub(r'[^\w\-_\. ]', '_', title)
