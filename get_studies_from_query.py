@@ -21,6 +21,10 @@ from aider.io import InputOutput
 
 init(autoreset=True)  # Initialise colorama
 
+# Définition des constantes globales
+DEFAULT_MAX_WORKERS = 5
+DEFAULT_WAIT_TIME = 2
+
 load_dotenv()
 
 def check_and_install_dependencies():
@@ -72,7 +76,7 @@ if not os.getenv('SEARCHAPI_KEY'):
     print(f"{Fore.RED}Erreur : La clé SEARCHAPI_KEY n'a pas été trouvée dans le fichier .env")
     exit(1)
 
-def get_studies_from_query(query, num_articles=40, output_dir='etudes'):
+def get_studies_from_query(query, num_articles=40, output_dir='etudes', max_workers=DEFAULT_MAX_WORKERS, analyze_immediately=True):
     # Fonction pour faire une requête à Google Scholar
     def google_scholar_request(query, num_articles):
         url = "https://www.searchapi.io/api/v1/search"
@@ -266,17 +270,20 @@ def get_studies_from_query(query, num_articles=40, output_dir='etudes'):
                 # Ajouter à la todolist
                 add_to_todolist(filename)
 
-                # Extraire les informations du PDF immédiatement après le téléchargement
-                extracted_info = extract_pdf_info(pdf_content, url, title, io)
-                
-                if extracted_info is not None:
-                    # Sauvegarder les informations extraites dans un fichier JSON
-                    json_filename = os.path.join(output_dir, f"{safe_title[:100]}.json")
-                    with open(json_filename, 'w', encoding='utf-8') as f:
-                        json.dump(extracted_info, f, ensure_ascii=False, indent=2)
-                    print(f"{Fore.GREEN}Informations extraites sauvegardées : {json_filename}")
+                if analyze_immediately:
+                    # Extraire les informations du PDF immédiatement après le téléchargement
+                    extracted_info = extract_pdf_info(pdf_content, url, title, io)
+                    
+                    if extracted_info is not None:
+                        # Sauvegarder les informations extraites dans un fichier JSON
+                        json_filename = os.path.join(output_dir, f"{safe_title[:100]}.json")
+                        with open(json_filename, 'w', encoding='utf-8') as f:
+                            json.dump(extracted_info, f, ensure_ascii=False, indent=2)
+                        print(f"{Fore.GREEN}Informations extraites sauvegardées : {json_filename}")
+                    else:
+                        print(f"{Fore.YELLOW}L'étude n'a pas été traitée en raison de sa taille ou d'une erreur.")
                 else:
-                    print(f"{Fore.YELLOW}L'étude n'a pas été traitée en raison de sa taille.")
+                    print(f"{Fore.YELLOW}L'analyse immédiate est désactivée. Le PDF a été téléchargé mais pas analysé.")
 
             except IOError as e:
                 print(f"{Fore.RED}Erreur lors de l'écriture du fichier {filename}: {e}")
@@ -294,7 +301,7 @@ def get_studies_from_query(query, num_articles=40, output_dir='etudes'):
     io = InputOutput()
 
     # Traiter chaque résultat en parallèle
-    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = []
         for result in scholar_results.get('organic_results', []):
             if interrupted:
@@ -516,13 +523,15 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--output", default="etudes", help="Dossier de sortie pour les PDFs")
     parser.add_argument("--analyze-all", action="store_true", help="Analyser tous les PDFs dans le dossier de sortie")
     parser.add_argument("--model", default="gpt-4o", help="Modèle GPT à utiliser pour l'analyse (par défaut: gpt-4o)")
+    parser.add_argument("--max-workers", type=int, default=DEFAULT_MAX_WORKERS, help=f"Nombre maximum de workers pour le ThreadPoolExecutor (par défaut: {DEFAULT_MAX_WORKERS})")
+    parser.add_argument("--no-immediate-analysis", action="store_true", help="Désactiver l'analyse immédiate après le téléchargement")
     args = parser.parse_args()
 
     io = InputOutput()
 
     if args.query:
         num_articles = min(100, max(1, args.num_articles))  # Limiter entre 1 et 100
-        get_studies_from_query(args.query, num_articles, args.output)
+        get_studies_from_query(args.query, num_articles, args.output, max_workers=args.max_workers, analyze_immediately=not args.no_immediate_analysis)
 
     if args.analyze_all:
         run_all_analysis(io, model=args.model)
