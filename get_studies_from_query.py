@@ -481,16 +481,16 @@ class StudyExtractor:
                     {"role": "system", "content": "You are a helpful assistant that extracts information from scientific papers."},
                     {"role": "user", "content": f"""Please extract the following information from the given PDF chunk:
 
-            |id|Nom|Auteurs|Journal|Date de publication|DOI|Citation|Type|Mots-clés|lienOrigine|Lien Google Drive|Abstract|Objectif de l'étude|Méthodologie|Conclusions de l'étude|Pertinence au regard de l'axe de travail 1|Pertinence au regard de l'axe de travail 2|Pertinence de l'étude au regard de l'axe de travail 3|Pertinence au regard de l'objectif de recherche|Axe de travail|Sélection|Apports et contributions|Verbatims des apports et contributions|Extraits Verbatim des Verrous|Verrous de l'étude|Données chifrées|Date de création|Date de dernière modification|
+|id|Nom|Auteurs|Journal|Date de publication|DOI|Citation|Type|Mots-clés|lienOrigine|Lien Google Drive|Abstract|Objectif de l'étude|Méthodologie|Conclusions de l'étude|Pertinence au regard de l'axe de travail 1|Pertinence au regard de l'axe de travail 2|Pertinence de l'étude au regard de l'axe de travail 3|Pertinence au regard de l'objectif de recherche|Axe de travail|Sélection|Apports et contributions|Verbatims des apports et contributions|Extraits Verbatim des Verrous|Verrous de l'étude|Données chifrées|Date de création|Date de dernière modification|
 
-            This is chunk {i+1} of {len(chunks)} of the PDF content.
-            The PDF content chunk is provided as a base64 encoded string: {chunk}
+This is chunk {i+1} of {len(chunks)} of the PDF content.
+The PDF content chunk is provided as a base64 encoded string: {chunk}
 
-            Additional information:
-            URL: {url}
-            Title: {title}
+Additional information:
+URL: {url}
+Title: {title}
 
-            Please provide the extracted information in a JSON format. If you can't find information for a field, leave it empty. Be concise and focus on the most important information. Make sure to extract as much relevant information as possible, especially for key fields like Abstract, Objectif de l'étude, Méthodologie, and Conclusions de l'étude."""}
+Please provide the extracted information in a JSON format. If you can't find information for a field, leave it empty. Be concise and focus on the most important information. Make sure to extract as much relevant information as possible, especially for key fields like Abstract, Objectif de l'étude, Méthodologie, and Conclusions de l'étude."""}
                 ]
 
                 # Make the API call
