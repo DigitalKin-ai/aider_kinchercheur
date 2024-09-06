@@ -12,7 +12,7 @@ from colorama import init, Fore, Style
 import concurrent.futures
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import argparse
-from sendchat import send_completion
+from aider.llm import litellm
 
 init(autoreset=True)  # Initialise colorama
 
@@ -219,7 +219,7 @@ def get_studies_from_query(query, num_articles=40, output_dir='etudes'):
                 # Ajouter à la todolist
                 add_to_todolist(filename)
 
-                # Extraire les informations du PDF
+                # Extraire les informations du PDF immédiatement après le téléchargement
                 extracted_info = extract_pdf_info(pdf_content, url, title)
                 
                 # Sauvegarder les informations extraites dans un fichier JSON
@@ -274,11 +274,9 @@ Please provide the extracted information in a JSON format."""}
     ]
 
     # Make the API call
-    _hash, response = send_completion(
-        model_name="gpt-4-1106-preview",
+    response = litellm.completion(
+        model="gpt-4",
         messages=messages,
-        functions=None,
-        stream=False,
     )
 
     # Parse and return the extracted information
