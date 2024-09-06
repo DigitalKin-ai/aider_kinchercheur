@@ -368,13 +368,13 @@ class StudyExtractor:
         pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
 
         # Split the PDF content into chunks
-        chunk_size = 500000  # Adjust this value as needed
+        chunk_size = 100000  # Reduced chunk size
         print(f"{Fore.CYAN}Découpage du contenu PDF en morceaux...")
         chunks = [pdf_base64[i:i+chunk_size] for i in range(0, len(pdf_base64), chunk_size)]
         print(f"{Fore.CYAN}Nombre de morceaux : {len(chunks)}")
 
-        if len(chunks) > 50:
-            print(f"{Fore.YELLOW}L'étude a plus de 50 morceaux ({len(chunks)}). Elle ne sera pas traitée.")
+        if len(chunks) > 100:
+            print(f"{Fore.YELLOW}L'étude a plus de 100 morceaux ({len(chunks)}). Elle ne sera pas traitée.")
             return None
 
         extracted_info = {}
@@ -394,7 +394,7 @@ class StudyExtractor:
         URL: {url}
         Title: {title}
 
-        Please provide the extracted information in a JSON format. If you can't find information for a field, leave it empty."""}
+        Please provide the extracted information in a JSON format. If you can't find information for a field, leave it empty. Be concise and focus on the most important information."""}
             ]
 
             # Make the API call
@@ -415,7 +415,11 @@ class StudyExtractor:
                         extracted_info[key] += " " + value
             except Exception as e:
                 print(f"{Fore.RED}Erreur lors de l'extraction des informations du PDF : {e}")
-                return None
+                continue  # Continue with the next chunk instead of returning None
+
+        if not extracted_info:
+            print(f"{Fore.RED}Aucune information n'a pu être extraite du PDF.")
+            return None
 
         print(f"{Fore.CYAN}Extraction terminée. Début de la synthèse...")
 
@@ -427,7 +431,7 @@ class StudyExtractor:
         {json.dumps(extracted_info, indent=2)}
 
         Provide a concise summary for each field, ensuring that the information is coherent and non-repetitive. 
-        Return the result in JSON format."""}
+        Return the result in JSON format. Limit your response to 4000 tokens."""}
         ]
 
         try:
