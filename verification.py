@@ -21,8 +21,8 @@ def lire_etat_de_lart(fichier):
 def extraire_references(contenu):
     print("Extraction des références à l'aide de GPT...")
     load_dotenv()  # Charge les variables d'environnement depuis le fichier .env
-    openai.api_key = os.getenv("OPENAI_API_KEY")
-    if not openai.api_key:
+    client = OpenAI()
+    if not client.api_key:
         raise ValueError("La clé API OpenAI n'est pas définie dans le fichier .env. Veuillez ajouter OPENAI_API_KEY à votre fichier .env.")
     
     response = openai.ChatCompletion.create(
