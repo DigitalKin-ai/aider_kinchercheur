@@ -2,6 +2,7 @@ import os
 import requests
 import json
 from dotenv import load_dotenv
+from urllib.parse import quote
 
 load_dotenv()
 
@@ -62,6 +63,22 @@ def get_studies_from_query(query):
         print(f"Contenu de la réponse PDF: {response.text}")
         return response.json()
 
+    # Fonction pour obtenir le PDF via Sci-Hub
+    def get_pdf_scihub(identifier):
+        scihub_url = f"https://sci-hub.ru/{quote(identifier)}"
+        try:
+            response = requests.get(scihub_url)
+            if response.status_code == 200:
+                pdf_url = response.text.split('iframe src="')[1].split('"')[0]
+                if pdf_url.startswith('//'):
+                    pdf_url = 'https:' + pdf_url
+                pdf_response = requests.get(pdf_url)
+                if pdf_response.headers.get('content-type') == 'application/pdf':
+                    return pdf_response.content
+        except Exception as e:
+            print(f"Erreur lors de la tentative de téléchargement via Sci-Hub: {e}")
+        return None
+
     # Obtenir les résultats de Google Scholar
     scholar_results = google_scholar_request(query)
 
@@ -106,7 +123,19 @@ def get_studies_from_query(query):
                 else:
                     print(f"Pas de DOI trouvé pour : {title}")
             else:
-                print(f"Pas de PDF trouvé pour : {title}")
+                # Si OpenAccess ne fonctionne pas, essayer avec Sci-Hub
+                pdf_content = get_pdf_scihub(url or title)
+                if pdf_content:
+                    # Créer le dossier 'etudes' s'il n'existe pas
+                    os.makedirs('etudes', exist_ok=True)
+                    
+                    # Sauvegarder le PDF
+                    filename = f"etudes/{title.replace(' ', '_')[:50]}.pdf"
+                    with open(filename, 'wb') as f:
+                        f.write(pdf_content)
+                    print(f"PDF sauvegardé via Sci-Hub : {filename}")
+                else:
+                    print(f"Pas de PDF trouvé pour : {title}")
 
 if __name__ == "__main__":
     query = input("Entrez votre requête de recherche : ")
