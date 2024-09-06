@@ -7,6 +7,7 @@ import hashlib
 import base64
 import signal
 import sys
+import subprocess
 from dotenv import load_dotenv
 from urllib.parse import quote, urlparse
 from tqdm import tqdm
@@ -20,6 +21,20 @@ from aider.io import InputOutput
 init(autoreset=True)  # Initialise colorama
 
 load_dotenv()
+
+def check_and_install_dependencies():
+    required_packages = [
+        'requests', 'python-dotenv', 'tqdm', 'colorama', 'aider'
+    ]
+    for package in required_packages:
+        try:
+            __import__(package)
+        except ImportError:
+            print(f"{Fore.YELLOW}Le package {package} n'est pas installé. Installation en cours...")
+            subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+    print(f"{Fore.GREEN}Toutes les dépendances sont installées.")
+
+check_and_install_dependencies()
 
 # Variable globale pour gérer l'interruption
 interrupted = False
@@ -336,8 +351,9 @@ def run_all_analysis(io):
     print(f"{Fore.GREEN}Toutes les analyses ont été effectuées.")
 
 class StudyExtractor:
-    def __init__(self, io):
+    def __init__(self, io, model="gpt-4o"):
         self.io = io
+        self.model = model
 
     def extract_and_save_pdf_info(self, pdf_content, url, title):
         # Encode PDF content to base64
@@ -367,20 +383,24 @@ class StudyExtractor:
             ]
 
             # Make the API call
-            response = litellm.completion(
-                model="gpt-4o",
-                messages=messages,
-            )
+            try:
+                response = litellm.completion(
+                    model=self.model,
+                    messages=messages,
+                )
 
-            # Parse the extracted information
-            chunk_info = json.loads(response.choices[0].message.content)
-            
-            # Merge the chunk info into the main extracted_info
-            for key, value in chunk_info.items():
-                if key not in extracted_info or not extracted_info[key]:
-                    extracted_info[key] = value
-                elif value:
-                    extracted_info[key] += " " + value
+                # Parse the extracted information
+                chunk_info = json.loads(response.choices[0].message.content)
+                
+                # Merge the chunk info into the main extracted_info
+                for key, value in chunk_info.items():
+                    if key not in extracted_info or not extracted_info[key]:
+                        extracted_info[key] = value
+                    elif value:
+                        extracted_info[key] += " " + value
+            except Exception as e:
+                print(f"{Fore.RED}Erreur lors de l'extraction des informations du PDF : {e}")
+                return None
 
         # Synthesize the results
         synthesis_messages = [
@@ -393,34 +413,38 @@ class StudyExtractor:
         Return the result in JSON format."""}
         ]
 
-        synthesis_response = litellm.completion(
-            model="gpt-4o",
-            messages=synthesis_messages,
-        )
+        try:
+            synthesis_response = litellm.completion(
+                model=self.model,
+                messages=synthesis_messages,
+            )
 
-        # Parse the synthesized information
-        synthesized_info = json.loads(synthesis_response.choices[0].message.content)
+            # Parse the synthesized information
+            synthesized_info = json.loads(synthesis_response.choices[0].message.content)
 
-        # Save the synthesized information to a markdown file
-        safe_title = re.sub(r'[^\w\-_\. ]', '_', title)
-        md_filename = os.path.join('analyses', f"{safe_title[:100]}.md")
-        os.makedirs('analyses', exist_ok=True)
-        
-        with open(md_filename, 'w', encoding='utf-8') as f:
-            f.write(f"# {title}\n\n")
-            for key, value in synthesized_info.items():
-                f.write(f"## {key}\n{value}\n\n")
-        
-        print(f"{Fore.GREEN}Analyse sauvegardée : {md_filename}")
-        
-        # Add the analysis to the current chat session
-        with open(md_filename, 'r', encoding='utf-8') as f:
-            analysis_content = f.read()
-        
-        self.io.tool_output(f"Nouvelle analyse ajoutée au chat : {md_filename}")
-        self.io.append_chat_history(analysis_content, linebreak=True)
-        
-        return synthesized_info
+            # Save the synthesized information to a markdown file
+            safe_title = re.sub(r'[^\w\-_\. ]', '_', title)
+            md_filename = os.path.join('analyses', f"{safe_title[:100]}.md")
+            os.makedirs('analyses', exist_ok=True)
+            
+            with open(md_filename, 'w', encoding='utf-8') as f:
+                f.write(f"# {title}\n\n")
+                for key, value in synthesized_info.items():
+                    f.write(f"## {key}\n{value}\n\n")
+            
+            print(f"{Fore.GREEN}Analyse sauvegardée : {md_filename}")
+            
+            # Add the analysis to the current chat session
+            with open(md_filename, 'r', encoding='utf-8') as f:
+                analysis_content = f.read()
+            
+            self.io.tool_output(f"Nouvelle analyse ajoutée au chat : {md_filename}")
+            self.io.append_chat_history(analysis_content, linebreak=True)
+            
+            return synthesized_info
+        except Exception as e:
+            print(f"{Fore.RED}Erreur lors de la synthèse des informations : {e}")
+            return None
 
 def extract_pdf_info(pdf_content, url, title, io):
     extractor = StudyExtractor(io)
@@ -432,6 +456,7 @@ if __name__ == "__main__":
     parser.add_argument("-n", "--num_articles", type=int, default=40, help="Nombre d'articles à télécharger (max 100)")
     parser.add_argument("-o", "--output", default="etudes", help="Dossier de sortie pour les PDFs")
     parser.add_argument("--analyze-all", action="store_true", help="Analyser tous les PDFs après le téléchargement")
+    parser.add_argument("--model", default="gpt-4o", help="Modèle GPT à utiliser pour l'analyse (par défaut: gpt-4o)")
     args = parser.parse_args()
 
     num_articles = min(100, max(1, args.num_articles))  # Limiter entre 1 et 100
@@ -439,4 +464,5 @@ if __name__ == "__main__":
     get_studies_from_query(args.query, num_articles, args.output)
 
     if args.analyze_all:
-        run_all_analysis(io)
+        extractor = StudyExtractor(io, model=args.model)
+        run_all_analysis(io, extractor)
