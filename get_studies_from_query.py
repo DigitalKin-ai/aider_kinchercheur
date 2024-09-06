@@ -103,7 +103,7 @@ def get_studies_from_query(query, num_articles=40, output_dir='etudes'):
     # Fonction pour obtenir le PDF d'une étude via openaccessbutton
     def get_pdf_openaccessbutton(id):
         url = f"https://api.openaccessbutton.org/find?id={id}"
-        print(f"url: {url}")
+        #print(f"url: {url}")
         response = requests.get(url)
         #print(f"Contenu de la réponse OpenAccess Button: {response.text}")
         data = response.json()
