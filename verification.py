@@ -23,7 +23,7 @@ def extraire_references(contenu):
         raise ValueError("La clé API OpenAI n'est pas définie. Veuillez définir la variable d'environnement OPENAI_API_KEY.")
     
     response = openai.ChatCompletion.create(
-        model="gpt-4",
+        model="gpt-4o",
         messages=[
             {"role": "system", "content": "Vous êtes un assistant chargé d'extraire des références à partir d'un document d'état de l'art."},
             {"role": "user", "content": f"Extrayez toutes les références du texte suivant et retournez-les sous forme de liste JSON : \n\n{contenu}"}
@@ -108,7 +108,7 @@ def main():
     else:
         print(f"{nombre_etudes_lues} études ont été lues, ce qui est suffisant.")
 
-    fichier_etat_de_lart = "etat_de_lart.md"  # Assurez-vous que ce fichier est dans le même répertoire que le script
+    fichier_etat_de_lart = "conscience_ia/etat_de_lart.md"  # Assurez-vous que ce fichier est dans le même répertoire que le script
     contenu = lire_etat_de_lart(fichier_etat_de_lart)
     references = extraire_references(contenu)
     
