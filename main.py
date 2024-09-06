@@ -656,27 +656,34 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         coder.add_file(file)
 
     def check_file_modified(file_path, last_modified_times):
-        current_mtime = os.path.getmtime(file_path)
-        if file_path not in last_modified_times or current_mtime > last_modified_times[file_path]:
-            last_modified_times[file_path] = current_mtime
-            return True
-        return False
+        try:
+            current_mtime = os.path.getmtime(file_path)
+            if file_path not in last_modified_times or current_mtime > last_modified_times[file_path]:
+                last_modified_times[file_path] = current_mtime
+                return True
+            return False
+        except OSError as e:
+            io.tool_error(f"Error checking file {file_path}: {str(e)}")
+            return False
+
+    def add_analyses_files(coder, io, analyses_folder, last_modified_times):
+        if analyses_folder.exists() and analyses_folder.is_dir():
+            analyses_files = [f for f in analyses_folder.iterdir() if f.is_file()]
+            io.tool_output("Adding/Updating files from 'analyses' folder:")
+            for file in analyses_files:
+                try:
+                    if check_file_modified(str(file), last_modified_times):
+                        io.tool_output(f"Adding/Updating {file}")
+                        coder.add_file(str(file))
+                except Exception as e:
+                    io.tool_error(f"Error adding/updating file {file}: {str(e)}")
+        else:
+            io.tool_output("The 'analyses' folder does not exist or is not a directory.")
 
     # Add all files from the 'analyses' folder to the chat
     analyses_folder = Path('analyses')
     last_modified_times = {}
-    if analyses_folder.exists() and analyses_folder.is_dir():
-        analyses_files = [f for f in analyses_folder.iterdir() if f.is_file()]
-        io.tool_output("Adding files from 'analyses' folder:")
-        for file in analyses_files:
-            try:
-                io.tool_output(str(file))
-                coder.add_file(str(file))
-                last_modified_times[str(file)] = os.path.getmtime(str(file))
-            except Exception as e:
-                io.tool_error(f"Error adding file {file}: {str(e)}")
-    else:
-        io.tool_output("The 'analyses' folder does not exist or is not a directory.")
+    add_analyses_files(coder, io, analyses_folder, last_modified_times)
         
     while True:
         io.tool_output("Appuyez sur Entrée pour continuer ou tapez 'exit' pour quitter.")
@@ -697,13 +704,43 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
                         except Exception as e:
                             io.tool_error(f"Error updating file {file}: {str(e)}")
 
-            coder.run(with_message="""IMPORTANT INSTRUCTIONS: 
-                      - Écrivez l'état de l'art principalement via des fichiers texte, pas dans main.py ou d'autres scripts.
-                      - Rédigez l'état de l'art progressivement, en utilisant template.md comme référence. Faites des modifications une par une, en laissant les () [] {} s'ils sont encore nécessaires.
-                      - Assurez-vous d'avoir téléchargé et lu au moins 10 études.
-                      - Ne référencez que les études que vous avez téléchargées et lues.
-                      - Concentrez-vous sur la synthèse des informations importantes de chaque étude.
-                      - Organisez l'état de l'art de manière logique, en regroupant les informations par thèmes ou concepts clés.""")
+            coder.run(with_message="""INSTRUCTIONS IMPORTANTES POUR LA RÉDACTION DE L'ÉTAT DE L'ART :
+1. Format et structure :
+   - Utilisez principalement des fichiers texte pour l'état de l'art, pas main.py ou d'autres scripts.
+   - Suivez la structure de template.md comme référence.
+   - Faites des modifications progressives, une section à la fois.
+   - Laissez les marqueurs () [] {} s'ils sont encore nécessaires pour les sections incomplètes.
+
+2. Contenu et sources :
+   - Assurez-vous d'avoir lu et analysé au moins 10 études pertinentes.
+   - Ne citez et ne référencez que les études que vous avez effectivement lues et analysées.
+   - Concentrez-vous sur la synthèse des informations clés de chaque étude.
+
+3. Organisation et présentation :
+   - Structurez l'état de l'art de manière logique et cohérente.
+   - Regroupez les informations par thèmes, concepts clés ou approches méthodologiques.
+   - Utilisez des sous-sections pour améliorer la lisibilité et la navigation dans le document.
+
+4. Analyse critique :
+   - Comparez et contrastez les différentes études et leurs résultats.
+   - Identifiez les tendances, les consensus et les divergences dans la littérature.
+   - Mettez en évidence les lacunes ou les questions non résolues dans la recherche actuelle.
+
+5. Mise à jour et révision :
+   - Intégrez régulièrement les nouvelles études ajoutées au dossier 'analyses'.
+   - Révisez et affinez le contenu existant à mesure que vous ajoutez de nouvelles informations.
+   - Assurez-vous que l'état de l'art reste cohérent et à jour tout au long du processus de rédaction.
+
+6. Style et langage :
+   - Utilisez un langage clair, précis et académique.
+   - Évitez le jargon excessif, mais incluez les termes techniques pertinents avec des explications si nécessaire.
+   - Assurez-vous que chaque paragraphe se concentre sur une idée principale et contribue à l'argument global.
+
+7. Références et citations :
+   - Utilisez un style de citation cohérent tout au long du document (par exemple, APA, MLA, etc.).
+   - Assurez-vous que toutes les références dans le texte correspondent à la liste des références à la fin du document.
+
+Continuez à travailler sur l'état de l'art en suivant ces directives, en vous concentrant sur une section à la fois et en intégrant de manière cohérente les nouvelles informations des études analysées.""")
         except SwitchCoder as switch:
             kwargs = dict(io=io, from_coder=coder)
             kwargs.update(switch.kwargs)
