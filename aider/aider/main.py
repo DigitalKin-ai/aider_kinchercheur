@@ -20,6 +20,7 @@ from aider.llm import litellm  # noqa: F401; properly init litellm on launch
 from aider.repo import GitRepo, UnableToCountRepoFiles
 from aider.report import report_uncaught_exceptions
 from aider.versioncheck import check_version, install_from_main_branch, install_upgrade
+from aider.file_selector import select_relevant_files
 
 from .dump import dump  # noqa: F401
 
@@ -675,10 +676,49 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     thread.daemon = True
     thread.start()
 
+    # Select relevant files
+    all_files = [f for f in os.listdir() if os.path.isfile(f)]
+    selected_files = select_relevant_files(all_files)
+
+    io.tool_output("Fichiers pertinents sélectionnés :")
+    for file in selected_files:
+        io.tool_output(file)
+
+    # Add selected files to the chat
+    for file in selected_files:
+        coder.add_file(file)
+
+    # Add all files from the 'analyses' folder to the chat
+    analyses_folder = Path('analyses')
+    if analyses_folder.exists() and analyses_folder.is_dir():
+        analyses_files = [f for f in analyses_folder.iterdir() if f.is_file()]
+        io.tool_output("Ajout des fichiers du dossier 'analyses' :")
+        for file in analyses_files:
+            io.tool_output(str(file))
+            coder.add_file(str(file))
+    else:
+        io.tool_output("Le dossier 'analyses' n'existe pas ou n'est pas un répertoire.")
+        
     while True:
+        io.tool_output("Appuyez sur Entrée pour continuer ou tapez 'exit' pour quitter.")
         try:
-            coder.run()
-            return
+            user_input = io.user_input("")
+            if user_input.lower() == 'exit':
+                break
+
+            # Add all files from the 'analyses' folder to the chat before each run
+            if analyses_folder.exists() and analyses_folder.is_dir():
+                analyses_files = [f for f in analyses_folder.iterdir() if f.is_file()]
+                io.tool_output("Mise à jour des fichiers du dossier 'analyses' :")
+                for file in analyses_files:
+                    io.tool_output(str(file))
+                    coder.add_file(str(file))
+
+            coder.run(with_message="""INSTRUCTIONS IMPORTANTES : 
+                      - N'utilisez pas main.py ou d'autres scripts pour écrire l'état de l'art, écrivez-le principalement via des fichiers texte.
+                      - Écrivez l'état de l'art progressivement, en utilisant template.md comme référence. Ne faites que des modifications une par une, en laissant les () [] {} s'ils sont encore nécessaires.
+                      - Assurez-vous d'avoir téléchargé et lu au moins 10 études.
+                      - Assurez-vous de ne référencer que les études que vous avez téléchargées et lues.""")
         except SwitchCoder as switch:
             kwargs = dict(io=io, from_coder=coder)
             kwargs.update(switch.kwargs)
@@ -689,6 +729,9 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
 
             if switch.kwargs.get("show_announcements") is not False:
                 coder.show_announcements()
+        except Exception as e:
+            io.tool_error(f"Une erreur s'est produite : {str(e)}")
+            break
 
 
 def load_slow_imports():
