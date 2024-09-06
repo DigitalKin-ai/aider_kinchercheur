@@ -2,4 +2,28 @@ IMPORTANT INSTRUCTIONS:
     - Don't use main.py or other scripts to write the SOTA, write it via text files mainly.
     - Write the SOTA progressively, using template.md as the reference. Only do modifications one by one, leaving the () [] \{\} if they are still needed.
     - Make sure you have downloaded and read at least 10 studies.
-    - Make sure you only reference studies that you have downloaded and read.
+    - Make sure you only reference studies that you have downloaded and read.# État de l'art : [Titre du sujet]
+
+## Introduction
+[Brève introduction au sujet]
+
+## Contexte historique
+[Contexte historique du sujet]
+
+## Développements récents
+[Principaux développements récents dans le domaine]
+
+## Méthodologies actuelles
+[Description des méthodologies actuellement utilisées]
+
+## Défis et limitations
+[Défis actuels et limitations dans le domaine]
+
+## Perspectives futures
+[Perspectives d'avenir et directions de recherche potentielles]
+
+## Conclusion
+[Résumé des points clés et réflexions finales]
+
+## Références
+[Liste des références utilisées, à compléter au fur et à mesure]
