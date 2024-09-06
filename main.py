@@ -699,14 +699,6 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     # Exécution de la fonction get_studies_from_query
     io.tool_output("Exécution de la recherche d'études...")
     try:
-        import sys
-        import os
-
-        # Add the parent directory to sys.path
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        parent_dir = os.path.dirname(current_dir)
-        sys.path.insert(0, parent_dir)
-
         from get_studies_from_query import get_studies_from_query, run_all_analysis, clean_orphan_files
         query = io.user_input("Entrez votre requête de recherche : ")
         num_articles = int(io.user_input("Combien d'articles voulez-vous rechercher ? (max 100) : "))
@@ -719,6 +711,17 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         
         if io.confirm_ask("Voulez-vous nettoyer les fichiers orphelins ?"):
             clean_orphan_files()
+        
+        # Ajout de tous les fichiers du dossier 'etudes' au chat
+        etudes_folder = Path('etudes')
+        if etudes_folder.exists() and etudes_folder.is_dir():
+            etudes_files = [f for f in etudes_folder.iterdir() if f.is_file()]
+            io.tool_output("Fichiers ajoutés depuis le dossier 'etudes' :")
+            for file in etudes_files:
+                io.tool_output(f"{file}")
+                coder.add_file(str(file))
+        else:
+            io.tool_output("Le dossier 'etudes' n'existe pas ou n'est pas un répertoire.")
     except Exception as e:
         io.tool_error(f"Erreur lors de la recherche ou de l'analyse d'études : {str(e)}")
 
