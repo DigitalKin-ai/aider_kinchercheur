@@ -108,7 +108,7 @@ def main():
     else:
         print(f"{nombre_etudes_lues} études ont été lues, ce qui est suffisant.")
 
-    fichier_etat_de_lart = "../conscience_ia/etat_de_l_art.md"  # Remplacez par le nom réel de votre fichier
+    fichier_etat_de_lart = "etat_de_lart.md"  # Assurez-vous que ce fichier est dans le même répertoire que le script
     contenu = lire_etat_de_lart(fichier_etat_de_lart)
     references = extraire_references(contenu)
     
