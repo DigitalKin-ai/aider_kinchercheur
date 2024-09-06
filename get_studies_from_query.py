@@ -10,6 +10,10 @@ from tqdm import tqdm
 
 load_dotenv()
 
+def add_to_todolist(filename):
+    with open('todolist.md', 'a') as f:
+        f.write(f"[ ] Lire, analyser et incorporer {filename}\n")
+
 # Vérification de la clé API
 if not os.getenv('SEARCHAPI_KEY'):
     print("Erreur : La clé SEARCHAPI_KEY n'a pas été trouvée dans le fichier .env")
@@ -198,6 +202,9 @@ def get_studies_from_query(query, num_articles=40):
             
             # Sauvegarder dans le cache
             save_pdf_to_cache(title, pdf_content)
+            
+            # Ajouter à la todolist
+            add_to_todolist(filename)
         else:
             print(f"Impossible de trouver un PDF valide pour : {title}")
 
