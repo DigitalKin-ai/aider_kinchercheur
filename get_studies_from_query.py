@@ -14,6 +14,11 @@ def add_to_todolist(filename):
     with open('todolist.md', 'a') as f:
         f.write(f"[ ] Lire, analyser et incorporer {filename}\n")
 
+def is_study_in_folder(title):
+    safe_title = re.sub(r'[^\w\-_\. ]', '_', title)
+    filename = f"etudes/{safe_title[:50]}.pdf"
+    return os.path.exists(filename)
+
 # Vérification de la clé API
 if not os.getenv('SEARCHAPI_KEY'):
     print("Erreur : La clé SEARCHAPI_KEY n'a pas été trouvée dans le fichier .env")
@@ -161,8 +166,8 @@ def get_studies_from_query(query, num_articles=40):
         print(f"\nTraitement de : {title}")
         print(f"URL : {url}")
 
-        if is_pdf_in_cache(title):
-            print(f"PDF déjà en cache pour : {title}")
+        if is_pdf_in_cache(title) or is_study_in_folder(title):
+            print(f"PDF déjà téléchargé pour : {title}")
             continue
 
         # Liste des méthodes de téléchargement à essayer
