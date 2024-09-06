@@ -10,6 +10,7 @@ from tqdm import tqdm
 from colorama import init, Fore, Style
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import concurrent.futures
+import argparse
 
 init(autoreset=True)  # Initialise colorama
 
@@ -25,17 +26,17 @@ def add_to_todolist(filename):
     with open('todolist.md', 'a') as f:
         f.write(f"[ ] Lire, analyser et incorporer {filename}\n")
 
-def is_study_in_folder(title):
+def is_study_in_folder(title, output_dir):
     safe_title = re.sub(r'[^\w\-_\. ]', '_', title)
-    filename = f"etudes/{safe_title[:50]}.pdf"
+    filename = os.path.join(output_dir, f"{safe_title[:100]}.pdf")
     return os.path.exists(filename)
 
 # Vérification de la clé API
 if not os.getenv('SEARCHAPI_KEY'):
-    print("Erreur : La clé SEARCHAPI_KEY n'a pas été trouvée dans le fichier .env")
+    print(f"{Fore.RED}Erreur : La clé SEARCHAPI_KEY n'a pas été trouvée dans le fichier .env")
     exit(1)
 
-def get_studies_from_query(query, num_articles=40):
+def get_studies_from_query(query, num_articles=40, output_dir='etudes'):
     # Fonction pour faire une requête à Google Scholar
     def google_scholar_request(query, num_articles):
         url = "https://www.searchapi.io/api/v1/search"
@@ -169,9 +170,11 @@ def get_studies_from_query(query, num_articles=40):
         print(f"\n{Fore.CYAN}Traitement de : {Style.BRIGHT}{title}")
         print(f"{Fore.CYAN}URL : {url}")
 
-        if is_pdf_in_cache(title) or is_study_in_folder(title):
+        if is_pdf_in_cache(title) or is_study_in_folder(title, output_dir):
             print(f"{Fore.YELLOW}PDF déjà téléchargé pour : {title}")
             return
+        
+        os.makedirs(output_dir, exist_ok=True)
 
         # Liste des méthodes de téléchargement à essayer
         download_methods = [
@@ -197,22 +200,22 @@ def get_studies_from_query(query, num_articles=40):
             time.sleep(WAIT_TIME)  # Attendre entre chaque tentative
 
         if pdf_content and isinstance(pdf_content, bytes):
-            # Créer le dossier 'etudes' s'il n'existe pas
-            os.makedirs('etudes', exist_ok=True)
-            
             # Générer un nom de fichier sûr
             safe_title = re.sub(r'[^\w\-_\. ]', '_', title)
-            filename = f"etudes/{safe_title[:50]}.pdf"
+            filename = os.path.join(output_dir, f"{safe_title[:100]}.pdf")
             
-            with open(filename, 'wb') as f:
-                f.write(pdf_content)
-            print(f"{Fore.GREEN}PDF sauvegardé via {successful_method} : {filename}")
-            
-            # Sauvegarder dans le cache
-            save_pdf_to_cache(title, pdf_content)
-            
-            # Ajouter à la todolist
-            add_to_todolist(filename)
+            try:
+                with open(filename, 'wb') as f:
+                    f.write(pdf_content)
+                print(f"{Fore.GREEN}PDF sauvegardé via {successful_method} : {filename}")
+                
+                # Sauvegarder dans le cache
+                save_pdf_to_cache(title, pdf_content)
+                
+                # Ajouter à la todolist
+                add_to_todolist(filename)
+            except IOError as e:
+                print(f"{Fore.RED}Erreur lors de l'écriture du fichier {filename}: {e}")
         else:
             print(f"{Fore.RED}Impossible de trouver un PDF valide pour : {title}")
 
@@ -237,7 +240,11 @@ def get_studies_from_query(query, num_articles=40):
     print(f"{Fore.GREEN}Tous les articles ont été traités.")
 
 if __name__ == "__main__":
-    query = input("Entrez votre requête de recherche : ")
-    num_articles = int(input("Combien d'articles voulez-vous télécharger ? (max 100) : "))
-    num_articles = min(100, max(1, num_articles))  # Limiter entre 1 et 100
-    get_studies_from_query(query, num_articles)
+    parser = argparse.ArgumentParser(description="Télécharger des articles scientifiques basés sur une requête.")
+    parser.add_argument("query", help="La requête de recherche")
+    parser.add_argument("-n", "--num_articles", type=int, default=40, help="Nombre d'articles à télécharger (max 100)")
+    parser.add_argument("-o", "--output", default="etudes", help="Dossier de sortie pour les PDFs")
+    args = parser.parse_args()
+
+    num_articles = min(100, max(1, args.num_articles))  # Limiter entre 1 et 100
+    get_studies_from_query(args.query, num_articles, args.output)
