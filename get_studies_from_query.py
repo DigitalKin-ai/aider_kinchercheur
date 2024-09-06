@@ -298,7 +298,7 @@ class StudyExtractor:
 
         # Make the API call
         response = litellm.completion(
-            model="gpt-4",
+            model="gpt-4o",
             messages=messages,
         )
 
