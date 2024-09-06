@@ -323,7 +323,7 @@ def get_studies_from_query(query, num_articles=40, output_dir='etudes'):
     print(f"{Fore.GREEN}Nombre de PDFs téléchargés : {pdf_count}")
     print(f"{Fore.GREEN}Nombre de fichiers JSON créés : {json_count}")
 
-def run_all_analysis(io):
+def run_all_analysis(io, model="gpt-4o"):
     etudes_dir = 'etudes'
     analyses_dir = 'analyses'
     
@@ -331,6 +331,8 @@ def run_all_analysis(io):
         os.makedirs(analyses_dir)
     
     pdf_files = [f for f in os.listdir(etudes_dir) if f.endswith('.pdf')]
+    
+    extractor = StudyExtractor(io, model=model)
     
     for pdf_file in pdf_files:
         pdf_path = os.path.join(etudes_dir, pdf_file)
@@ -344,7 +346,7 @@ def run_all_analysis(io):
             title = pdf_file[:-4]  # Remove .pdf extension
             url = ""  # We don't have the original URL here
             
-            extract_pdf_info(pdf_content, url, title, io)
+            extractor.extract_and_save_pdf_info(pdf_content, url, title)
         else:
             print(f"{Fore.YELLOW}Analyse déjà existante pour : {pdf_file}")
     
@@ -464,5 +466,4 @@ if __name__ == "__main__":
     get_studies_from_query(args.query, num_articles, args.output)
 
     if args.analyze_all:
-        extractor = StudyExtractor(io, model=args.model)
-        run_all_analysis(io, extractor)
+        run_all_analysis(io, model=args.model)
