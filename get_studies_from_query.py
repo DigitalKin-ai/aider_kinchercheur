@@ -397,90 +397,90 @@ class StudyExtractor:
     def extract_and_save_pdf_info(self, pdf_content, url, title):
         print(f"{Fore.CYAN}Début de l'extraction des informations pour : {title}")
         
-        # Encode PDF content to base64
-        print(f"{Fore.CYAN}Encodage du contenu PDF en base64...")
-        pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
+        try:
+            # Encode PDF content to base64
+            print(f"{Fore.CYAN}Encodage du contenu PDF en base64...")
+            pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
 
-        # Split the PDF content into chunks
-        chunk_size = 50000  # Further reduced chunk size
-        print(f"{Fore.CYAN}Découpage du contenu PDF en morceaux...")
-        chunks = [pdf_base64[i:i+chunk_size] for i in range(0, len(pdf_base64), chunk_size)]
-        print(f"{Fore.CYAN}Nombre de morceaux : {len(chunks)}")
+            # Split the PDF content into chunks
+            chunk_size = 50000  # Further reduced chunk size
+            print(f"{Fore.CYAN}Découpage du contenu PDF en morceaux...")
+            chunks = [pdf_base64[i:i+chunk_size] for i in range(0, len(pdf_base64), chunk_size)]
+            print(f"{Fore.CYAN}Nombre de morceaux : {len(chunks)}")
 
-        if len(chunks) > 100:
-            print(f"{Fore.YELLOW}L'étude a plus de 100 morceaux ({len(chunks)}). Elle ne sera pas traitée.")
-            return None
+            if len(chunks) > 100:
+                print(f"{Fore.YELLOW}L'étude a plus de 100 morceaux ({len(chunks)}). Elle ne sera pas traitée.")
+                return None
 
-        extracted_info = {}
-        for i, chunk in enumerate(chunks):
-            print(f"{Fore.CYAN}Traitement du morceau {i+1}/{len(chunks)} pour l'étude : {title}")
-            # Prepare the message for the LLM
-            messages = [
-                {"role": "system", "content": "You are a helpful assistant that extracts information from scientific papers."},
-                {"role": "user", "content": f"""Please extract the following information from the given PDF chunk:
+            extracted_info = {}
+            for i, chunk in enumerate(chunks):
+                print(f"{Fore.CYAN}Traitement du morceau {i+1}/{len(chunks)} pour l'étude : {title}")
+                # Prepare the message for the LLM
+                messages = [
+                    {"role": "system", "content": "You are a helpful assistant that extracts information from scientific papers."},
+                    {"role": "user", "content": f"""Please extract the following information from the given PDF chunk:
 
-        |id|Nom|Auteurs|Journal|Date de publication|DOI|Citation|Type|Mots-clés|lienOrigine|Lien Google Drive|Abstract|Objectif de l'étude|Méthodologie|Conclusions de l'étude|Pertinence au regard de l'axe de travail 1|Pertinence au regard de l'axe de travail 2|Pertinence de l'étude au regard de l'axe de travail 3|Pertinence au regard de l'objectif de recherche|Axe de travail|Sélection|Apports et contributions|Verbatims des apports et contributions|Extraits Verbatim des Verrous|Verrous de l'étude|Données chifrées|Date de création|Date de dernière modification|
+            |id|Nom|Auteurs|Journal|Date de publication|DOI|Citation|Type|Mots-clés|lienOrigine|Lien Google Drive|Abstract|Objectif de l'étude|Méthodologie|Conclusions de l'étude|Pertinence au regard de l'axe de travail 1|Pertinence au regard de l'axe de travail 2|Pertinence de l'étude au regard de l'axe de travail 3|Pertinence au regard de l'objectif de recherche|Axe de travail|Sélection|Apports et contributions|Verbatims des apports et contributions|Extraits Verbatim des Verrous|Verrous de l'étude|Données chifrées|Date de création|Date de dernière modification|
 
-        This is chunk {i+1} of {len(chunks)} of the PDF content.
-        The PDF content chunk is provided as a base64 encoded string: {chunk}
+            This is chunk {i+1} of {len(chunks)} of the PDF content.
+            The PDF content chunk is provided as a base64 encoded string: {chunk}
 
-        Additional information:
-        URL: {url}
-        Title: {title}
+            Additional information:
+            URL: {url}
+            Title: {title}
 
-        Please provide the extracted information in a JSON format. If you can't find information for a field, leave it empty. Be concise and focus on the most important information."""}
+            Please provide the extracted information in a JSON format. If you can't find information for a field, leave it empty. Be concise and focus on the most important information."""}
+                ]
+
+                # Make the API call
+                try:
+                    response = litellm.completion(
+                        model=self.model,
+                        messages=messages,
+                    )
+
+                    # Parse the extracted information
+                    try:
+                        chunk_info = json.loads(response.choices[0].message.content)
+                    except json.JSONDecodeError:
+                        print(f"{Fore.YELLOW}Réponse non-JSON reçue. Tentative de nettoyage...")
+                        content = response.choices[0].message.content
+                        # Tentative de nettoyage de la réponse
+                        content = content.strip()
+                        if content.startswith("```json"):
+                            content = content.split("```json")[1]
+                        if content.endswith("```"):
+                            content = content.rsplit("```", 1)[0]
+                        chunk_info = json.loads(content)
+
+                    # Merge the chunk info into the main extracted_info
+                    for key, value in chunk_info.items():
+                        if key not in extracted_info or not extracted_info[key]:
+                            extracted_info[key] = value
+                        elif value:
+                            extracted_info[key] += " " + value
+                except Exception as e:
+                    print(f"{Fore.RED}Erreur lors de l'extraction des informations du PDF (morceau {i+1}/{len(chunks)}) : {e}")
+                    print(f"{Fore.RED}Contenu de la réponse : {response.choices[0].message.content[:500]}...")
+                    continue  # Continue with the next chunk instead of returning None
+
+            if not extracted_info:
+                print(f"{Fore.RED}Aucune information n'a pu être extraite du PDF.")
+                return None
+
+            print(f"{Fore.CYAN}Extraction terminée. Début de la synthèse...")
+
+            # Synthesize the results
+            synthesis_messages = [
+                {"role": "system", "content": "You are a helpful assistant that synthesizes information from scientific papers."},
+                {"role": "user", "content": f"""Please synthesize the following information extracted from a scientific paper:
+
+            {json.dumps(extracted_info, indent=2)}
+
+            Provide a concise summary for each field, ensuring that the information is coherent and non-repetitive. 
+            Return the result in JSON format. Limit your response to 4000 tokens."""}
             ]
 
-            # Make the API call
-            try:
-                response = litellm.completion(
-                    model=self.model,
-                    messages=messages,
-                )
-
-                # Parse the extracted information
-                try:
-                    chunk_info = json.loads(response.choices[0].message.content)
-                except json.JSONDecodeError:
-                    print(f"{Fore.YELLOW}Réponse non-JSON reçue. Tentative de nettoyage...")
-                    content = response.choices[0].message.content
-                    # Tentative de nettoyage de la réponse
-                    content = content.strip()
-                    if content.startswith("```json"):
-                        content = content.split("```json")[1]
-                    if content.endswith("```"):
-                        content = content.rsplit("```", 1)[0]
-                    chunk_info = json.loads(content)
-
-                # Merge the chunk info into the main extracted_info
-                for key, value in chunk_info.items():
-                    if key not in extracted_info or not extracted_info[key]:
-                        extracted_info[key] = value
-                    elif value:
-                        extracted_info[key] += " " + value
-            except Exception as e:
-                print(f"{Fore.RED}Erreur lors de l'extraction des informations du PDF : {e}")
-                print(f"{Fore.RED}Contenu de la réponse : {response.choices[0].message.content[:500]}...")
-                continue  # Continue with the next chunk instead of returning None
-
-        if not extracted_info:
-            print(f"{Fore.RED}Aucune information n'a pu être extraite du PDF.")
-            return None
-
-        print(f"{Fore.CYAN}Extraction terminée. Début de la synthèse...")
-
-        # Synthesize the results
-        synthesis_messages = [
-            {"role": "system", "content": "You are a helpful assistant that synthesizes information from scientific papers."},
-            {"role": "user", "content": f"""Please synthesize the following information extracted from a scientific paper:
-
-        {json.dumps(extracted_info, indent=2)}
-
-        Provide a concise summary for each field, ensuring that the information is coherent and non-repetitive. 
-        Return the result in JSON format. Limit your response to 4000 tokens."""}
-        ]
-
-        try:
             synthesis_response = litellm.completion(
                 model=self.model,
                 messages=synthesis_messages,
@@ -530,10 +530,10 @@ class StudyExtractor:
 
             return synthesized_info
         except Exception as e:
-            print(f"{Fore.RED}Erreur lors de la synthèse des informations : {e}")
-            print(f"{Fore.RED}Contenu de la réponse de synthèse : {synthesis_response.choices[0].message.content[:500]}...")
+            print(f"{Fore.RED}Erreur générale lors de l'extraction et de la synthèse des informations : {e}")
+            import traceback
+            traceback.print_exc()
             return None
-
         finally:
             print(f"{Fore.CYAN}Fin du traitement pour : {title}")
 
