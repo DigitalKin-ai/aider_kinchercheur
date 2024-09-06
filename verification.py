@@ -1,8 +1,9 @@
 import json
 import os
-import openai
+from openai import OpenAI
 import requests
 from tqdm import tqdm
+from dotenv import load_dotenv
 from dotenv import load_dotenv
 
 def compter_etudes_lues():
