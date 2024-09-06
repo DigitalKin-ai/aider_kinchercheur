@@ -9,7 +9,6 @@ from urllib.parse import quote, urlparse
 from tqdm import tqdm
 from colorama import init, Fore, Style
 from concurrent.futures import ThreadPoolExecutor, as_completed
-import concurrent.futures
 import argparse
 
 init(autoreset=True)  # Initialise colorama
