@@ -14,13 +14,11 @@ from tqdm import tqdm
 from colorama import init, Fore, Style
 import concurrent.futures
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from tqdm import tqdm
 import argparse
 from aider.llm import litellm
 from aider.io import InputOutput
-from pydantic import BaseModel, ValidationError, validator, field_validator
+from pydantic import BaseModel, ValidationError, field_validator
 from typing import List, Optional
-import json
 
 init(autoreset=True)  # Initialise colorama
 
