@@ -564,6 +564,11 @@ class StudyExtractor:
                     if field in content:
                         setattr(synthesized_info, field, content[field])
 
+            # Vérifier si l'analyse est vide
+            if all(not value for value in synthesized_info.dict().values()):
+                print(f"{Fore.RED}L'analyse générée est vide. Utilisation des informations brutes.")
+                synthesized_info = StudyInfo(**extracted_info)
+
             # Save the synthesized information to a markdown file
             safe_title = re.sub(r'[^\w\-_\. ]', '_', title)
             md_filename = os.path.join('analyses', f"{safe_title[:100]}.md")
@@ -572,7 +577,8 @@ class StudyExtractor:
             with open(md_filename, 'w', encoding='utf-8') as f:
                 f.write(f"# {title}\n\n")
                 for key, value in synthesized_info.dict().items():
-                    f.write(f"## {key}\n{value}\n\n")
+                    if value:  # N'écrit que les champs non vides
+                        f.write(f"## {key}\n{value}\n\n")
             
             print(f"{Fore.GREEN}Analyse sauvegardée : {md_filename}")
             
