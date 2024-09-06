@@ -167,7 +167,7 @@ def get_studies_from_query(query, num_articles=40, output_dir='etudes'):
             print(f"Erreur lors de la recherche sur Google Scholar: {e}")
         return None
 
-    def process_result(result):
+    def process_result(result, io):
         url = result.get('link')
         title = result.get('title')
         
@@ -220,7 +220,7 @@ def get_studies_from_query(query, num_articles=40, output_dir='etudes'):
                 add_to_todolist(filename)
 
                 # Extraire les informations du PDF immédiatement après le téléchargement
-                extracted_info = extract_pdf_info(pdf_content, url, title, self.io)
+                extracted_info = extract_pdf_info(pdf_content, url, title, io)
                 
                 # Sauvegarder les informations extraites dans un fichier JSON
                 json_filename = os.path.join(output_dir, f"{safe_title[:100]}.json")
@@ -240,9 +240,12 @@ def get_studies_from_query(query, num_articles=40, output_dir='etudes'):
         print("Impossible d'obtenir les résultats de Google Scholar. Vérifiez votre clé API et la connexion internet.")
         return
 
+    # Create an instance of InputOutput
+    io = InputOutput()
+
     # Traiter chaque résultat en parallèle
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        futures = [executor.submit(process_result, result) for result in scholar_results.get('organic_results', [])]
+        futures = [executor.submit(process_result, result, io) for result in scholar_results.get('organic_results', [])]
         for future in tqdm(as_completed(futures), total=len(futures), desc="Téléchargement des articles"):
             try:
                 future.result()  # This will raise any exceptions that occurred during execution
