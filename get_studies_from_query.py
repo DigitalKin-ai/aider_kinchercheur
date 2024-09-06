@@ -29,7 +29,7 @@ def get_studies_from_query(query):
         try:
             response = requests.get(url, headers=headers, params=params)
             print(f"Statut de la réponse: {response.status_code}")
-            print(f"Contenu de la réponse: {response.text}")
+            #print(f"Contenu de la réponse: {response.text}")
             response.raise_for_status()  # Raise an exception for bad status codes
             return response.json()
         except requests.exceptions.RequestException as e:
@@ -48,7 +48,9 @@ def get_studies_from_query(query):
     # Fonction pour obtenir le PDF d'une étude
     def get_pdf(id):
         url = f"https://api.openaccessbutton.org/find?id={id}"
+        print(f"url: {url}")
         response = requests.get(url)
+        print(f"Contenu de la réponse PDF: {response.text}")
         return response.json()
 
     # Obtenir les résultats de Google Scholar
