@@ -18,7 +18,7 @@ from tqdm import tqdm
 import argparse
 from aider.llm import litellm
 from aider.io import InputOutput
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, ValidationError, validator
 from typing import List, Optional
 import json
 
@@ -439,6 +439,12 @@ class StudyInfo(BaseModel):
 
     class Config:
         extra = "ignore"
+
+    @validator('Auteurs', 'Mots_cles', 'Verbatims_apports_contributions', 'Extraits_Verbatim_Verrous', 'Verrous_de_l_etude', 'Donnees_chiffrees', pre=True)
+    def convert_empty_to_list(cls, v):
+        if v == '':
+            return []
+        return v
 
 class StudyExtractor:
     def __init__(self, io, model="gpt-4o-2024-08-06"):
