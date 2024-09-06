@@ -274,18 +274,26 @@ def get_studies_from_query(query, num_articles=40, output_dir='etudes'):
 
     # Traiter chaque résultat en parallèle
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        futures = [executor.submit(process_result, result, io) for result in scholar_results.get('organic_results', [])]
+        futures = []
+        for result in scholar_results.get('organic_results', []):
+            if interrupted:
+                break
+            futures.append(executor.submit(process_result, result, io))
+        
         for future in tqdm(as_completed(futures), total=len(futures), desc="Téléchargement des articles"):
             if interrupted:
-                executor.shutdown(wait=False)
+                executor.shutdown(wait=False, cancel_futures=True)
                 print(f"{Fore.YELLOW}Interruption détectée. Arrêt des téléchargements.")
                 break
             try:
-                future.result()  # This will raise any exceptions that occurred during execution
+                future.result(timeout=60)  # Ajouter un timeout de 60 secondes
             except concurrent.futures.TimeoutError:
                 print(f"{Fore.RED}Une tâche a dépassé le temps imparti.")
             except Exception as e:
                 print(f"{Fore.RED}Une erreur s'est produite lors du traitement d'un article : {e}")
+            
+            if interrupted:
+                break
 
     if not interrupted:
         print(f"{Fore.GREEN}Tous les articles ont été traités.")
