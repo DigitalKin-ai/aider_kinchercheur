@@ -79,8 +79,14 @@ def get_studies_from_query(query, num_articles=40):
         url = f"https://api.openaccessbutton.org/find?id={id}"
         print(f"url: {url}")
         response = requests.get(url)
-        print(f"Contenu de la réponse PDF: {response.text}")
-        return response.json()
+        print(f"Contenu de la réponse OpenAccess Button: {response.text}")
+        data = response.json()
+        if 'data' in data and 'url' in data['data']:
+            pdf_url = data['data']['url']
+            pdf_response = requests.get(pdf_url)
+            if pdf_response.headers.get('content-type') == 'application/pdf':
+                return pdf_response.content
+        return None
 
     # Fonction pour obtenir le PDF via Sci-Hub
     def get_pdf_scihub(identifier):
@@ -178,7 +184,7 @@ def get_studies_from_query(query, num_articles=40):
                 print(f"Erreur lors de la tentative via {method_name}: {e}")
             time.sleep(2)  # Attendre 2 secondes entre chaque tentative
 
-        if pdf_content:
+        if pdf_content and isinstance(pdf_content, bytes):
             # Créer le dossier 'etudes' s'il n'existe pas
             os.makedirs('etudes', exist_ok=True)
             
@@ -193,7 +199,7 @@ def get_studies_from_query(query, num_articles=40):
             # Sauvegarder dans le cache
             save_pdf_to_cache(title, pdf_content)
         else:
-            print(f"Impossible de trouver un PDF pour : {title}")
+            print(f"Impossible de trouver un PDF valide pour : {title}")
 
         time.sleep(5)  # Attendre 5 secondes entre chaque article
 
