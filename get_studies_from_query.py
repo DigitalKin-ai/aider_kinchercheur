@@ -18,16 +18,16 @@ def get_studies_from_query(query):
             "Authorization": f"Bearer {os.getenv('SEARCHAPI_KEY')}",
             "Content-Type": "application/json"
         }
-        payload = {
+        params = {
             "engine": "google_scholar",
             "q": query,
             "num": 40,
             "time_period_min": 2010
         }
         print(f"Envoi de la requête à {url}")
-        print(f"Payload: {payload}")
+        print(f"Paramètres: {params}")
         try:
-            response = requests.post(url, headers=headers, json=payload)
+            response = requests.get(url, headers=headers, params=params)
             print(f"Statut de la réponse: {response.status_code}")
             print(f"Contenu de la réponse: {response.text}")
             response.raise_for_status()  # Raise an exception for bad status codes
