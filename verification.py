@@ -24,8 +24,9 @@ def extraire_references(contenu):
     if not client.api_key:
         raise ValueError("La clé API OpenAI n'est pas définie dans le fichier .env. Veuillez ajouter OPENAI_API_KEY à votre fichier .env.")
     
-    response = client.chat.completions.create(
-        model="gpt-4",  # Changé de "gpt-4o" à "gpt-4"
+    response = client.chat.completions.create(#FIXME)
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
         messages=[
             {"role": "system", "content": "Vous êtes un assistant chargé d'extraire des références à partir d'un document d'état de l'art."},
             {"role": "user", "content": f"Extrayez toutes les références du texte suivant et retournez-les sous forme de liste JSON : \n\n{contenu}"}
@@ -73,7 +74,7 @@ def lire_fichier(chemin_fichier):
 def verifier_presence_gpt(reference, contenu):
     client = OpenAI()
     response = client.chat.completions.create(
-        model="gpt-4o",
+        model="gpt-4o", # NE PAS CHANGER
         messages=[
             {"role": "system", "content": "Vous êtes un assistant chargé de vérifier si une référence est présente dans un texte."},
             {"role": "user", "content": f"La référence suivante est-elle présente dans le texte ? Répondez par 'true' ou 'false'.\n\nRéférence : {reference}\n\nTexte : {contenu[:2000]}"}  # Limite de 2000 caractères pour éviter de dépasser les limites de l'API
