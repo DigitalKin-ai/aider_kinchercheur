@@ -25,19 +25,32 @@ def extraire_references(contenu):
         raise ValueError("La clé API OpenAI n'est pas définie dans le fichier .env. Veuillez ajouter OPENAI_API_KEY à votre fichier .env.")
     
     response = client.chat.completions.create(
-        model="gpt-4o",
+        model="gpt-4",  # Correction du nom du modèle
         messages=[
             {"role": "system", "content": "Vous êtes un assistant chargé d'extraire des références à partir d'un document d'état de l'art."},
-            {"role": "user", "content": f"Extrayez toutes les références du texte suivant et retournez-les sous forme de liste JSON : \n\n{contenu}"}
+            {"role": "user", "content": f"Extrayez toutes les références du texte suivant et retournez-les sous forme de liste JSON. Chaque référence doit être un objet avec les clés 'texte' et 'lien'. Si aucun lien n'est disponible, utilisez une chaîne vide pour la clé 'lien'. Voici le texte : \n\n{contenu}"}
         ]
     )
     
+    print("Réponse brute de l'API :")
+    print(response.choices[0].message.content)
+    
     try:
         references = json.loads(response.choices[0].message.content)
-    except json.JSONDecodeError:
-        print("Erreur lors du décodage JSON. Contenu de la réponse :")
-        print(response.choices[0].message.content)
+        if not isinstance(references, list):
+            raise ValueError("La réponse n'est pas une liste JSON valide")
+    except (json.JSONDecodeError, ValueError) as e:
+        print(f"Erreur lors du décodage JSON : {str(e)}")
+        print("Tentative de correction...")
         references = []
+        # Tentative de correction manuelle
+        lines = response.choices[0].message.content.split('\n')
+        for line in lines:
+            if ':' in line:
+                parts = line.split(':', 1)
+                ref_text = parts[0].strip().strip('"')
+                ref_link = parts[1].strip().strip('"') if len(parts) > 1 else ""
+                references.append({"texte": ref_text, "lien": ref_link})
     
     print(f"{len(references)} références extraites.")
     return references
@@ -73,7 +86,7 @@ def lire_fichier(chemin_fichier):
 def verifier_presence_gpt(reference, contenu):
     client = OpenAI()
     response = client.chat.completions.create(
-        model="gpt4-o", # NE PAS CHANGER
+        model="gpt-4",  # Correction du nom du modèle
         messages=[
             {"role": "system", "content": "Vous êtes un assistant chargé de vérifier si une référence est présente dans un texte."},
             {"role": "user", "content": f"La référence suivante est-elle présente dans le texte ? Répondez par 'true' ou 'false'.\n\nRéférence : {reference}\n\nTexte : {contenu[:2000]}"}  # Limite de 2000 caractères pour éviter de dépasser les limites de l'API
@@ -81,6 +94,8 @@ def verifier_presence_gpt(reference, contenu):
     )
     
     reponse = response.choices[0].message.content.strip().lower()
+    print(f"Vérification de la référence : {reference}")
+    print(f"Réponse de l'API : {reponse}")
     return reponse == 'true'
 
 def verifier_lien(lien):
