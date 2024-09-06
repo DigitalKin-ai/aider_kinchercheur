@@ -33,8 +33,9 @@ def add_to_todolist(filename):
 
 def is_study_in_folder(title, output_dir):
     safe_title = re.sub(r'[^\w\-_\. ]', '_', title)
-    filename = os.path.join(output_dir, f"{safe_title[:100]}.pdf")
-    return os.path.exists(filename)
+    pdf_filename = os.path.join(output_dir, f"{safe_title[:100]}.pdf")
+    json_filename = os.path.join(output_dir, f"{safe_title[:100]}.json")
+    return os.path.exists(pdf_filename) or os.path.exists(json_filename)
 
 # Vérification de la clé API
 if not os.getenv('SEARCHAPI_KEY'):
@@ -171,15 +172,23 @@ def get_studies_from_query(query, num_articles=40, output_dir='etudes'):
     def process_result(result, io):
         url = result.get('link')
         title = result.get('title')
-        
+    
         print(f"\n{Fore.CYAN}Traitement de : {Style.BRIGHT}{title}")
         print(f"{Fore.CYAN}URL : {url}")
 
-        if is_pdf_in_cache(title) or is_study_in_folder(title, output_dir):
-            print(f"{Fore.YELLOW}PDF déjà téléchargé pour : {title}")
+        if not os.path.exists(output_dir):
+            print(f"{Fore.RED}Le dossier de sortie {output_dir} n'existe pas. Création...")
+            os.makedirs(output_dir)
+
+        if is_pdf_in_cache(title):
+            print(f"{Fore.YELLOW}PDF déjà dans le cache pour : {title}")
             return
-        
-        os.makedirs(output_dir, exist_ok=True)
+    
+        if is_study_in_folder(title, output_dir):
+            print(f"{Fore.YELLOW}Étude déjà dans le dossier de sortie pour : {title}")
+            return
+    
+        print(f"{Fore.BLUE}Tentative de téléchargement pour : {title}")
 
         # Liste des méthodes de téléchargement à essayer
         download_methods = [
@@ -256,6 +265,12 @@ def get_studies_from_query(query, num_articles=40, output_dir='etudes'):
                 print(f"{Fore.RED}Une erreur s'est produite lors du traitement d'un article : {e}")
 
     print(f"{Fore.GREEN}Tous les articles ont été traités.")
+    
+    # Vérifier le nombre de fichiers téléchargés
+    pdf_count = len([f for f in os.listdir(output_dir) if f.endswith('.pdf')])
+    json_count = len([f for f in os.listdir(output_dir) if f.endswith('.json')])
+    print(f"{Fore.GREEN}Nombre de PDFs téléchargés : {pdf_count}")
+    print(f"{Fore.GREEN}Nombre de fichiers JSON créés : {json_count}")
 
 class StudyExtractor:
     def __init__(self, io):
