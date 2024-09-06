@@ -18,8 +18,9 @@ from tqdm import tqdm
 import argparse
 from aider.llm import litellm
 from aider.io import InputOutput
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 from typing import List, Optional
+import json
 
 init(autoreset=True)  # Initialise colorama
 
@@ -392,34 +393,37 @@ def run_all_analysis(io, model="gpt-4o-mini"):
     print(f"{Fore.GREEN}Vérification terminée.")
 
 class StudyInfo(BaseModel):
-    id: Optional[str]
-    Nom: str
-    Auteurs: List[str]
-    Journal: Optional[str]
-    Date_de_publication: Optional[str]
-    DOI: Optional[str]
-    Citation: Optional[str]
-    Type: Optional[str]
-    Mots_cles: List[str]
-    lienOrigine: Optional[str]
-    Lien_Google_Drive: Optional[str]
-    Abstract: str
-    Objectif_de_l_etude: str
-    Methodologie: str
-    Conclusions_de_l_etude: str
-    Pertinence_axe_1: Optional[str]
-    Pertinence_axe_2: Optional[str]
-    Pertinence_axe_3: Optional[str]
-    Pertinence_objectif_recherche: str
-    Axe_de_travail: Optional[str]
-    Selection: Optional[str]
-    Apports_et_contributions: str
-    Verbatims_apports_contributions: List[str]
-    Extraits_Verbatim_Verrous: List[str]
-    Verrous_de_l_etude: List[str]
-    Donnees_chiffrees: List[str]
-    Date_de_creation: Optional[str]
-    Date_de_derniere_modification: Optional[str]
+    id: Optional[str] = None
+    Nom: str = ""
+    Auteurs: List[str] = []
+    Journal: Optional[str] = None
+    Date_de_publication: Optional[str] = None
+    DOI: Optional[str] = None
+    Citation: Optional[str] = None
+    Type: Optional[str] = None
+    Mots_cles: List[str] = []
+    lienOrigine: Optional[str] = None
+    Lien_Google_Drive: Optional[str] = None
+    Abstract: str = ""
+    Objectif_de_l_etude: str = ""
+    Methodologie: str = ""
+    Conclusions_de_l_etude: str = ""
+    Pertinence_axe_1: Optional[str] = None
+    Pertinence_axe_2: Optional[str] = None
+    Pertinence_axe_3: Optional[str] = None
+    Pertinence_objectif_recherche: str = ""
+    Axe_de_travail: Optional[str] = None
+    Selection: Optional[str] = None
+    Apports_et_contributions: str = ""
+    Verbatims_apports_contributions: List[str] = []
+    Extraits_Verbatim_Verrous: List[str] = []
+    Verrous_de_l_etude: List[str] = []
+    Donnees_chiffrees: List[str] = []
+    Date_de_creation: Optional[str] = None
+    Date_de_derniere_modification: Optional[str] = None
+
+    class Config:
+        extra = "ignore"
 
 class StudyExtractor:
     def __init__(self, io, model="gpt-4o-2024-08-06"):
@@ -471,7 +475,17 @@ class StudyExtractor:
                     )
 
                     # Parse the extracted information
-                    chunk_info = StudyInfo.parse_raw(response.choices[0].message.content)
+                    try:
+                        chunk_info = StudyInfo.parse_raw(response.choices[0].message.content)
+                    except ValidationError as e:
+                        print(f"{Fore.YELLOW}Erreur de validation : {e}")
+                        # Créer un objet StudyInfo avec des valeurs par défaut
+                        chunk_info = StudyInfo()
+                        # Essayer de remplir les champs disponibles
+                        content = json.loads(response.choices[0].message.content)
+                        for field in StudyInfo.__fields__:
+                            if field in content:
+                                setattr(chunk_info, field, content[field])
 
                     # Merge the chunk info into the main extracted_info
                     for field in StudyInfo.__fields__:
@@ -511,7 +525,17 @@ class StudyExtractor:
             )
 
             # Parse the synthesized information
-            synthesized_info = StudyInfo.parse_raw(synthesis_response.choices[0].message.content)
+            try:
+                synthesized_info = StudyInfo.parse_raw(synthesis_response.choices[0].message.content)
+            except ValidationError as e:
+                print(f"{Fore.YELLOW}Erreur de validation lors de la synthèse : {e}")
+                # Créer un objet StudyInfo avec des valeurs par défaut
+                synthesized_info = StudyInfo()
+                # Essayer de remplir les champs disponibles
+                content = json.loads(synthesis_response.choices[0].message.content)
+                for field in StudyInfo.__fields__:
+                    if field in content:
+                        setattr(synthesized_info, field, content[field])
 
             # Save the synthesized information to a markdown file
             safe_title = re.sub(r'[^\w\-_\. ]', '_', title)
