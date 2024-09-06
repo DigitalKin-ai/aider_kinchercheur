@@ -697,6 +697,15 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         else:
             io.tool_output("Le dossier 'analyses' n'existe pas ou n'est pas un répertoire.")
 
+    # Exécution du script de recherche
+    io.tool_output("Exécution du script de recherche...")
+    try:
+        from scrape import main as scrape_main
+        scrape_main()
+        io.tool_output("Script de recherche exécuté avec succès.")
+    except Exception as e:
+        io.tool_error(f"Erreur lors de l'exécution du script de recherche : {str(e)}")
+
     # Ajout de tous les fichiers du dossier 'analyses' au chat
     analyses_folder = Path('analyses')
     last_modified_times = {}
