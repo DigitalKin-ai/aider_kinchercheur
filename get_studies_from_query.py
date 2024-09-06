@@ -100,7 +100,7 @@ def get_studies_from_query(query, num_articles=40, output_dir='etudes'):
         url = f"https://api.openaccessbutton.org/find?id={id}"
         print(f"url: {url}")
         response = requests.get(url)
-        print(f"Contenu de la réponse OpenAccess Button: {response.text}")
+        #print(f"Contenu de la réponse OpenAccess Button: {response.text}")
         data = response.json()
         if 'data' in data and 'url' in data['data']:
             pdf_url = data['data']['url']
