@@ -652,7 +652,7 @@ def clean_orphan_files():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Télécharger ou analyser des articles scientifiques.")
-    parser.add_argument("-q", "--query", help="La requête de recherche pour télécharger des articles")
+    parser.add_argument("query", nargs="?", help="La requête de recherche pour télécharger des articles")
     parser.add_argument("-n", "--num_articles", type=int, default=40, help="Nombre d'articles à télécharger (max 100)")
     parser.add_argument("-o", "--output", default="etudes", help="Dossier de sortie pour les PDFs")
     parser.add_argument("--analyze-all", action="store_true", help="Analyser tous les PDFs dans le dossier de sortie")
