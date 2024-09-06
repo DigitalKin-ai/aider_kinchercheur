@@ -10,10 +10,6 @@ from aider import __version__, models, utils
 import git
 from dotenv import load_dotenv
 from prompt_toolkit.enums import EditingMode
-
-import os
-from aider import __version__, models, utils
-import sys
 import os
 
 # Add the parent directory to sys.path
