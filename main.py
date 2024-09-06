@@ -655,6 +655,17 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     for file in selected_files:
         coder.add_file(file)
 
+    # Add all files from the 'analyses' folder to the chat
+    analyses_folder = Path('analyses')
+    if analyses_folder.exists() and analyses_folder.is_dir():
+        analyses_files = [f for f in analyses_folder.iterdir() if f.is_file()]
+        io.tool_output("Adding files from 'analyses' folder:")
+        for file in analyses_files:
+            io.tool_output(f"Adding {file}")
+            coder.add_file(str(file))
+    else:
+        io.tool_output("The 'analyses' folder does not exist or is not a directory.")
+
     def check_file_modified(file_path, last_modified_times):
         try:
             current_mtime = os.path.getmtime(file_path)
