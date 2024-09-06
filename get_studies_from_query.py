@@ -4,6 +4,7 @@ import json
 import time
 import re
 import hashlib
+import base64
 from dotenv import load_dotenv
 from urllib.parse import quote, urlparse
 from tqdm import tqdm
@@ -11,6 +12,7 @@ from colorama import init, Fore, Style
 import concurrent.futures
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import argparse
+from sendchat import send_completion
 
 init(autoreset=True)  # Initialise colorama
 
@@ -216,6 +218,16 @@ def get_studies_from_query(query, num_articles=40, output_dir='etudes'):
                 
                 # Ajouter à la todolist
                 add_to_todolist(filename)
+
+                # Extraire les informations du PDF
+                extracted_info = extract_pdf_info(pdf_content, url, title)
+                
+                # Sauvegarder les informations extraites dans un fichier JSON
+                json_filename = os.path.join(output_dir, f"{safe_title[:100]}.json")
+                with open(json_filename, 'w', encoding='utf-8') as f:
+                    json.dump(extracted_info, f, ensure_ascii=False, indent=2)
+                print(f"{Fore.GREEN}Informations extraites sauvegardées : {json_filename}")
+
             except IOError as e:
                 print(f"{Fore.RED}Erreur lors de l'écriture du fichier {filename}: {e}")
         else:
@@ -240,6 +252,38 @@ def get_studies_from_query(query, num_articles=40, output_dir='etudes'):
                 print(f"{Fore.RED}Une erreur s'est produite lors du traitement d'un article : {e}")
 
     print(f"{Fore.GREEN}Tous les articles ont été traités.")
+
+def extract_pdf_info(pdf_content, url, title):
+    # Encode PDF content to base64
+    pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
+
+    # Prepare the message for the LLM
+    messages = [
+        {"role": "system", "content": "You are a helpful assistant that extracts information from scientific papers."},
+        {"role": "user", "content": f"""Please extract the following information from the given PDF:
+
+|id|Nom|Auteurs|Journal|Date de publication|DOI|Citation|Type|Mots-clés|lienOrigine|Lien Google Drive|Abstract|Objectif de l'étude|Méthodologie|Conclusions de l'étude|Pertinence au regard de l'axe de travail 1|Pertinence au regard de l'axe de travail 2|Pertinence de l'étude au regard de l'axe de travail 3|Pertinence au regard de l'objectif de recherche|Axe de travail|Sélection|Apports et contributions|Verbatims des apports et contributions|Extraits Verbatim des Verrous|Verrous de l'étude|Données chifrées|Date de création|Date de dernière modification|
+
+The PDF content is provided as a base64 encoded string: {pdf_base64}
+
+Additional information:
+URL: {url}
+Title: {title}
+
+Please provide the extracted information in a JSON format."""}
+    ]
+
+    # Make the API call
+    _hash, response = send_completion(
+        model_name="gpt-4-1106-preview",
+        messages=messages,
+        functions=None,
+        stream=False,
+    )
+
+    # Parse and return the extracted information
+    extracted_info = json.loads(response.choices[0].message.content)
+    return extracted_info
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Télécharger des articles scientifiques basés sur une requête.")
