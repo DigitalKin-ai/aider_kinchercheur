@@ -13,6 +13,7 @@ import concurrent.futures
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import argparse
 from aider.llm import litellm
+from aider.io import InputOutput
 
 init(autoreset=True)  # Initialise colorama
 
