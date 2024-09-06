@@ -407,8 +407,8 @@ class StudyExtractor:
         chunks = [pdf_base64[i:i+chunk_size] for i in range(0, len(pdf_base64), chunk_size)]
         print(f"{Fore.CYAN}Nombre de morceaux : {len(chunks)}")
 
-        if len(chunks) > 200:
-            print(f"{Fore.YELLOW}L'étude a plus de 200 morceaux ({len(chunks)}). Elle ne sera pas traitée.")
+        if len(chunks) > 100:
+            print(f"{Fore.YELLOW}L'étude a plus de 100 morceaux ({len(chunks)}). Elle ne sera pas traitée.")
             return None
 
         extracted_info = {}
@@ -497,6 +497,7 @@ class StudyExtractor:
             self.io.append_chat_history(analysis_content, linebreak=True)
             
             print(f"{Fore.GREEN}Extraction et synthèse terminées pour : {title}")
+            print(f"{Fore.CYAN}Contenu de l'analyse :\n{analysis_content[:500]}...")  # Affiche les 500 premiers caractères
 
             # Save the synthesized information to a JSON file
             json_filename = os.path.join('etudes', f"{safe_title[:100]}.json")
