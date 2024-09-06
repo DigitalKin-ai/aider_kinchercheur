@@ -29,7 +29,6 @@ def get_studies_from_query(query):
         try:
             response = requests.get(url, headers=headers, params=params)
             print(f"Statut de la réponse: {response.status_code}")
-            #print(f"Contenu de la réponse: {response.text}")
             response.raise_for_status()  # Raise an exception for bad status codes
             return response.json()
         except requests.exceptions.RequestException as e:
@@ -45,8 +44,18 @@ def get_studies_from_query(query):
             print(f"Contenu de la réponse: {response.text}")
             return None
 
-    # Fonction pour obtenir le PDF d'une étude
-    def get_pdf(id):
+    # Fonction pour télécharger directement le PDF
+    def download_pdf(url):
+        try:
+            response = requests.get(url, allow_redirects=True)
+            if response.headers.get('content-type') == 'application/pdf':
+                return response.content
+        except requests.exceptions.RequestException:
+            return None
+        return None
+
+    # Fonction pour obtenir le PDF d'une étude via openaccessbutton
+    def get_pdf_openaccessbutton(id):
         url = f"https://api.openaccessbutton.org/find?id={id}"
         print(f"url: {url}")
         response = requests.get(url)
@@ -65,26 +74,39 @@ def get_studies_from_query(query):
         url = result.get('link')
         title = result.get('title')
         
-        # Essayer d'abord avec l'URL, puis avec le titre
-        pdf_result = get_pdf(url) if url else None
-        if not pdf_result or 'data' not in pdf_result:
-            pdf_result = get_pdf(title)
-
-        if pdf_result and 'data' in pdf_result:
-            doi = pdf_result['data'].get('doi')
-            if doi:
-                # Créer le dossier 'etudes' s'il n'existe pas
-                os.makedirs('etudes', exist_ok=True)
-                
-                # Sauvegarder le résultat dans un fichier
-                filename = f"etudes/{doi.replace('/', '_')}.json"
-                with open(filename, 'w') as f:
-                    json.dump(pdf_result, f, indent=2)
-                print(f"Sauvegardé : {filename}")
-            else:
-                print(f"Pas de DOI trouvé pour : {title}")
+        # Essayer d'abord de télécharger directement le PDF
+        pdf_content = download_pdf(url) if url else None
+        
+        if pdf_content:
+            # Créer le dossier 'etudes' s'il n'existe pas
+            os.makedirs('etudes', exist_ok=True)
+            
+            # Sauvegarder le PDF
+            filename = f"etudes/{title.replace(' ', '_')[:50]}.pdf"
+            with open(filename, 'wb') as f:
+                f.write(pdf_content)
+            print(f"PDF sauvegardé : {filename}")
         else:
-            print(f"Pas de PDF trouvé pour : {title}")
+            # Si le téléchargement direct échoue, essayer avec openaccessbutton
+            pdf_result = get_pdf_openaccessbutton(url) if url else None
+            if not pdf_result or 'data' not in pdf_result:
+                pdf_result = get_pdf_openaccessbutton(title)
+
+            if pdf_result and 'data' in pdf_result:
+                doi = pdf_result['data'].get('doi')
+                if doi:
+                    # Créer le dossier 'etudes' s'il n'existe pas
+                    os.makedirs('etudes', exist_ok=True)
+                    
+                    # Sauvegarder le résultat dans un fichier
+                    filename = f"etudes/{doi.replace('/', '_')}.json"
+                    with open(filename, 'w') as f:
+                        json.dump(pdf_result, f, indent=2)
+                    print(f"Sauvegardé : {filename}")
+                else:
+                    print(f"Pas de DOI trouvé pour : {title}")
+            else:
+                print(f"Pas de PDF trouvé pour : {title}")
 
 if __name__ == "__main__":
     query = input("Entrez votre requête de recherche : ")
