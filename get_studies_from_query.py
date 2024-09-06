@@ -51,7 +51,6 @@ def signal_handler(signum, frame):
     global interrupted
     interrupted = True
     print(f"\n{Fore.YELLOW}Interruption demandée. Arrêt en cours...")
-    sys.exit(0)
 
 # Configurer le gestionnaire de signal
 signal.signal(signal.SIGINT, signal_handler)
@@ -304,32 +303,35 @@ def get_studies_from_query(query, num_articles=40, output_dir='etudes', max_work
     io = InputOutput()
 
     # Traiter chaque résultat en parallèle
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        futures = []
-        for result in scholar_results.get('organic_results', []):
-            if interrupted:
-                break
-            futures.append(executor.submit(process_result, result, io))
-        
-        for future in tqdm(as_completed(futures), total=len(futures), desc="Téléchargement des articles"):
-            if interrupted:
-                executor.shutdown(wait=False, cancel_futures=True)
-                print(f"{Fore.YELLOW}Interruption détectée. Arrêt des téléchargements.")
-                break
-            try:
-                future.result(timeout=60)  # Ajouter un timeout de 60 secondes
-            except concurrent.futures.TimeoutError:
-                print(f"{Fore.RED}Une tâche a dépassé le temps imparti.")
-            except Exception as e:
-                print(f"{Fore.RED}Une erreur s'est produite lors du traitement d'un article : {e}")
+    try:
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = []
+            for result in scholar_results.get('organic_results', []):
+                if interrupted:
+                    break
+                futures.append(executor.submit(process_result, result, io))
             
-            if interrupted:
-                break
+            for future in tqdm(as_completed(futures), total=len(futures), desc="Téléchargement des articles"):
+                if interrupted:
+                    executor.shutdown(wait=False, cancel_futures=True)
+                    print(f"{Fore.YELLOW}Interruption détectée. Arrêt des téléchargements.")
+                    break
+                try:
+                    future.result(timeout=60)  # Ajouter un timeout de 60 secondes
+                except concurrent.futures.TimeoutError:
+                    print(f"{Fore.RED}Une tâche a dépassé le temps imparti.")
+                except Exception as e:
+                    print(f"{Fore.RED}Une erreur s'est produite lors du traitement d'un article : {e}")
+                
+                if interrupted:
+                    break
 
-    if not interrupted:
-        print(f"{Fore.GREEN}Tous les articles ont été traités.")
-    else:
-        print(f"{Fore.YELLOW}Le traitement a été interrompu.")
+        if not interrupted:
+            print(f"{Fore.GREEN}Tous les articles ont été traités.")
+        else:
+            print(f"{Fore.YELLOW}Le traitement a été interrompu.")
+    except KeyboardInterrupt:
+        print(f"\n{Fore.YELLOW}Interruption détectée. Arrêt des téléchargements.")
     
     # Vérifier le nombre de fichiers téléchargés
     pdf_count = len([f for f in os.listdir(output_dir) if f.endswith('.pdf')])
@@ -349,6 +351,8 @@ def run_all_analysis(io, model="gpt-4o-mini"):
     extractor = StudyExtractor(io, model=model)
     
     def process_pdf(pdf_file):
+        if interrupted:
+            return None
         pdf_path = os.path.join(etudes_dir, pdf_file)
         analysis_file = os.path.join(analyses_dir, pdf_file.replace('.pdf', '.md'))
         
@@ -365,32 +369,42 @@ def run_all_analysis(io, model="gpt-4o-mini"):
             print(f"{Fore.YELLOW}Analyse déjà existante pour : {pdf_file}")
             return None
 
-    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        futures = [executor.submit(process_pdf, pdf_file) for pdf_file in pdf_files]
-        
-        for future in tqdm(as_completed(futures), total=len(futures), desc="Analyse des PDFs"):
-            try:
-                result = future.result()
-                if result:
-                    print(f"{Fore.GREEN}Analyse terminée pour un fichier.")
-            except Exception as e:
-                print(f"{Fore.RED}Une erreur s'est produite lors de l'analyse d'un PDF : {e}")
+    try:
+        with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+            futures = [executor.submit(process_pdf, pdf_file) for pdf_file in pdf_files]
+            
+            for future in tqdm(as_completed(futures), total=len(futures), desc="Analyse des PDFs"):
+                if interrupted:
+                    executor.shutdown(wait=False, cancel_futures=True)
+                    print(f"{Fore.YELLOW}Interruption détectée. Arrêt des analyses.")
+                    break
+                try:
+                    result = future.result()
+                    if result:
+                        print(f"{Fore.GREEN}Analyse terminée pour un fichier.")
+                except Exception as e:
+                    print(f"{Fore.RED}Une erreur s'est produite lors de l'analyse d'un PDF : {e}")
 
-    print(f"{Fore.GREEN}Toutes les analyses ont été effectuées.")
+        if not interrupted:
+            print(f"{Fore.GREEN}Toutes les analyses ont été effectuées.")
 
-    # Vérification des analyses pour le mot "ÉCARTÉ"
-    print(f"{Fore.CYAN}Vérification des analyses pour le mot 'ÉCARTÉ'...")
-    for analysis_file in os.listdir(analyses_dir):
-        if analysis_file.endswith('.md'):
-            file_path = os.path.join(analyses_dir, analysis_file)
-            with open(file_path, 'r', encoding='utf-8') as f:
-                content = f.read()
-                if "ÉCARTÉ" in content:
-                    print(f"{Fore.YELLOW}Le mot 'ÉCARTÉ' a été trouvé dans {analysis_file}. Suppression de l'analyse du chat...")
-                    io.tool_output(f"Suppression de l'analyse {analysis_file} du chat.")
-                    io.append_chat_history(f"L'analyse {analysis_file} a été supprimée car elle contient le mot 'ÉCARTÉ'.", linebreak=True)
+            # Vérification des analyses pour le mot "ÉCARTÉ"
+            print(f"{Fore.CYAN}Vérification des analyses pour le mot 'ÉCARTÉ'...")
+            for analysis_file in os.listdir(analyses_dir):
+                if analysis_file.endswith('.md'):
+                    file_path = os.path.join(analyses_dir, analysis_file)
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                        if "ÉCARTÉ" in content:
+                            print(f"{Fore.YELLOW}Le mot 'ÉCARTÉ' a été trouvé dans {analysis_file}. Suppression de l'analyse du chat...")
+                            io.tool_output(f"Suppression de l'analyse {analysis_file} du chat.")
+                            io.append_chat_history(f"L'analyse {analysis_file} a été supprimée car elle contient le mot 'ÉCARTÉ'.", linebreak=True)
 
-    print(f"{Fore.GREEN}Vérification terminée.")
+            print(f"{Fore.GREEN}Vérification terminée.")
+        else:
+            print(f"{Fore.YELLOW}Le traitement a été interrompu.")
+    except KeyboardInterrupt:
+        print(f"\n{Fore.YELLOW}Interruption détectée. Arrêt des analyses.")
 
 class StudyInfo(BaseModel):
     id: Optional[str] = None
