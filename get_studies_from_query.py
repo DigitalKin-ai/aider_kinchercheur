@@ -18,6 +18,8 @@ from tqdm import tqdm
 import argparse
 from aider.llm import litellm
 from aider.io import InputOutput
+from pydantic import BaseModel
+from typing import List, Optional
 
 init(autoreset=True)  # Initialise colorama
 
@@ -389,8 +391,38 @@ def run_all_analysis(io, model="gpt-4o-mini"):
 
     print(f"{Fore.GREEN}Vérification terminée.")
 
+class StudyInfo(BaseModel):
+    id: Optional[str]
+    Nom: str
+    Auteurs: List[str]
+    Journal: Optional[str]
+    Date_de_publication: Optional[str]
+    DOI: Optional[str]
+    Citation: Optional[str]
+    Type: Optional[str]
+    Mots_cles: List[str]
+    lienOrigine: Optional[str]
+    Lien_Google_Drive: Optional[str]
+    Abstract: str
+    Objectif_de_l_etude: str
+    Methodologie: str
+    Conclusions_de_l_etude: str
+    Pertinence_axe_1: Optional[str]
+    Pertinence_axe_2: Optional[str]
+    Pertinence_axe_3: Optional[str]
+    Pertinence_objectif_recherche: str
+    Axe_de_travail: Optional[str]
+    Selection: Optional[str]
+    Apports_et_contributions: str
+    Verbatims_apports_contributions: List[str]
+    Extraits_Verbatim_Verrous: List[str]
+    Verrous_de_l_etude: List[str]
+    Donnees_chiffrees: List[str]
+    Date_de_creation: Optional[str]
+    Date_de_derniere_modification: Optional[str]
+
 class StudyExtractor:
-    def __init__(self, io, model="gpt-4o-mini"):
+    def __init__(self, io, model="gpt-4o-2024-08-06"):
         self.io = io
         self.model = model
 
@@ -432,31 +464,24 @@ class StudyExtractor:
 
                 # Make the API call
                 try:
-                    response = litellm.completion(
+                    response = litellm.beta.chat.completions.parse(
                         model=self.model,
                         messages=messages,
+                        response_format=StudyInfo,
                     )
 
                     # Parse the extracted information
-                    try:
-                        chunk_info = json.loads(response.choices[0].message.content)
-                    except json.JSONDecodeError:
-                        print(f"{Fore.YELLOW}Réponse non-JSON reçue. Tentative de nettoyage...")
-                        content = response.choices[0].message.content
-                        # Tentative de nettoyage de la réponse
-                        content = content.strip()
-                        if content.startswith("```json"):
-                            content = content.split("```json")[1]
-                        if content.endswith("```"):
-                            content = content.rsplit("```", 1)[0]
-                        chunk_info = json.loads(content)
+                    chunk_info = response.choices[0].message.parsed
 
                     # Merge the chunk info into the main extracted_info
-                    for key, value in chunk_info.items():
-                        if key not in extracted_info or not extracted_info[key]:
-                            extracted_info[key] = value
-                        elif value:
-                            extracted_info[key] += " " + value
+                    for field in StudyInfo.__fields__:
+                        value = getattr(chunk_info, field)
+                        if field not in extracted_info or not extracted_info[field]:
+                            extracted_info[field] = value
+                        elif isinstance(value, list):
+                            extracted_info[field] = list(set(extracted_info[field] + value))
+                        elif isinstance(value, str) and value:
+                            extracted_info[field] += " " + value
                 except Exception as e:
                     print(f"{Fore.RED}Erreur lors de l'extraction des informations du PDF (morceau {i+1}/{len(chunks)}) : {e}")
                     print(f"{Fore.RED}Contenu de la réponse : {response.choices[0].message.content[:500]}...")
@@ -479,24 +504,14 @@ class StudyExtractor:
             Return the result in JSON format. Limit your response to 4000 tokens."""}
             ]
 
-            synthesis_response = litellm.completion(
+            synthesis_response = litellm.beta.chat.completions.parse(
                 model=self.model,
                 messages=synthesis_messages,
+                response_format=StudyInfo,
             )
 
             # Parse the synthesized information
-            try:
-                synthesized_info = json.loads(synthesis_response.choices[0].message.content)
-            except json.JSONDecodeError:
-                print(f"{Fore.YELLOW}Réponse de synthèse non-JSON reçue. Tentative de nettoyage...")
-                content = synthesis_response.choices[0].message.content
-                # Tentative de nettoyage de la réponse
-                content = content.strip()
-                if content.startswith("```json"):
-                    content = content.split("```json")[1]
-                if content.endswith("```"):
-                    content = content.rsplit("```", 1)[0]
-                synthesized_info = json.loads(content)
+            synthesized_info = synthesis_response.choices[0].message.parsed
 
             # Save the synthesized information to a markdown file
             safe_title = re.sub(r'[^\w\-_\. ]', '_', title)
