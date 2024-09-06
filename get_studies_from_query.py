@@ -63,7 +63,7 @@ def add_to_todolist(filename):
     with open('todolist.md', 'r+') as f:
         content = f.read()
         f.seek(0, 0)
-        f.write(f"[ ] Lire, analyser et incorporer {filename}\n" + content)
+        f.write(f"[ ] Incorporer les informations analysées dans {filename} au sein de l'état de l'art en cours de rédaction\n" + content)
 
 def is_study_in_folder(title, output_dir):
     safe_title = re.sub(r'[^\w\-_\. ]', '_', title)
@@ -76,7 +76,7 @@ if not os.getenv('SEARCHAPI_KEY'):
     print(f"{Fore.RED}Erreur : La clé SEARCHAPI_KEY n'a pas été trouvée dans le fichier .env")
     exit(1)
 
-def get_studies_from_query(query, num_articles=40, output_dir='etudes', max_workers=DEFAULT_MAX_WORKERS, analyze_immediately=True):
+def get_studies_from_query(query, num_articles=20, output_dir='etudes', max_workers=DEFAULT_MAX_WORKERS, analyze_immediately=True):
     global interrupted
     # Fonction pour faire une requête à Google Scholar
     def google_scholar_request(query, num_articles):
@@ -467,12 +467,12 @@ class StudyExtractor:
             print(f"{Fore.CYAN}Nombre de morceaux : {len(chunks)}")
 
             extracted_info = {}
-            chunks_to_process = chunks[:40] + chunks[-10:] if len(chunks) > 50 else chunks
+            chunks_to_process = chunks[:30] + chunks[-10:] if len(chunks) > 50 else chunks
             for i, chunk in enumerate(chunks_to_process):
                 if interrupted:
                     print(f"{Fore.YELLOW}Interruption détectée. Arrêt de l'extraction.")
                     return None
-                chunk_index = i if i < 40 else len(chunks) - (50 - i)
+                chunk_index = i if i < 30 else len(chunks) - (50 - i)
                 print(f"{Fore.CYAN}Traitement du morceau {chunk_index+1}/{len(chunks)} pour l'étude : {title}")
                 # Prepare the message for the LLM
                 messages = [
@@ -488,7 +488,7 @@ Additional information:
 URL: {url}
 Title: {title}
 
-Please provide the extracted information in a JSON format. If you can't find information for a field, leave it empty. Be concise and focus on the most important information. Make sure to extract as much relevant information as possible, especially for key fields like Abstract, Objectif de l'étude, Méthodologie, and Conclusions de l'étude."""}
+Please provide the extracted information in a JSON format. If you can't find information for a field, leave it empty. Be thorough and include verbatim extracts whenever possible. Make sure to extract as much relevant information as possible, especially for key fields like Abstract, Objectif de l'étude, Méthodologie, and Conclusions de l'étude."""}
                 ]
 
                 # Make the API call
@@ -539,8 +539,8 @@ Please provide the extracted information in a JSON format. If you can't find inf
 
             {json.dumps(extracted_info, indent=2)}
 
-            Provide a concise summary for each field, ensuring that the information is coherent and non-repetitive. 
-            Return the result in JSON format. Limit your response to 4000 tokens."""}
+            Provide a thorough summary for each field, ensuring that the information is coherent and non-repetitive. 
+            Return the result in JSON format."""}
             ]
 
             synthesis_response = litellm.completion(
@@ -651,7 +651,7 @@ def clean_orphan_files():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Télécharger ou analyser des articles scientifiques.")
     parser.add_argument("query", nargs="?", help="La requête de recherche pour télécharger des articles")
-    parser.add_argument("-n", "--num_articles", type=int, default=40, help="Nombre d'articles à télécharger (max 100)")
+    parser.add_argument("-n", "--num_articles", type=int, default=20, help="Nombre d'articles à télécharger (max 100)")
     parser.add_argument("-o", "--output", default="etudes", help="Dossier de sortie pour les PDFs")
     parser.add_argument("--analyze-all", action="store_true", help="Analyser tous les PDFs dans le dossier de sortie")
     parser.add_argument("--model", default="gpt-4o-mini", help="Modèle GPT à utiliser pour l'analyse (par défaut: gpt-4o-mini)")

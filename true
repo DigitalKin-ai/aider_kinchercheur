@@ -1,31 +1,261 @@
-IMPORTANT INSTRUCTIONS: 
-    - Don't use main.py or other scripts to write the SOTA, write it via text files mainly.
-    - Write the SOTA progressively, using template.md as the reference. Only do modifications one by one, leaving the () [] \{\} if they are still needed.
-    - Make sure you have downloaded and read at least 10 studies.
-    - Make sure you only reference studies that you have downloaded and read.
+"gpt4-o" with a "o" for "Omni" is OpenAIs' newest model.
 
-# État de l'art : L'impact des réseaux sociaux sur la santé mentale des adolescents
+CONTEXT INFOS for development:
 
-## Introduction
-L'avènement des réseaux sociaux a profondément transformé la façon dont les adolescents interagissent, communiquent et se perçoivent. Cette révolution numérique, bien qu'offrant de nombreuses opportunités, soulève également des inquiétudes quant à son impact sur la santé mentale des jeunes. Cet état de l'art vise à examiner les recherches actuelles sur la relation complexe entre l'utilisation des réseaux sociaux et le bien-être psychologique des adolescents.
+How to use Structured Outputs
+We’re introducing Structured Outputs in two forms in the API: 
 
-## Contexte historique
-[Contexte historique du sujet]
+1. Function calling: Structured Outputs via tools is available by setting strict: true within your function definition. This feature works with all models that support tools, including all models gpt-4-0613 and gpt-3.5-turbo-0613 and later. When Structured Outputs are enabled, model outputs will match the supplied tool definition.
 
-## Développements récents
-[Principaux développements récents dans le domaine]
+Request
+Output JSON
+Request
+Output JSON
+JSON
 
-## Méthodologies actuelles
-[Description des méthodologies actuellement utilisées]
+1
+91
+1
+POST /v1/chat/completions
+2
+{
+3
+  "model": "gpt-4o-2024-08-06",
+4
+  "messages": [
+5
+    {
+6
+      "role": "system",
+7
+      "content": "You are a helpful assistant. The current date is August 6, 2024. You help users query for the data they are looking for by calling the query function."
+8
+    },
+9
+    {
+10
+      "role": "user",
+11
+      "content": "look up all my orders in may of last year that were fulfilled but not delivered on time"
+12
+    }
+13
+  ],
+14
+  "tools": [
+15
+    {
+16
+      "type": "function",
+17
+      "function": {
+18
+        "name": "query",
+19
+        "description": "Execute a query.",
+20
+        "strict": true,
+21
+        "parameters": {
+22
+          "type": "object",
+23
+          "properties": {
+24
+            "table_name": {
+25
+              "type": "string",
+26
+              "enum": ["orders"]
+27
+            },
+28
+            "columns": {
+29
+              "type": "array",
+30
+              "items": {
+31
+                "type": "string",
+32
+                "enum": [
+33
+                  "id",
+34
+                  "status",
+35
+                  "expected_delivery_date",
+36
+                  "delivered_at",
+37
+                  "shipped_at",
+38
+                  "ordered_at",
+39
+                  "canceled_at"
+40
+                ]
+41
+              }
+42
+            },
+43
+            "conditions": {
+44
+              "type": "array",
+45
+              "items": {
+46
+                "type": "object",
+47
+                "properties": {
+48
+                  "column": {
+49
+                    "type": "string"
+50
+                  },
+51
+                  "operator": {
+52
+                    "type": "string",
+53
+                    "enum": ["=", ">", "<", ">=", "<=", "!="]
+54
+                  },
+55
+                  "value": {
+56
+                    "anyOf": [
+57
+                      {
+58
+                        "type": "string"
+59
+                      },
+60
+                      {
+61
+                        "type": "number"
+62
+                      },
+63
+                      {
+64
+                        "type": "object",
+65
+                        "properties": {
+66
+                          "column_name": {
+67
+                            "type": "string"
+68
+                          }
+69
+                        },
+70
+                        "required": ["column_name"],
+71
+                        "additionalProperties": false
+72
+                      }
+73
+                    ]
+74
+                  }
+75
+                },
+76
+                "required": ["column", "operator", "value"],
+77
+                "additionalProperties": false
+78
+              }
+79
+            },
+80
+            "order_by": {
+81
+              "type": "string",
+82
+              "enum": ["asc", "desc"]
+83
+            }
+84
+          },
+85
+          "required": ["table_name", "columns", "conditions", "order_by"],
+86
+          "additionalProperties": false
+87
+        }
+88
+      }
+89
+    }
+90
+  ]
+91
+}
+JSON
 
-## Défis et limitations
-[Défis actuels et limitations dans le domaine]
-
-## Perspectives futures
-[Perspectives d'avenir et directions de recherche potentielles]
-
-## Conclusion
-[Résumé des points clés et réflexions finales]
-
-## Références
-[Liste des références utilisées, à compléter au fur et à mesure]
+1
+1
+{
+2
+  "table_name": "orders",
+3
+  "columns": ["id", "status", "expected_delivery_date", "delivered_at"],
+4
+  "conditions": [
+5
+    {
+6
+      "column": "status",
+7
+      "operator": "=",
+8
+      "value": "fulfilled"
+9
+    },
+10
+    {
+11
+      "column": "ordered_at",
+12
+      "operator": ">=",
+13
+      "value": "2023-05-01"
+14
+    },
+15
+    {
+16
+      "column": "ordered_at",
+17
+      "operator": "<",
+18
+      "value": "2023-06-01"
+19
+    },
+20
+    {
+21
+      "column": "delivered_at",
+22
+      "operator": ">",
+23
+      "value": {
+24
+        "column_name": "expected_delivery_date"
+25
+      }
+26
+    }
+27
+  ],
+28
+  "order_by": "asc"
+29
+}
+2. A new option for the response_format parameter: developers can now supply a JSON Schema via json_schema, a new option for the response_format parameter. This is useful when the model is not calling a tool, but rather, responding to the user in a structured way. This feature works with our newest GPT-4o models: gpt-4o-2024-08-06, released today, and gpt-4o-mini-2024-07-18. When a response_format is supplied with strict: true, model outputs will match the supplied schema

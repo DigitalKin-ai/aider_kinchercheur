@@ -1434,3 +1434,4636 @@
 +  File "/var/www/html/synthetic-souls/aider/__main__.py", line 1, in <module>
 +    from . import main as main_function
 +ImportError: attempted relative import with no known parent package
+
+# 2024-09-06 06:05:03.368916
++create a new file called get_studies_from_query.py . This function has a parameter that is the query. Then it callsa function to do a google scholar request: GET https://www.searchapi.io/api/v1/search
++ body {
++  "engine": "google_scholar",
++  "q": "the query",
++  "num": 40,
++  "time_period_min": 2010
++}
++Bearer: Token (SEARCHAPI_TOKEN in .env file)
++
++Then, for each url in the response, it calls a function to get the pdf: GET 
++Example: URL | DOI | Title | cURL
++
++curl -X GET "https://api.openaccessbutton.org/find?id=10.1126/science.196.4287.293"
++Accepts a single parameter called "id", which should contain (in order of preference) a URL-encoded doi, pmc, pmid, url, title, or citation. It then saves the result in a file called the DOI of the study, in the folder etudes
+
+# 2024-09-06 06:06:09.697094
++ C:\users\conta\autonomous> python aider\get_studies_from_query.py
++Entrez votre requête de recherche : llms autonomous
++Traceback (most recent call last):
++  File "C:\Python312\Lib\site-packages\requests\models.py", line 974, in json
++    return complexjson.loads(self.text, **kwargs)
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "C:\Python312\Lib\json\__init__.py", line 346, in loads
++    return _default_decoder.decode(s)
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "C:\Python312\Lib\json\decoder.py", line 337, in decode
++    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
++               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "C:\Python312\Lib\json\decoder.py", line 355, in raw_decode
++    raise JSONDecodeError("Expecting value", s, err.value) from None
++json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
++
++During handling of the above exception, another exception occurred:
++
++Traceback (most recent call last):
++  File "C:\users\conta\autonomous\aider\get_studies_from_query.py", line 62, in <module>
++    get_studies_from_query(query)
++  File "C:\users\conta\autonomous\aider\get_studies_from_query.py", line 32, in get_studies_from_query
++    scholar_results = google_scholar_request(query)
++                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "C:\users\conta\autonomous\aider\get_studies_from_query.py", line 23, in google_scholar_request
++    return response.json()
++           ^^^^^^^^^^^^^^^
++  File "C:\Python312\Lib\site-packages\requests\models.py", line 978, in json
++    raise RequestsJSONDecodeError(e.msg, e.doc, e.pos)
++requests.exceptions.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
++PS C:\users\conta\autonomous>
++
++Ajoute des infos de debug
+
+# 2024-09-06 06:07:39.107036
++                <li><a class="text-base text-gray-600 hover:text-gray-900" href="/">Google SERP API</a></li>
++                <li><a class="text-base text-gray-600 hover:text-gray-900" href="/google-shopping">Google Shopping API</a></li>
++                <li><a class="text-base text-gray-600 hover:text-gray-900" href="/google-maps">Google Maps API</a></li>
++                <li><a class="text-base text-gray-600 hover:text-gray-900" href="/google-trends">Google Trends API</a></li>
++                <li><a class="text-base text-gray-600 hover:text-gray-900" href="/google-videos">Google Videos API</a></li>
++                <li><a class="text-base text-gray-600 hover:text-gray-900" href="/google-images">Google Images API</a></li>
++                <li><a class="text-base text-gray-600 hover:text-gray-900" href="/google-lens">Google Lens API</a></li>
++                <li><a class="text-base text-gray-600 hover:text-gray-900" href="/google-news">Google News API</a></li>
++                <li><a class="text-base text-gray-600 hover:text-gray-900" href="/google-autocomplete">Google Autocomplete API</a></li>
++                <li><a class="text-base text-gray-600 hover:text-gray-900" href="/google-scholar">Google Scholar API</a></li>
++                <li><a class="text-base text-gray-600 hover:text-gray-900" href="/google-finance">Google Finance API</a></li>
++                <li><a class="text-base text-gray-600 hover:text-gray-900" href="/google-patents">Google Patents API</a></li>
++                <li><a class="text-base text-gray-600 hover:text-gray-900" href="/google-jobs">Google Jobs API</a></li>
++                <li><a class="text-base text-gray-600 hover:text-gray-900" href="/amazon">Amazon Search API</a></li>
++                <li><a class="text-base text-gray-600 hover:text-gray-900" href="/bing">Bing Search API</a></li>
++                <li><a class="text-base text-gray-600 hover:text-gray-900" href="/baidu">Baidu Search API</a></li>
++                <li><a class="text-base text-gray-600 hover:text-gray-900" href="/google-play">Google Play API</a></li>
++                <li><a class="text-base text-gray-600 hover:text-gray-900" href="/apple-app-store">Apple App Store API</a></li>
++                <li><a class="text-base text-gray-600 hover:text-gray-900" href="/youtube">YouTube Search API</a></li>
++            </ul>
++          </div>
++        </div>
++        <div class="md:grid md:grid-cols-2 md:gap-8">
++          <div>
++            <div class="text-sm font-semibold text-gray-500 tracking-wider uppercase">Product</div>
++            <ul role="list" class="mt-4 space-y-4">
++              <li><a class="text-base text-gray-600 hover:text-gray-900" href="/pricing">Pricing</a></li>
++              <li><a class="text-base text-gray-600 hover:text-gray-900" href="https://status.searchapi.io/">Status Page</a></li>
++              <li><a class="text-base text-gray-600 hover:text-gray-900" href="/affiliate-program">Affiliate Program</a></li>
++              <li><a class="text-base text-gray-600 hover:text-gray-900" href="/press">Press</a></li>
++              <li><a class="text-base text-gray-600 hover:text-gray-900" href="/careers">Careers</a></li>
++            </ul>
++          </div>
++          <div class="mt-12 md:mt-0">
++            <div class="text-sm font-semibold text-gray-500 tracking-wider uppercase">Legal</div>
++            <ul role="list" class="mt-4 space-y-4">
++              <li><a class="text-base text-gray-600 hover:text-gray-900" href="/legal/privacy">Privacy Policy</a></li>
++              <li><a class="text-base text-gray-600 hover:text-gray-900" href="/legal/terms">Terms of Service</a></li>
++            </ul>
++          </div>
++        </div>
++      </div>
++    </div>
++    <div class="mt-12 border-t border-gray-200 pt-8">
++      <p class="text-base text-gray-500 xl:text-center">&copy; 2024 SearchApi. All rights reserverd.</p>
++    </div>
++  </div>
++</footer>
++
++  <script id="IntercomSettingsScriptTag">
++//<![CDATA[
++window.intercomSettings = {"app_id":"rr8jbidf","installation_type":"rails"};(function(){var w=window;var ic=w.Intercom;if(typeof ic==="function"){ic('update',intercomSettings);}else{var d=document;var i=function(){i.c(arguments)};i.q=[];i.c=function(args){i.q.push(args)};w.Intercom=i;function l(){var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://widget.intercom.io/widget/rr8jbidf';var x=d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s,x);}if(document.readyState==='complete'){l();}else if(w.attachEvent){w.attachEvent('onload',l);}else{w.addEventListener('load',l,false);}};})()
++//]]>
++</script>
++</body>
++</html>
++
++Traceback (most recent call last):
++  File "C:\Python312\Lib\site-packages\requests\models.py", line 974, in json
++    return complexjson.loads(self.text, **kwargs)
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "C:\Python312\Lib\json\__init__.py", line 346, in loads
++    return _default_decoder.decode(s)
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "C:\Python312\Lib\json\decoder.py", line 337, in decode
++    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
++               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "C:\Python312\Lib\json\decoder.py", line 355, in raw_decode
++    raise JSONDecodeError("Expecting value", s, err.value) from None
++json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
++
++During handling of the above exception, another exception occurred:
++
++Traceback (most recent call last):
++  File "C:\users\conta\autonomous\aider\get_studies_from_query.py", line 67, in <module>
++    get_studies_from_query(query)
++  File "C:\users\conta\autonomous\aider\get_studies_from_query.py", line 37, in get_studies_from_query
++    scholar_results = google_scholar_request(query)
++                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "C:\users\conta\autonomous\aider\get_studies_from_query.py", line 28, in google_scholar_request
++    return response.json()
++           ^^^^^^^^^^^^^^^
++  File "C:\Python312\Lib\site-packages\requests\models.py", line 978, in json
++    raise RequestsJSONDecodeError(e.msg, e.doc, e.pos)
++requests.exceptions.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
++PS C:\users\conta\autonomous>
+
+# 2024-09-06 06:11:06.886133
++c'est bien la clé du fichier .env que tu utilises?
+
+# 2024-09-06 06:11:36.356079
++non c'est bien SEARCHAPI_KEY
+
+# 2024-09-06 06:13:09.414966
++  </div>
++</footer>
++
++  <script id="IntercomSettingsScriptTag">
++//<![CDATA[
++window.intercomSettings = {"app_id":"rr8jbidf","installation_type":"rails"};(function(){var w=window;var ic=w.Intercom;if(typeof ic==="function"){ic('update',intercomSettings);}else{var d=document;var i=function(){i.c(arguments)};i.q=[];i.c=function(args){i.q.push(args)};w.Intercom=i;function l(){var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://widget.intercom.io/widget/rr8jbidf';var x=d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s,x);}if(document.readyState==='complete'){l();}else if(w.attachEvent){w.attachEvent('onload',l);}else{w.addEventListener('load',l,false);}};})()
++//]]>
++</script>
++</body>
++</html>
++
++Impossible d'obtenir les résultats de Google Scholar. Vérifiez votre clé API et la connexion internet.
++PS C:\users\conta\autonomous> pourtant la clé est bonne et ajoutée au fichier .env
+
+# 2024-09-06 06:17:46.200394
++Payload: {'engine': 'google_scholar', 'q': 'dz', 'num': 40, 'time_period_min': 2010}
++Statut de la réponse: 404
++Contenu de la réponse: <!DOCTYPE html>
++<html class="h-full antialiased" lang="en">
++  <head>
++    <meta name="csrf-param" content="authenticity_token" />
++<meta name="csrf-token" content="P55eZTdqj3z3fBVcKcrxt5QtzuOcRXVUHHPayV0yC9FNIND3jTN5NDXyJBN2iju0OrLFW2GCV6e7m-7NpM3Pcw" />
++
++Ca doit etre une réponse GET
+
+# 2024-09-06 06:24:05.487943
++avant de faire appel à openaccessbutton essaie de télécharger le pdf directement
+
+# 2024-09-06 06:26:24.022732
++si open acccess ne marche pas, essaie avec scihub (DOI ou url) : https://sci-hub.ru/https://arxiv.org/abs/2303.07103
+
+# 2024-09-06 06:26:55.708469
++que suggères-tu d'autres pour maximisr nos chances de récupérer le pdf?
+
+# 2024-09-06 06:27:47.199699
++encore des améliorations à faire ou ça va ?
+
+# 2024-09-06 06:29:30.088651
++Essai de téléchargement via arXiv...
++Essai de téléchargement via OpenAccess Button...
++url: https://api.openaccessbutton.org/find?id=https://link.springer.com/chapter/10.1007/978-3-031-57870-0_18
++Contenu de la réponse PDF: {
++  "metadata": {
++    "title": "llm-based agents utilized in&nbsp;a&nbsp;trustworthy artificial conscience model for&nbsp;controlling ai in&nbsp;medical applications",
++    "doi": "10.1007/978-3-031-57870-0_18",
++    "type": "book-chapter",
++    "issn": [
++      "2367-4512",
++      "2367-4520"
++    ],
++    "journal": "Advanced Information Networking and Applications",
++    "publisher": "Springer Nature Switzerland",
++    "published": "2024-01-01",
++    "year": "2024",
++    "author": [],
++    "pages": "198-209"
++  }
++}
++Téléchargement des articles:  10%|███▊                                  | 1/10 [00:13<01:58, 13.22s/it]
++Traceback (most recent call last):
++  File "C:\users\conta\autonomous\aider\get_studies_from_query.py", line 204, in <module>
++    get_studies_from_query(query, num_articles)
++  File "C:\users\conta\autonomous\aider\get_studies_from_query.py", line 190, in get_studies_from_query
++    f.write(pdf_content)
++TypeError: a bytes-like object is required, not 'dict'
+
+# 2024-09-06 06:33:07.219166
++pour chaque PDF téléchargé avec succès, crée une fonction qui ajoute à todolist.md la ligne [ ] Lire, analyser et incorporer etudes/<nom du fichier de l'étude>.pdf
+
+# 2024-09-06 06:33:54.050442
++est-ce qu'on vérifie bien si l'étude n'est pas déjà dans la liste de fichier du dossier etudes avant de la retélécharger?
+
+# 2024-09-06 06:35:35.522891
++mets des couleurs dans les logs
+
+# 2024-09-06 06:36:21.637476
++peut on paralléliser toutes les recherches détudes, de manière à ce que cette partie soit plus rapide ?
+
+# 2024-09-06 06:37:17.806232
++c'est fonctionnel ou as-tu besoin d'apporter des modifications supplémentaires?
+
+# 2024-09-06 06:38:02.082225
++c'est fonctionnel ou as-tu besoin d'apporter des modifications supplémentaires?
+
+# 2024-09-06 06:38:47.787559
++PS C:\users\conta\autonomous> pip install futures
++WARNING: Ignoring invalid distribution ~%p (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~ (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~-p (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~0p (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~1p (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~2p (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~3p (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~=p (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~harset-normalizer (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~ider-chat (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~ip (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~~p (C:\Python312\Lib\site-packages)
++Collecting futures
++  Using cached futures-3.0.5.tar.gz (25 kB)
++  Preparing metadata (setup.py) ... error
++  error: subprocess-exited-with-error
++
++  × python setup.py egg_info did not run successfully.
++  │ exit code: 1
++  ╰─> [30 lines of output]
++      Traceback (most recent call last):
++        File "<string>", line 2, in <module>
++        File "<pip-setuptools-caller>", line 14, in <module>
++        File "C:\Python312\Lib\site-packages\setuptools\__init__.py", line 282, in <module>
++          monkey.patch_all()
++        File "C:\Python312\Lib\site-packages\setuptools\monkey.py", line 87, in patch_all
++          patch_for_msvc_specialized_compiler()
++        File "C:\Python312\Lib\site-packages\setuptools\monkey.py", line 154, in patch_for_msvc_specialized_compiler
++          patch_func(*msvc14('_get_vc_env'))
++                      ^^^^^^^^^^^^^^^^^^^^^
++        File "C:\Python312\Lib\site-packages\setuptools\monkey.py", line 144, in patch_params
++          mod = import_module(mod_name)
++                ^^^^^^^^^^^^^^^^^^^^^^^
++        File "C:\Python312\Lib\importlib\__init__.py", line 90, in import_module
++          return _bootstrap._gcd_import(name[level:], package, level)
++                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++        File "C:\Python312\Lib\site-packages\setuptools\_distutils\_msvccompiler.py", line 19, in <module>
++          import unittest.mock as mock
++        File "C:\Python312\Lib\unittest\mock.py", line 26, in <module>
++          import asyncio
++        File "C:\Python312\Lib\asyncio\__init__.py", line 8, in <module>
++          from .base_events import *
++        File "C:\Python312\Lib\asyncio\base_events.py", line 18, in <module>
++          import concurrent.futures
++        File "C:\Users\conta\AppData\Local\Temp\pip-install-dmi4lv92\futures_10652132311f4af4b0f139e0b3f9c513\concurrent\futures\__init__.py", line 8, in <module>
++          from concurrent.futures._base import (FIRST_COMPLETED,
++        File "C:\Users\conta\AppData\Local\Temp\pip-install-dmi4lv92\futures_10652132311f4af4b0f139e0b3f9c513\concurrent\futures\_base.py", line 357
++          raise type(self._exception), self._exception, self._traceback
++                                     ^
++      SyntaxError: invalid syntax
++      [end of output]
++
++  note: This error originates from a subprocess, and is likely not a problem with pip.
++error: metadata-generation-failed
++
++× Encountered error while generating package metadata.
++╰─> See above for output.
++
++note: This is an issue with the package mentioned ab
+
+# 2024-09-06 06:41:06.860076
++l'ajout à la todolist doit se faire en début de fichier, non en fin
+
+# 2024-09-06 06:54:58.168981
++nous allons rajouter une fonction qui fait un appel llm avec le pdf directement passé en binaire, demandant de répondre une extraction des informations suivantes :
++|id|Nom|Auteurs|Journal|Date de publication|DOI|Citation|Type|Mots-clés|lienOrigine|Lien Google Drive|Abstract|Objectif de l'étude|Méthodologie|Conclusions de l'étude|Pertinence au regard de l'axe de travail 1|Pertinence au regard de l'axe de travail 2|Pertinence de l'étude au regard de l'axe de travail 3|Pertinence au regard de l'objectif de recherche|Axe de travail|Sélection|Apports et contributions|Verbatims des apports et contributions|Extraits Verbatim des Verrous|Verrous de l'étude|Données chifrées|Date de création|Date de dernière modification| | | | | | | | | | |
++|:----|:----|:----|:----|:----|:----|:----|:----|:----|:----|:----|:----|:----|:----|:----|:----|:----|:----|:----|:----|:----|:----|:----|:----|:----|:----|:----|:----|:----|:----|:----|:----|:----|:----|:----|:----|:----|:----|
++| |Titre de l'étude (Verbatim, word for word in original language)|Auteurs de l'étude|Nom du journal, A comité de lecture ou non|Date de publication de l'étude|DOI de l'étude ou autre identifiant trouvé|Citation selon le style Harvard|Type de l'étude|Mots-clés pertinents de l'étude|Le lien original sur lequel l'étude a été récupérée|webViewLink (lien de notre copie sur Google Drive)|Abstract de l'étude, mot pour mot, verbatim, en langage d'origine, et en intégralité.|Énonce le but principal ou la question de recherche guidant l'étude|Décrit les procédures et techniques utilisées pour collecter et analyser les données|Résumé des principaux résultats et/ou apprentissages issus de l'étude, ainsi que leurs impacts, tout en mentionnant les limites de l'étude.|Évaluation de la capacité de l'étude à apporter une contribution directe et significative l'axe de travail 1 pour atteindre l'objectif principal de recherche.
++Commence par rédiger un court raisonnement, puis donne ton évaluation.
++Evaluations possibles : Très pertinent, Pertinent, Complémentaire, Hors-sujet.|Évaluation de la capacité de l'étude à apporter une contribution directe et significative l'axe de travail 2 pour atteindre l'objectif principal de recherche.
++Commence par rédiger un court raisonnement, puis donne ton évaluation.
++Evaluations possibles : Très pertinent, Pertinent, Complémentaire, Hors-sujet.|Évaluation de la capacité de l'étude à apporter une contribution directe et significative l'axe de travail 3 pour atteindre l'objectif principal de recherche.
++Commence par rédiger un court raisonnement, puis donne ton évaluation.
++Evaluations possibles : Très pertinent, Pertinent, Complémentaire, Hors-sujet.|Évaluation de la capacité de l'étude à apporter une contribution *directe* et significative pour atteindre l'objectif principal de recherche. Commence par rédiger un court raisonnement, puis donne ton évaluation.
++Evaluations possibles : Très pertinent, Pertinent, Complémentaire, Hors-sujet.|Numéro et nom de l"Axe de travail le plus pertinent parmi ceux de la mission dans lequel catégoriser l'étude.|"SÉLECTIONNÉ", "ÉCARTÉ",  "NON-ACCÉDÉ" : Les études sélectionnées sont les études ayant :
++- Un PDF accessible,
++-  une contribution à l'atteinte de l'objectif principal de recherche formulé dans la mission directe et significative,
++- Une date de publication dans les critères de la mission.|Connaissances apportées par l'étude qui illustrent notre compréhension actuelle des PHÉNOMÈNES ou des CAPACITÉS TECHNIQUES et TECHNOLOGIQUES qui aident à atteindre l'objectif de recherche. Ces éléments doivent apporter ou illustrer notre compréhension des relations entre les PARAMÈTRES du SYSTÈME, et la qualité des résultats souhaités.|Cherche des verbatims qui illustrent notre compréhension actuelle des PHÉNOMÈNES ou des CAPACITÉS TECHNIQUES et TECHNOLOGIQUES et aide à atteindre l'objectif de recherche. Les citations doivent provenir de publications scientifiques et doivent apporter ou illustrer notre compréhension des relations entre les PARAMÈTRES du SYSTÈME et la qualité des résultats souhaités.|Cherche des verbatims qui montrent que notre compréhension actuelle des PHÉNOMÈNES ou des CAPACITÉS TECHNIQUES et TECHNOLOGIQUES est insuffisante pour atteindre l'OBJECTIF DE RECHERCHE. Les citations doivent provenir de publications scientifiques et doivent démontrer explicitement les limites ou les lacunes dans la compréhension des relations entre les PARAMÈTRES du SYSTÈME (par exemple, les paramètres de l'AXE DE TRAVAIL) et la qualité des résultats souhaités. Par exemple, des citations qui mentionnent que les interactions entre les paramètres sont encore mal comprises ou que les effets de certains paramètres sur la qualité des résultats ne sont pas pleinement élucidés.|Liste des éléments qui montrent que l'objectif de recherche n'est pas atteint dans l'état actuel des connaissances.(ARRAY)|Liste des données chifrées extraites de l'étude pertinentes à la rédaction de l'état de l'art.|Date de création de l'entité (non-renvoyé)|Date de dernière modification de l'entité (non-renvoyé)| | | | | | | | | | |
++
+
+# 2024-09-06 06:56:24.452056
++modele "gpt-4o", regarde le bon nom de la fonction d'appel (complete je crois). Appelle cette fonction dès le PDF téléchargé.
+
+# 2024-09-06 06:57:43.033414
++une fois l'extraction recue, enregistre la dans analyses/<nom de l'étude>.md , puis ajoute le au chat de la session en cours
+
+# 2024-09-06 07:00:31.757281
++Y a il encore des modifications que tu as besoin de faire?
+
+# 2024-09-06 07:03:51.175132
++aucune étude n'a été sauvegardée dans etudes, alors que ca marchait tout a l'heure
++
++ python aider\get_studies_from_query.py "llm conscious"
++Envoi de la requête à https://www.searchapi.io/api/v1/search
++Paramètres: {'engine': 'google_scholar', 'q': 'llm conscious', 'num': 40, 'time_period_min': 2010}
++Statut de la réponse: 200
++
++Traitement de : Could a large language model be conscious?
++
++Traitement de : Yucong Duan: From" Artificial Consciousness System= Subconscious System (LLM)+ Conscious System (DIKWP)" to Semantic Solutions forAlgorithmic Bias
++URL : https://arxiv.org/abs/2303.07103URL : https://www.researchgate.net/profile/Yucong-Duan/publication/378657912_From_Artificial_Consciousness_System_Subconscious_System_LLM_Conscious_System_DIKWP_to_Semantic_Solutions_for_Algorithmic_Bias/links/65e2a56dadc608480af52dea/From-Artificial-Consciousness-System-Subconscious-System-LLM-Conscious-System-DIKWP-to-Semantic-Solutions-for-Algorithmic-Bias.pdf
++
++Traitement de : LLM-Based Agents Utilized in a Trustworthy Artificial Conscience Model for Controlling AI in Medical ApplicationsEssai de téléchargement via Téléchargement direct...
++
++
++Traitement de : Memory, Consciousness and Large Language Model
++PDF déjà téléchargé pour : Could a large language model be conscious?
++
++Traitement de : Large language models auto-profile conscious awareness changes under psychedelic drug effectsURL : https://arxiv.org/abs/2401.02509
++
++
++
++Traitement de : Nothing in Excess: Mitigating the Exaggerated Safety for LLMs via Safety-Conscious Activation Steering
++URL : https://www.researchsquare.com/article/rs-4670805/latest
++PDF déjà téléchargé pour : Memory, Consciousness and Large Language ModelURL : https://arxiv.org/abs/2408.11491
++URL : https://link.springer.com/chapter/10.1007/978-3-031-57870-0_18
++PDF déjà téléchargé pour : Large language models auto-profile conscious awareness changes under psychedelic drug effects
++
++
++Traitement de : Enforced Amnesia as a Way to Mitigate the Potential Risk of Silent Suffering in the Conscious AIPDF déjà téléchargé pour : LLM-Based Agents Utilized in a Trustworthy Artificial Conscience Model for Controlling AI in Medical Applications
++
++Traitement de : The feasibility of artificial consciousness through the lens of neuroscience
++URL : https://yegortkachenko.com/posts/aiamnesia.html
++URL : https://www.cell.com/trends/neurosciences/fulltext/S0166-2236(23)00227-8
++
++
++Traitement de : … the alignment problem of artificial general intelligence: safe AI through intersecting computational psychological neuroscience and LLM architecture for emergent …PDF déjà téléchargé pour : Nothing in Excess: Mitigating the Exaggerated Safety for LLMs via Safety-Conscious Activation SteeringEssai de téléchargement via Téléchargement direct...
++URL : https://www.frontiersin.org/journals/computational-neuroscience/articles/10.3389/fncom.2024.1395901/fullPDF déjà téléchargé pour : Enforced Amnesia as a Way to Mitigate the Potential Risk of Silent Suffering in the Conscious AI
++
++
++
++Traitement de : I Think, Therefore I am: Awareness in Large Language Models
++Traitement de : LLM Theory of Mind and Alignment: Opportunities and Risks
++URL : https://arxiv.org/abs/2401.17882
++
++Téléchargement des articles:   0%|                                              | 0/20 [00:00<?, ?it/s]
++PDF déjà téléchargé pour : I Think, Therefore I am: Awareness in Large Language ModelsURL : https://arxiv.org/abs/2405.08154
++
++
++Traitement de : Rapid optimization for jailbreaking llms via subconscious exploitation and echopraxiaEssai de téléchargement via Téléchargement direct...
++PDF déjà téléchargé pour : LLM Theory of Mind and Alignment: Opportunities and Risks
++
++URL : https://arxiv.org/abs/2402.05467
++
++Traitement de : Determinants of llm-assisted decision-makingPDF déjà téléchargé pour : Rapid optimization for jailbreaking llms via subconscious exploitation and echopraxia
++
++URL : https://arxiv.org/abs/2402.17385
++
++Traitement de : Position: Enforced Amnesia as a Way to Mitigate the Potential Risk of Silent Suffering in the Conscious AI
++URL : https://openreview.net/forum?id=nACGn4US1R
++PDF déjà téléchargé pour : Determinants of llm-assisted decision-making
++PDF déjà téléchargé pour : Position: Enforced Amnesia as a Way to Mitigate the Potential Risk of Silent Suffering in the Conscious AI
++Traitement de : Consciousness beyond the human case
++
++URL : https://www.cell.com/current-biology/fulltext/S0960-9822(23)00852-7
++Traitement de : “All animals are conscious”: Shifting the null hypothesis in consciousness science
++
++URL : https://onlinelibrary.wiley.com/doi/abs/10.1111/mila.12498
++Essai de téléchargement via Téléchargement direct...
++Essai de téléchargement via Téléchargement direct...
++Essai de téléchargement via arXiv...
++Essai de téléchargement via arXiv...
++Essai de téléchargement via arXiv...
++Essai de téléchargement via arXiv...
++Essai de téléchargement via arXiv...
++Essai de téléchargement via OpenAccess Button...
++url: https://api.openaccessbutton.org/find?id=https://www.researchgate.net/profile/Yucong-Duan/publication/378657912_From_Artificial_Consciousness_System_Subconscious_System_LLM_Conscious_System_DIKWP_to_Semantic_Solutions_for_Algorithmic_Bias/links/65e2a56dadc608480af52dea/From-Artificial-Consciousness-System-Subconscious-System-LLM-Conscious-System-DIKWP-to-Semantic-Solutions-for-Algorithmic-Bias.pdf
++Essai de téléchargement via OpenAccess Button...
++url: https://api.openaccessbutton.org/find?id=https://www.cell.com/current-biology/fulltext/S0960-9822(23)00852-7
++Essai de téléchargement via OpenAccess Button...
++url: https://api.openaccessbutton.org/find?id=https://onlinelibrary.wiley.com/doi/abs/10.1111/mila.12498
++Essai de téléchargement via OpenAccess Button...
++url: https://api.openaccessbutton.org/find?id=https://www.cell.com/trends/neurosciences/fulltext/S0166-2236(23)00227-8
++Essai de téléchargement via OpenAccess Button...
++url: https://api.openaccessbutton.org/find?id=https://www.frontiersin.org/journals/computational-neuroscience/articles/10.3389/fncom.2024.1395901/full
++Essai de téléchargement via Google Scholar...
++Essai de téléchargement via Google Scholar...
++Essai de téléchargement via Google Scholar...
++Essai de téléchargement via Google Scholar...
++Essai de téléchargement via Sci-Hub...
++Essai de téléchargement via Google Scholar...
++Erreur lors de la tentative de téléchargement via Sci-Hub: list index out of range
++Essai de téléchargement via Sci-Hub...
++Essai de téléchargement via Sci-Hub...
++Essai de téléchargement via Sci-Hub...
++Erreur lors de la tentative de téléchargement via Sci-Hub: list index out of range
++Erreur lors de la tentative de téléchargement via Sci-Hub: list index out of range
++Erreur lors de la tentative de téléchargement via Sci-Hub: list index out of range
++Impossible de trouver un PDF valide pour : Consciousness beyond the human case
++
++Traitement de : Should We Fear Large Language Models? A Structural Analysis of the Human Reasoning SysteTéléchargement des articles:  60%|██████████████████████▏              | 12/20 [00:12<00:08,  1.04s/it]
++URL : https://arxiv.org/abs/2403.03288
++PDF déjà téléchargé pour : Should We Fear Large Language Models? A Structural Analysis of the Human Reasoning System for Elucidating LLM Capabilities and Risks Through the Lens of …
++
++Traitement de : " My agent understands me better": Integrating Dynamic Human-like Memory Recall and Consolidation in LLM-Based Agents
++URL : https://dl.acm.org/doi/abs/10.1145/3613905.3650839
++PDF déjà téléchargé pour : " My agent understands me better": Integrating Dynamic Human-like Memory Recall and Consolidation in LLM-Based Agents
++
++Traitement de : Introspective capabilities in large language models
++URL : https://www.ingentaconnect.com/content/imp/jcs/2023/00000030/f0020009/art00010
++PDF déjà téléchargé pour : Introspective capabilities in large language models
++
++Traitement de : A Preliminary Study on the Capability Boundary of LLM and a New Implementation Approach for AGI
++URL : None
++Essai de téléchargement via Téléchargement direct...
++Essai de téléchargement via Sci-Hub...
++Impossible de trouver un PDF valide pour : “All animals are conscious”: Shifting the null hypothesis in consciousness science
++Téléchargement des articles:  80%|█████████████████████████████▌       | 16/20 [00:14<00:03,  1.21it/s]Impossible de trouver un PDF valide pour : The feasibility of artificial consciousness through the lens of neuroscience
++Impossible de trouver un PDF valide pour : Yucong Duan: From" Artificial Consciousness System= Subconscious System (LLM)+ Conscious System (DIKWP)" to Semantic Solutions forAlgorithmic Bias
++Téléchargement des articles:  90%|█████████████████████████████████▎   | 18/20 [00:14<00:01,  1.45it/s]Erreur lors de la tentative de téléchargement via Sci-Hub: list index out of range
++Essai de téléchargement via arXiv...
++Impossible de trouver un PDF valide pour : … the alignment problem of artificial general intelligence: safe AI through intersecting computational psychological neuroscience and LLM architecture for emergent …
++Téléchargement des articles:  95%|███████████████████████████████████▏ | 19/20 [00:16<00:00,  1.17it/s]Essai de téléchargement via OpenAccess Button...
++url: https://api.openaccessbutton.org/find?id=A Preliminary Study on the Capability Boundary of LLM and a New Implementation Approach for AGI
++Essai de téléchargement via Google Scholar...
++Erreur lors de la recherche sur Google Scholar: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
++Essai de téléchargement via Sci-Hub...
++Erreur lors de la tentative de téléchargement via Sci-Hub: list index out of range
++Impossible de trouver un PDF valide pour : A Preliminary Study on the Capability Boundary of LLM and a New Implementation Approach for AGI
++Téléchargement des articles: 100%|█████████████████████████████████████| 20/20 [00:39<00:00,  1.99s/it]
++Tous les articles ont été traités.
+
+# 2024-09-06 07:07:22.891118
++rajoute une fonction run_all_analysis, qui appelle la fonction d'analyse pour toutes les études présentes dont le fichier d'analyse n'existe pas
+
+# 2024-09-06 07:08:45.979536
++Erreur lors de la tentative de téléchargement via Sci-Hub: list index out of range
+
+# 2024-09-06 07:09:30.471511
++Erreur lors de la tentative de téléchargement via Sci-Hub: list index out of range
+
+# 2024-09-06 07:10:09.574858
++fais en sorte que je puisse interrompre les recherches avec ctrl +c
+
+# 2024-09-06 07:11:39.045447
++ca ne fonctionne pas, je n'arrive pas à interrompre les recherches
+
+# 2024-09-06 07:13:17.488641
++Une erreur s'est produite lors du traitement d'un article : litellm.BadRequestError: litellm.ContextWindowExceededError: ContextWindowExceededError: OpenAIException - Error code: 400 - {'error': {'message': "Invalid 'messages[1].content': string too long. Expected a string with maximum length 1048576, but got a string with length 2778554 instead.", 'type': 'invalid_request_error', 'param': 'messages[1].content', 'code': 'string_above_max_length'}}
++
++Il faut chunker le pdf de manière à ne pas dépasser la fenetre de contexte, puis synthétiser les réponses en une réponse
+
+# 2024-09-06 07:13:48.947510
++des choses à rajouter?
+
+# 2024-09-06 07:14:58.461067
++per défaut le modèle doit être "gpt-4o" (o pour omni), est-ce le cas?
+
+# 2024-09-06 07:17:36.625240
++rajoute des prints avant, pendant et après la lecture de pdf, sinon on ne sait pas ce qu'il se passe
+
+# 2024-09-06 07:18:55.018563
++si l'étude a plus de 50 mocreaux ne la lis pas
+
+# 2024-09-06 07:19:24.412199
++encore des erreurs :
++
++Essai de téléchargement via Téléchargement direct...
++PDF sauvegardé via Google Scholar : etudes\On the Road with GPT-4V _ision__ Explorations of Utilizing Visual-Language Model as Autonomous Drivi.pdf
++Début de l'extraction des informations pour : On the Road with GPT-4V (ision): Explorations of Utilizing Visual-Language Model as Autonomous Driving Agent
++Encodage du contenu PDF en base64...
++Découpage du contenu PDF en morceaux...
++Nombre de morceaux : 29
++Traitement du morceau 1/29...
++Impossible de trouver un PDF valide pour : Enhancing Autonomous System Security and Resilience with Generative AI: A Comprehensive Survey
++
++Traitement de : ProcessCarbonAgent: A large language models-empowered autonomous agent for decision-makiTéléchargement des articles:  75%|███████████████████████████▊         | 15/20 [00:27<00:10,  2.14s/it]
++URL : https://www.sciencedirect.com/science/article/pii/S0278612524001729
++Tentative de téléchargement pour : ProcessCarbonAgent: A large language models-empowered autonomous agent for decision-making in manufacturing carbon emission management
++Essai de téléchargement via Téléchargement direct...
++Essai de téléchargement via Sci-Hub...
++Impossible de trouver l'URL du PDF sur la page Sci-Hub
++Essai de téléchargement via arXiv...
++Erreur lors de l'extraction des informations du PDF : litellm.BadRequestError: litellm.ContextWindowExceededError: ContextWindowExceededError: OpenAIException - Error code: 400 - {'error': {'message': "This model's maximum context length is 128000 tokens. However, your messages resulted in 342520 tokens. Please reduce the length of the messages.", 'type': 'invalid_request_error', 'param': 'messages', 'code': 'context_length_exceeded'}}
++Informations extraites sauvegardées : etudes\On the Road with GPT-4V _ision__ Explorations of Utilizing Visual-Language Model as Autonomous Drivi.json
++Téléchargement des articles:  80%|█████████████████████████████▌       | 16/20 [00:27<00:06,  1.61s/it]Essai de téléchargement via arXiv...
++Impossible de trouver un PDF valide pour : Evaluation of LLM Agents for the SOC Tier 1 Analyst Triage Process
++Téléchargement des articles:  85%|███████████████████████████████▍     | 17/20 [00:29<00:05,  1.70s/it]Essai de téléchargement via OpenAccess Button...
++PDF sauvegardé via arXiv : etudes\Tokenize the World into Object-level Knowledge to Address Long-tail Events in Autonomous Driving.pdf
++Début de l'extraction des informations pour : Tokenize the World into Object-level Knowledge to Address Long-tail Events in Autonomous Driving
++Encodage du contenu PDF en base64...
++Découpage du contenu PDF en morceaux...
++Nombre de morceaux : 36
++Traitement du morceau 1/36...
++Erreur lors de l'extraction des informations du PDF : litellm.BadRequestError: litellm.ContextWindowExceededError: ContextWindowExceededError: OpenAIException - Error code: 400 - {'error': {'message': "This model's maximum context length is 128000 tokens. However, your messages resulted in 341598 tokens. Please reduce the length of the messages.", 'type': 'invalid_request_error', 'param': 'messages', 'code': 'context_length_exceeded'}}
++Informations extraites sauvegardées : etudes\Tokenize the World into Object-level Knowledge to Address Long-tail Events in Autonomous Driving.json
++Téléchargement des articles:  90%|█████████████████████████████████▎   | 18/20 [00:32<00:04,  2.25s/it]PDF sauvegardé via arXiv : etudes\Probing Multimodal LLMs as World Models for Driving.pdf
++Début de l'extraction des informations pour : Probing Multimodal LLMs as World Models for Driving
++Encodage du contenu PDF en base64...
++Découpage du contenu PDF en morceaux...
++Nombre de morceaux : 80
++Traitement du morceau 1/80...
++Essai de téléchargement via Google Scholar...
++Erreur lors de l'extraction des informations du PDF : litellm.BadRequestError: litellm.ContextWindowExceededError: ContextWindowExceededError: OpenAIException - Error code: 400 - {'error': {'message': "This model's maximum context length is 128000 tokens. However, your messages resulted in 334673 tokens. Please reduce the length of the messages.", 'type': 'invalid_request_error', 'param': 'messages', 'code': 'context_length_exceeded'}}
++Informations extraites sauvegardées : etudes\Probing Multimodal LLMs as World Models for Driving.json
++Téléchargement des articles:  95%|███████████████████████████████████▏ | 19/20 [00:34<00:02,  2.11s/it]Essai de téléchargement via Sci-Hub...
++Impossible de trouver l'URL du PDF sur la page Sci-Hub
++Impossible de trouver un PDF valide pour : ProcessCarbonAgent: A large language models-empowered autonomous agent for decision-making in manufacturing carbon emission management
++Téléchargement des articles: 100%|█████████████████████████████████████| 20/20 [00:40<00:00,  2.00s/it]
++Tous les articles ont été traités.
++Nombre de PDFs téléchargés : 65
++Nombre de fichiers JSON créés : 17
+
+# 2024-09-06 07:21:30.487595
++c'est top bravo. Je vois dans le dossier que :
++- les fichiers json des études contiennent tous "null"
++- Les fichiers des analyses n'ont pas été crées
+
+# 2024-09-06 07:22:54.775203
++modifie le comportement pour que --analyze-all ne fasse pas l'appel à la requete mais juste l'analyse. 
++
++Le format d'appel n'a plus besoin de passer la requete
+
+# 2024-09-06 07:24:29.732812
++parallélise les analyse dans analyse all
+
+# 2024-09-06 07:25:28.496661
++"Traitement du morceau 2/42..." indique de quelle étude dans le print
+
+# 2024-09-06 07:27:54.318674
++à la fin de analyze all, lis toutes les analyses et recherche la valeur "ÉCARTÉ". Si le mot est présent dans le fichier, alors supprime l'analyse du chat de la session en cours
+
+# 2024-09-06 07:28:22.509527
++des modifications à effectuer?
+
+# 2024-09-06 07:36:50.835821
++je ne vois aucune analyse etre sauvegardée?
++EGalement, je vois des analyses 2/171, alors qu'on doit pas traiter les plus que 100
+
+# 2024-09-06 07:37:29.533504
++augmente le nombre de workers par défaut
+
+# 2024-09-06 07:40:04.890355
++beaucoup d'erreurs ?
++
++issociation
++Encodage du contenu PDF en base64...
++Découpage du contenu PDF en morceaux...
++Nombre de morceaux : 11
++Traitement du morceau 1/11 pour l'étude : Artificial consciousness and the consciousness-attention dissociation
++Erreur lors de l'extraction des informations du PDF : Expecting value: line 1 column 1 (char 0)
++Traitement du morceau 5/47 pour l'étude : Advancing Object Goal Navigation Through LLM-enhanced Object Affinities Transfer
++Erreur lors de l'extraction des informations du PDF : Expecting value: line 1 column 1 (char 0)
++Traitement du morceau 5/5 pour l'étude : A Methodology for the Assessment of AI Consciousness
++Erreur lors de l'extraction des informations du PDF : Expecting value: line 1 column 1 (char 0)
++Traitement du morceau 3/42 pour l'étude : AI ethics in computational psychiatry_ From the neuroscience of consciousness to the ethics of consc
++Erreur lors de l'extraction des informations du PDF : Expecting value: line 1 column 1 (char 0)
++Traitement du morceau 2/8 pour l'étude : Artificial conscious intelligence
++Erreur lors de l'extraction des informations du PDF : Expecting value: line 1 column 1 (char 0)
++Traitement du morceau 2/11 pour l'étude : Artificial consciousness and the consciousness-attention dissociation
++Erreur lors de l'extraction des informations du PDF : Expecting value: line 1 column 1 (char 0)
++Traitement du morceau 6/47 pour l'étude : Advancing Object Goal Navigation Through LLM-enhanced Object Affinities Transfer
++Erreur lors de l'extraction des informations du PDF : Expecting value: line 1 column 1 (char 0)
++Aucune information n'a pu être extraite du PDF.
++Analyse des PDFs:   8%|███▊                                             | 5/65 [00:29<04:40,  4.67s/it]
++Début de l'extraction des informations pour : Artificial consciousness
++Encodage du contenu PDF en base64...
+
+# 2024-09-06 07:41:05.640519
++non l'erreur intervient pendant l'analyse des études
+
+# 2024-09-06 07:42:26.579096
++au lieu de ne pas traiter les é"tudes à plus de 100 morceaux, traitons toutes les études mais faisons que les 40 premiers morceaux + les 10 derniers
+
+# 2024-09-06 07:42:51.364533
++c'est tout bon?
+
+# 2024-09-06 07:44:12.014400
++itation
++Not specified
++
++## Type
++Review/Report
++
++## Mots-clés
++VAE, financement, formation, validation des compétences
++
++## lienOrigine
++Not specified
++
++## Lien Google Drive
++Not specified
++
++## Abstract
++This study discusses funding options available for the Validation of Acquire...
++Informations JSON sauvegardées : etudes\4_. Comment financer votre VAE_.json
++Fin du traitement pour : 4_. Comment financer votre VAE_
++Analyse terminée pour un fichier.Analyse en cours pour : Après des vérifications_ nous vous informons que certains documents visés par votre demande relève d.pdf
++Analyse des PDFs:   3%|██                                                               | 2/65 [00:31<15:03, 14.35s/it]
++Début de l'extraction des informations pour : Après des vérifications_ nous vous informons que certains documents visés par votre demande relève d
++Encodage du contenu PDF en base64...
++Découpage du contenu PDF en morceaux...
++Nombre de morceaux : 171
++Traitement du morceau 1/171 pour l'étude : Après des vérifications_ nous vous informons que certains documents visés par votre demande relève d
++Réponse de synthèse non-JSON reçue. Tentative de nettoyage...
++Analyse sauvegardée : analyses\4. Comment financer votre VAE_.md
++Nouvelle analyse ajoutée au chat : analyses\4. Comment financer votre VAE_.md
++Extraction et synthèse terminées pour : 4. Comment financer votre VAE_
++Contenu de l'analyse :
++# 4. Comment financer votre VAE_
++
++## id
++
++
++## Nom
++How to finance your VAE
++
++## Auteurs
++
++
++## Journal
++
++
++## Date de publication
++
++
++## DOI
++
++
++## Citation
++
++
++## Type
++
++
++## Mots-clés
++
++
++## lienOrigine
++
++
++## Lien Google Drive
++
++
++## Abstract
++
++
++## Objectif de l'étude
++To explore various methods and possibilities for financing the Validation des Acquis de l'Expérience (VAE).
++
++## Méthodologie
++The study employs a review of existing funding options, interviews with VAE candidates, and analysis of institutional policie...
++Informations JSON sauvegardées : etudes\4. Comment financer votre VAE_.json
++Fin du traitement pour : 4. Comment financer votre VAE_
++Analyse terminée pour un fichier.Analyse en cours pour : Artificial conscious intelligence.pdf
++Analyse des PDFs:   5%|███                                                              | 3/65 [00:31<08:20,  8.07s/it]
++Début de l'extraction des informations pour : Artificial conscious intelligence
++Encodage du contenu PDF en base64...
++Découpage du contenu PDF en morceaux...
++Nombre de morceaux : 8
++Traitement du morceau 1/8 pour l'étude : Artificial conscious intelligence
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++
+
+# 2024-09-06 07:45:01.203007
++voici comment forcer le format de l'output avec openai:
++
++ntroducing Structured Outputs in the API
++We are introducing Structured Outputs in the API—model outputs now reliably adhere to developer-supplied JSON Schemas.
++
++Structured Output in the API > Hero Image > Media Item
++Last year at DevDay, we introduced JSON mode—a useful building block for developers looking to build reliable applications with our models. While JSON mode improves model reliability for generating valid JSON outputs, it does not guarantee that the model’s response will conform to a particular schema. Today we’re introducing Structured Outputs in the API, a new feature designed to ensure model-generated outputs will exactly match JSON Schemas provided by developers.
++
++Generating structured data from unstructured inputs is one of the core use cases for AI in today’s applications. Developers use the OpenAI API to build powerful assistants that have the ability to fetch data and answer questions via function calling(opens in a new window), extract structured data for data entry, and build multi-step agentic workflows that allow LLMs to take actions. Developers have long been working around the limitations of LLMs in this area via open source tooling, prompting, and retrying requests repeatedly to ensure that model outputs match the formats needed to interoperate with their systems. Structured Outputs solves this problem by constraining OpenAI models to match developer-supplied schemas and by training our models to better understand complicated schemas.
++
++On our evals of complex JSON schema following, our new model gpt-4o-2024-08-06 with Structured Outputs scores a perfect 100%. In comparison, gpt-4-0613 scores less than 40%.
++
++Prompting Alone
++Structured Outputs (strict=false)
++Structured Outputs (strict=true)
++gpt-4-0613
++gpt-4-turbo-2024-04-09
++gpt-4o-2024-05-13
++gpt-4o-2024-08-06
++0
++10
++20
++30
++40
++50
++60
++70
++80
++90
++100
++With Structured Outputs, gpt-4o-2024-08-06 achieves 100% reliability in our evals, perfectly matching the output schemas.
++
++How to use Structured Outputs
++We’re introducing Structured Outputs in two forms in the API: 
++
++1. Function calling: Structured Outputs via tools is available by setting strict: true within your function definition. This feature works with all models that support tools, including all models gpt-4-0613 and gpt-3.5-turbo-0613 and later. When Structured Outputs are enabled, model outputs will match the supplied tool definition.
++
++Request
++Output JSON
++Request
++Output JSON
++JSON
++
++1
++2
++3
++4
++5
++6
++7
++8
++9
++10
++11
++12
++13
++14
++15
++16
++17
++18
++19
++20
++21
++22
++23
++24
++25
++26
++27
++28
++29
++30
++31
++32
++33
++34
++35
++36
++37
++38
++39
++40
++41
++42
++43
++44
++45
++46
++47
++48
++49
++50
++51
++52
++53
++54
++55
++56
++57
++58
++59
++60
++61
++62
++63
++64
++65
++66
++67
++68
++69
++70
++71
++72
++73
++74
++75
++76
++77
++78
++79
++80
++81
++82
++83
++84
++85
++86
++87
++88
++89
++90
++91
++1
++POST /v1/chat/completions
++2
++{
++3
++  "model": "gpt-4o-2024-08-06",
++4
++  "messages": [
++5
++    {
++6
++      "role": "system",
++7
++      "content": "You are a helpful assistant. The current date is August 6, 2024. You help users query for the data they are looking for by calling the query function."
++8
++    },
++9
++    {
++10
++      "role": "user",
++11
++      "content": "look up all my orders in may of last year that were fulfilled but not delivered on time"
++12
++    }
++13
++  ],
++14
++  "tools": [
++15
++    {
++16
++      "type": "function",
++17
++      "function": {
++18
++        "name": "query",
++19
++        "description": "Execute a query.",
++20
++        "strict": true,
++21
++        "parameters": {
++22
++          "type": "object",
++23
++          "properties": {
++24
++            "table_name": {
++25
++              "type": "string",
++26
++              "enum": ["orders"]
++27
++            },
++28
++            "columns": {
++29
++              "type": "array",
++30
++              "items": {
++31
++                "type": "string",
++32
++                "enum": [
++33
++                  "id",
++34
++                  "status",
++35
++                  "expected_delivery_date",
++36
++                  "delivered_at",
++37
++                  "shipped_at",
++38
++                  "ordered_at",
++39
++                  "canceled_at"
++40
++                ]
++41
++              }
++42
++            },
++43
++            "conditions": {
++44
++              "type": "array",
++45
++              "items": {
++46
++                "type": "object",
++47
++                "properties": {
++48
++                  "column": {
++49
++                    "type": "string"
++50
++                  },
++51
++                  "operator": {
++52
++                    "type": "string",
++53
++                    "enum": ["=", ">", "<", ">=", "<=", "!="]
++54
++                  },
++55
++                  "value": {
++56
++                    "anyOf": [
++57
++                      {
++58
++                        "type": "string"
++59
++                      },
++60
++                      {
++61
++                        "type": "number"
++62
++                      },
++63
++                      {
++64
++                        "type": "object",
++65
++                        "properties": {
++66
++                          "column_name": {
++67
++                            "type": "string"
++68
++                          }
++69
++                        },
++70
++                        "required": ["column_name"],
++71
++                        "additionalProperties": false
++72
++                      }
++73
++                    ]
++74
++                  }
++75
++                },
++76
++                "required": ["column", "operator", "value"],
++77
++                "additionalProperties": false
++78
++              }
++79
++            },
++80
++            "order_by": {
++81
++              "type": "string",
++82
++              "enum": ["asc", "desc"]
++83
++            }
++84
++          },
++85
++          "required": ["table_name", "columns", "conditions", "order_by"],
++86
++          "additionalProperties": false
++87
++        }
++88
++      }
++89
++    }
++90
++  ]
++91
++}
++JSON
++
++1
++2
++3
++4
++5
++6
++7
++8
++9
++10
++11
++12
++13
++14
++15
++16
++17
++18
++19
++20
++21
++22
++23
++24
++25
++26
++27
++28
++29
++1
++{
++2
++  "table_name": "orders",
++3
++  "columns": ["id", "status", "expected_delivery_date", "delivered_at"],
++4
++  "conditions": [
++5
++    {
++6
++      "column": "status",
++7
++      "operator": "=",
++8
++      "value": "fulfilled"
++9
++    },
++10
++    {
++11
++      "column": "ordered_at",
++12
++      "operator": ">=",
++13
++      "value": "2023-05-01"
++14
++    },
++15
++    {
++16
++      "column": "ordered_at",
++17
++      "operator": "<",
++18
++      "value": "2023-06-01"
++19
++    },
++20
++    {
++21
++      "column": "delivered_at",
++22
++      "operator": ">",
++23
++      "value": {
++24
++        "column_name": "expected_delivery_date"
++25
++      }
++26
++    }
++27
++  ],
++28
++  "order_by": "asc"
++29
++}
++2. A new option for the response_format parameter: developers can now supply a JSON Schema via json_schema, a new option for the response_format parameter. This is useful when the model is not calling a tool, but rather, responding to the user in a structured way. This feature works with our newest GPT-4o models: gpt-4o-2024-08-06, released today, and gpt-4o-mini-2024-07-18. When a response_format is supplied with strict: true, model outputs will match the supplied schema.
++
++Request
++Output JSON
++Request
++Output JSON
++Request
++
++1
++2
++3
++4
++5
++6
++7
++8
++9
++10
++11
++12
++13
++14
++15
++16
++17
++18
++19
++20
++21
++22
++23
++24
++25
++26
++27
++28
++29
++30
++31
++32
++33
++34
++35
++36
++37
++38
++39
++40
++41
++42
++43
++44
++45
++46
++47
++1
++POST /v1/chat/completions
++2
++{
++3
++  "model": "gpt-4o-2024-08-06",
++4
++  "messages": [
++5
++    {
++6
++      "role": "system",
++7
++      "content": "You are a helpful math tutor."
++8
++    },
++9
++    {
++10
++      "role": "user",
++11
++      "content": "solve 8x + 31 = 2"
++12
++    }
++13
++  ],
++14
++  "response_format": {
++15
++    "type": "json_schema",
++16
++    "json_schema": {
++17
++      "name": "math_response",
++18
++      "strict": true,
++19
++      "schema": {
++20
++        "type": "object",
++21
++        "properties": {
++22
++          "steps": {
++23
++            "type": "array",
++24
++            "items": {
++25
++              "type": "object",
++26
++              "properties": {
++27
++                "explanation": {
++28
++                  "type": "string"
++29
++                },
++30
++                "output": {
++31
++                  "type": "string"
++32
++                }
++33
++              },
++34
++              "required": ["explanation", "output"],
++35
++              "additionalProperties": false
++36
++            }
++37
++          },
++38
++          "final_answer": {
++39
++            "type": "string"
++40
++          }
++41
++        },
++42
++        "required": ["steps", "final_answer"],
++43
++        "additionalProperties": false
++44
++      }
++45
++    }
++46
++  }
++47
++}
++Output JSON
++
++1
++2
++3
++4
++5
++6
++7
++8
++9
++10
++11
++12
++13
++14
++15
++16
++17
++1
++{
++2
++  "steps": [
++3
++    {
++4
++      "explanation": "Subtract 31 from both sides to isolate the term with x.",
++5
++      "output": "8x + 31 - 31 = 2 - 31"
++6
++    },
++7
++    {
++8
++      "explanation": "This simplifies to 8x = -29.",
++9
++      "output": "8x = -29"
++10
++    },
++11
++    {
++12
++      "explanation": "Divide both sides by 8 to solve for x.",
++13
++      "output": "x = -29 / 8"
++14
++    }
++15
++  ],
++16
++  "final_answer": "x = -29 / 8"
++17
++}
++Safe Structured Outputs
++Safety is a top priority for OpenAI—the new Structured Outputs functionality will abide by our existing safety policies and will still allow the model to refuse an unsafe request. To make development simpler, there is a new refusal string value on API responses which allows developers to programmatically detect if the model has generated a refusal instead of output matching the schema. When the response does not include a refusal and the model’s response has not been prematurely interrupted (as indicated by finish_reason), then the model’s response will reliably produce valid JSON matching the supplied schema.
++
++JSON
++
++1
++2
++3
++4
++5
++6
++7
++8
++9
++10
++11
++12
++13
++14
++15
++16
++17
++18
++19
++20
++21
++22
++23
++1
++{
++2
++  "id": "chatcmpl-9nYAG9LPNonX8DAyrkwYfemr3C8HC",
++3
++  "object": "chat.completion",
++4
++  "created": 1721596428,
++5
++  "model": "gpt-4o-2024-08-06",
++6
++  "choices": [
++7
++    {
++8
++      "index": 0,
++9
++      "message": {
++10
++        "role": "assistant",
++11
++        "refusal": "I'm sorry, I cannot assist with that request."
++12
++      },
++13
++      "logprobs": null,
++14
++      "finish_reason": "stop"
++15
++    }
++16
++  ],
++17
++  "usage": {
++18
++    "prompt_tokens": 81,
++19
++    "completion_tokens": 11,
++20
++    "total_tokens": 92
++21
++  },
++22
++  "system_fingerprint": "fp_3407719c7f"
++23
++}
++Native SDK support
++Our Python and Node SDKs have been updated with native support for Structured Outputs. Supplying a schema for tools or as a response format is as easy as supplying a Pydantic or Zod object, and our SDKs will handle converting the data type to a supported JSON schema, deserializing the JSON response into the typed data structure automatically, and parsing refusals if they arise.
++
++The following examples show native support for Structured Outputs with function calling.
++
++Python
++Node
++Python
++Node
++python
++
++1
++2
++3
++4
++5
++6
++7
++8
++9
++10
++11
++12
++13
++14
++15
++16
++17
++18
++19
++20
++21
++22
++23
++24
++25
++26
++27
++28
++29
++30
++31
++32
++33
++34
++35
++36
++37
++38
++39
++40
++41
++42
++43
++44
++45
++46
++47
++48
++49
++50
++51
++52
++53
++54
++55
++56
++57
++58
++59
++60
++61
++62
++63
++64
++65
++66
++67
++68
++69
++70
++71
++72
++73
++74
++75
++76
++1
++from enum import Enum
++2
++from typing import Union
++3
++
++4
++from pydantic import BaseModel
++5
++
++6
++import openai
++7
++from openai import OpenAI
++8
++
++9
++
++10
++class Table(str, Enum):
++11
++    orders = "orders"
++12
++    customers = "customers"
++13
++    products = "products"
++14
++
++15
++
++16
++class Column(str, Enum):
++17
++    id = "id"
++18
++    status = "status"
++19
++    expected_delivery_date = "expected_delivery_date"
++20
++    delivered_at = "delivered_at"
++21
++    shipped_at = "shipped_at"
++22
++    ordered_at = "ordered_at"
++23
++    canceled_at = "canceled_at"
++24
++
++25
++
++26
++class Operator(str, Enum):
++27
++    eq = "="
++28
++    gt = ">"
++29
++    lt = "<"
++30
++    le = "<="
++31
++    ge = ">="
++32
++    ne = "!="
++33
++
++34
++
++35
++class OrderBy(str, Enum):
++36
++    asc = "asc"
++37
++    desc = "desc"
++38
++
++39
++
++40
++class DynamicValue(BaseModel):
++41
++    column_name: str
++42
++
++43
++
++44
++class Condition(BaseModel):
++45
++    column: str
++46
++    operator: Operator
++47
++    value: Union[str, int, DynamicValue]
++48
++
++49
++
++50
++class Query(BaseModel):
++51
++    table_name: Table
++52
++    columns: list[Column]
++53
++    conditions: list[Condition]
++54
++    order_by: OrderBy
++55
++
++56
++
++57
++client = OpenAI()
++58
++
++59
++completion = client.beta.chat.completions.parse(
++60
++    model="gpt-4o-2024-08-06",
++61
++    messages=[
++62
++        {
++63
++            "role": "system",
++64
++            "content": "You are a helpful assistant. The current date is August 6, 2024. You help users query for the data they are looking for by calling the query function.",
++65
++        },
++66
++        {
++67
++            "role": "user",
++68
++            "content": "look up all my orders in may of last year that were fulfilled but not delivered on time",
++69
++        },
++70
++    ],
++71
++    tools=[
++72
++        openai.pydantic_function_tool(Query),
++73
++    ],
++74
++)
++75
++
++76
++print(completion.choices[0].message.tool_calls[0].function.parsed_arguments)
++javascript
++
++1
++2
++3
++4
++5
++6
++7
++8
++9
++10
++11
++12
++13
++14
++15
++16
++17
++18
++19
++20
++21
++22
++23
++24
++25
++26
++27
++28
++29
++30
++31
++32
++33
++34
++35
++36
++37
++38
++39
++40
++41
++42
++43
++44
++45
++1
++import OpenAI from 'openai';
++2
++import z from 'zod';
++3
++import { zodFunction } from 'openai/helpers/zod';
++4
++
++5
++const Table = z.enum(['orders', 'customers', 'products']);
++6
++const Column = z.enum([
++7
++    'id',
++8
++    'status',
++9
++    'expected_delivery_date',
++10
++    'delivered_at',
++11
++    'shipped_at',
++12
++    'ordered_at',
++13
++    'canceled_at',
++14
++]);
++15
++const Operator = z.enum(['=', '>', '<', '<=', '>=', '!=']);
++16
++const OrderBy = z.enum(['asc', 'desc']);
++17
++
++18
++const DynamicValue = z.object({
++19
++    column_name: z.string(),
++20
++});
++21
++
++22
++const Condition = z.object({
++23
++    column: z.string(),
++24
++    operator: Operator,
++25
++    value: z.union([z.string(), z.number(), DynamicValue]),
++26
++});
++27
++
++28
++const QueryArgs = z.object({
++29
++    table_name: Table,
++30
++    columns: z.array(Column),
++31
++    conditions: z.array(Condition),
++32
++    order_by: OrderBy,
++33
++});
++34
++
++35
++const client = new OpenAI();
++36
++
++37
++const completion = await client.beta.chat.completions.parse({
++38
++    model: 'gpt-4o-2024-08-06',
++39
++    messages: [
++40
++        { role: 'system', content: 'You are a helpful assistant. The current date is August 6, 2024. You help users query for the data they are looking for by calling the query function.' },
++41
++        { role: 'user', content: 'look up all my orders in may of last year that were fulfilled but not delivered on time' }
++42
++    ],
++43
++    tools: [zodFunction({ name: 'query', parameters: QueryArgs })],
++44
++});
++45
++console.log(completion.choices[0].message.tool_calls[0].function.parsed_arguments);
++Native Structured Outputs support is also available for response_format.
++
++Python
++Node
++Python
++Node
++python
++
++1
++2
++3
++4
++5
++6
++7
++8
++9
++10
++11
++12
++13
++14
++15
++16
++17
++18
++19
++20
++21
++22
++23
++24
++25
++26
++27
++28
++29
++30
++31
++32
++1
++from pydantic import BaseModel
++2
++
++3
++from openai import OpenAI
++4
++
++5
++
++6
++class Step(BaseModel):
++7
++    explanation: str
++8
++    output: str
++9
++
++10
++
++11
++class MathResponse(BaseModel):
++12
++    steps: list[Step]
++13
++    final_answer: str
++14
++
++15
++
++16
++client = OpenAI()
++17
++
++18
++completion = client.beta.chat.completions.parse(
++19
++    model="gpt-4o-2024-08-06",
++20
++    messages=[
++21
++        {"role": "system", "content": "You are a helpful math tutor."},
++22
++        {"role": "user", "content": "solve 8x + 31 = 2"},
++23
++    ],
++24
++    response_format=MathResponse,
++25
++)
++26
++
++27
++message = completion.choices[0].message
++28
++if message.parsed:
++29
++    print(message.parsed.steps)
++30
++    print(message.parsed.final_answer)
++31
++else:
++32
++    print(message.refusal)
++javascript
++
++1
++2
++3
++4
++5
++6
++7
++8
++9
++10
++11
++12
++13
++14
++15
++16
++17
++18
++19
++20
++21
++22
++23
++24
++25
++26
++27
++28
++29
++30
++31
++32
++33
++34
++35
++36
++37
++1
++import OpenAI from 'openai';
++2
++import { zodResponseFormat } from 'openai/helpers/zod';
++3
++import { z } from 'zod';
++4
++
++5
++
++6
++const Step = z.object({
++7
++    explanation: z.string(),
++8
++    output: z.string(),
++9
++})
++10
++
++11
++const MathResponse = z.object({
++12
++    steps: z.array(Step),
++13
++    final_answer: z.string(),
++14
++})
++15
++
++16
++
++17
++const client = new OpenAI();
++18
++
++19
++const completion = await client.beta.chat.completions.parse({
++20
++    model: 'gpt-4o-2024-08-06',
++21
++    messages: [
++22
++        {
++23
++            "role": "system",
++24
++            "content": "You are a helpful math tutor. Only use the schema for math responses.",
++25
++        },
++26
++        { "role": "user", "content": "solve 8x + 3 = 21" },
++27
++    ],
++28
++    response_format: zodResponseFormat(MathResponse, 'mathResponse'),
++29
++});
++30
++
++31
++const message = completion.choices[0]?.message;
++32
++if (message?.parsed) {
++33
++    console.log(message.parsed.steps);
++34
++    console.log(message.parsed.final_answer);
++35
++} else {
++36
++    console.log(message.refusal);
++37
++}
++Additional use cases
++Developers frequently use OpenAI’s models to generate structured data for various use cases. Some additional examples include:
++
++Dynamically generating user interfaces based on the user’s intent
++For example, developers can use Structured Outputs to create code- or UI-generating applications. All of the following examples use the same response_format, and can be used to generate varying UIs based on user input.
++
++System
++You are a user interface assistant. Your job is to help users visualize their website and app ideas.
++Response format
++
++View JSON schema
++Assistant
++Landing page for a gardener
++Sign up screen for an app
++Stock price widget
++Landing page for a gardener
++Sign up screen for an app
++Stock price widget
++{
++  "type": "div",
++  "label": "",
++  "children": [
++    {
++      "type": "header",
++      "label": "",
++      "children": [
++        {
++          "type": "div",
++          "label": "Green Thumb Gardening",
++          "children": [],
++          "attributes": [{ "name": "className", "value": "site-title" }]
++        },
++        {
++          "type": "div",
++          "label": "Bringing Life to Your Garden",
++          "children": [],
++          "attributes": [{ "name": "className", "value": "site-tagline" }]
++        }
++      ],
++      "attributes": [{ "name": "className", "value": "header" }]
++    },
++    {
++      "type": "section",
++      "label": "",
++      "children": [
++        {
++          "type": "div",
++          "label": "",
++          "children": [
++            {
++              "type": "div",
++              "label": "About Us",
++              "children": [
++                {
++                  "type": "div",
++                  "label": "At Green Thumb Gardening, we specialize in transforming your outdoor spaces into beautiful, thriving gardens. Our team has decades of experience in horticulture and landscape design.",
++                  "children": [],
++                  "attributes": [
++                    { "name": "className", "value": "about-description" }
++                  ]
++                }
++              ],
++              "attributes": [{ "name": "className", "value": "about-section" }]
++            }
++          ],
++          "attributes": [{ "name": "className", "value": "content" }]
++        }
++      ],
++      "attributes": [{ "name": "className", "value": "about-container" }]
++    },
++    {
++      "type": "section",
++      "label": "",
++      "children": [
++        {
++          "type": "div",
++          "label": "",
++          "children": [
++            {
++              "type": "div",
++              "label": "Our Services",
++              "children": [
++                {
++                  "type": "div",
++                  "label": "Garden Design",
++                  "children": [],
++                  "attributes": [
++                    { "name": "className", "value": "service-item" }
++                  ]
++                },
++                {
++                  "type": "div",
++                  "label": "Plant Care & Maintenance",
++                  "children": [],
++                  "attributes": [
++                    { "name": "className", "value": "service-item" }
++                  ]
++                },
++                {
++                  "type": "div",
++                  "label": "Seasonal Cleanup",
++                  "children": [],
++                  "attributes": [
++                    { "name": "className", "value": "service-item" }
++                  ]
++                },
++                {
++                  "type": "div",
++                  "label": "Custom Landscaping",
++                  "children": [],
++                  "attributes": [
++                    { "name": "className", "value": "service-item" }
++                  ]
++                }
++              ],
++              "attributes": [{ "name": "className", "value": "services-list" }]
++            }
++          ],
++          "attributes": [{ "name": "className", "value": "content" }]
++        }
++      ],
++      "attributes": [{ "name": "className", "value": "services-container" }]
++    }
++  ],
++  "attributes": [{ "name": "className", "value": "landing-page" }]
++}
++
++Welcome to Green Thumb Gardening
++Bringing Life to Your Garden
++At Green Thumb Gardening, we specialize in transforming your outdoor spaces into beautiful, thriving gardens. Our team has decades of experience in horticulture and landscape design.
++Our services
++Garden Design
++Plant Care & Maintenance
++Seasonal Cleanup
++Custom Landscaping
++{
++  "type": "form",
++  "label": "Sign Up Form",
++  "children": [
++    {
++      "type": "header",
++      "label": "Sign Up for MovieReviews",
++      "children": [],
++      "attributes": [{ "name": "className", "value": "signup-header" }]
++    },
++    {
++      "type": "field",
++      "label": "Username",
++      "attributes": [
++        { "name": "type", "value": "text" },
++        { "name": "placeholder", "value": "Enter your username" },
++        { "name": "name", "value": "username" },
++        { "name": "required", "value": "true" },
++        { "name": "className", "value": "input-text" }
++      ],
++      "children": []
++    },
++    {
++      "type": "field",
++      "label": "Email",
++      "attributes": [
++        { "name": "type", "value": "email" },
++        { "name": "placeholder", "value": "Enter your email" },
++        { "name": "name", "value": "email" },
++        { "name": "required", "value": "true" },
++        { "name": "className", "value": "input-email" }
++      ],
++      "children": []
++    },
++    {
++      "type": "field",
++      "label": "Password",
++      "attributes": [
++        { "name": "type", "value": "password" },
++        { "name": "placeholder", "value": "Create a password" },
++        { "name": "name", "value": "password" },
++        { "name": "required", "value": "true" },
++        { "name": "className", "value": "input-password" }
++      ],
++      "children": []
++    },
++    {
++      "type": "field",
++      "label": "Confirm Password",
++      "attributes": [
++        { "name": "type", "value": "password" },
++        { "name": "placeholder", "value": "Confirm your password" },
++        { "name": "name", "value": "confirm_password" },
++        { "name": "required", "value": "true" },
++        { "name": "className", "value": "input-password-confirm" }
++      ],
++      "children": []
++    },
++    {
++      "type": "button",
++      "label": "Sign Up",
++      "attributes": [
++        { "name": "type", "value": "submit" },
++        { "name": "className", "value": "submit-button" }
++      ],
++      "children": []
++    }
++  ],
++  "attributes": [
++    { "name": "action", "value": "/signup" },
++    { "name": "method", "value": "POST" },
++    { "name": "className", "value": "signup-form" }
++  ]
++}
++Sign up to MovieReviews
++Enter your username
++Enter your email
++Create a password
++Confirm your password
++Submit
++{
++  "type": "div",
++  "label": "",
++  "children": [
++    {
++      "type": "header",
++      "label": "Stock App",
++      "children": [],
++      "attributes": [
++        {
++          "name": "style",
++          "value": "font-size: 24px; font-weight: bold; text-align: center; margin-bottom: 20px;"
++        }
++      ]
++    },
++    {
++      "type": "div",
++      "label": "",
++      "children": [
++        {
++          "type": "div",
++          "label": "Company Name: XYZ Corp",
++          "children": [],
++          "attributes": [
++            {
++              "name": "style",
++              "value": "font-size: 20px; font-weight: bold; margin-bottom: 10px;"
++            }
++          ]
++        },
++        {
++          "type": "div",
++          "label": "Chart Area",
++          "children": [],
++          "attributes": [
++            {
++              "name": "style",
++              "value": "width: 100%; height: 300px; border: 1px solid #ccc; margin-bottom: 20px;"
++            }
++          ]
++        }
++      ],
++      "attributes": [
++        {
++          "name": "style",
++          "value": "padding: 20px; border: 1px solid #ddd; margin-bottom: 20px;"
++        }
++      ]
++    },
++    {
++      "type": "div",
++      "label": "",
++      "children": [
++        {
++          "type": "button",
++          "label": "Refresh",
++          "children": [],
++          "attributes": [
++            {
++              "name": "style",
++              "value": "margin-right: 10px; padding: 10px 20px; background-color: #4CAF50; color: white; border: none; font-size: 16px;"
++            },
++            { "name": "type", "value": "button" }
++          ]
++        },
++        {
++          "type": "button",
++          "label": "Change Time Scale",
++          "children": [],
++          "attributes": [
++            {
++              "name": "style",
++              "value": "margin-right: 10px; padding: 10px 20px; background-color: #2196F3; color: white; border: none; font-size: 16px;"
++            },
++            { "name": "type", "value": "button" }
++          ]
++        },
++        {
++          "type": "button",
++          "label": "Export Data",
++          "children": [],
++          "attributes": [
++            {
++              "name": "style",
++              "value": "padding: 10px 20px; background-color: #f44336; color: white; border: none; font-size: 16px;"
++            },
++            { "name": "type", "value": "button" }
++          ]
++        }
++      ],
++      "attributes": [{ "name": "style", "value": "text-align: center;" }]
++    }
++  ],
++  "attributes": [
++    {
++      "name": "style",
++      "value": "max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif;"
++    }
++  ]
++}
++Stock app
++Company Name: XYZ Corp
++Jan
++Feb
++Mar
++Apr
++May
++June
++July
++Refresh
++Change time scale
++Export data
++Separating a final answer from supporting reasoning or additional commentary
++It can be useful to give the model a separate field for chain of thought to improve the final quality of the response.
++
++Request
++Structured Output
++Request
++Structured Output
++JSON
++
++1
++2
++3
++4
++5
++6
++7
++8
++9
++10
++11
++12
++13
++14
++15
++16
++17
++18
++19
++20
++21
++22
++23
++24
++25
++26
++27
++28
++29
++30
++31
++32
++33
++34
++35
++36
++37
++38
++1
++{
++2
++  "model": "gpt-4o-2024-08-06",
++3
++  "messages": [
++4
++    {
++5
++      "role": "system",
++6
++      "content": "You are a helpful assistant"
++7
++    },
++8
++    {
++9
++      "role": "user",
++10
++      "content": "9.11 and 9.9 -- which is bigger?"
++11
++    }
++12
++  ],
++13
++  "response_format": {
++14
++    "type": "json_schema",
++15
++    "json_schema": {
++16
++      "name": "reasoning_schema",
++17
++      "strict": true,
++18
++      "schema": {
++19
++        "type": "object",
++20
++        "properties": {
++21
++          "reasoning_steps": {
++22
++            "type": "array",
++23
++            "items": {
++24
++              "type": "string"
++25
++            },
++26
++            "description": "The reasoning steps leading to the final conclusion."
++27
++          },
++28
++          "answer": {
++29
++            "type": "string",
++30
++            "description": "The final answer, taking into account the reasoning steps."
++31
++          }
++32
++        },
++33
++        "required": ["reasoning_steps", "answer"],
++34
++        "additionalProperties": false
++35
++      }
++36
++    }
++37
++  }
++38
++}
++JSON
++
++1
++2
++3
++4
++5
++6
++7
++8
++9
++10
++11
++12
++13
++1
++{
++2
++  "reasoning_steps": [
++3
++    "First step is to compare the numbers 9.11 and 9.9.",
++4
++    "Both numbers have the same whole number part, which is 9.",
++5
++    "To compare the decimal parts, convert them to the same number of decimal places.",
++6
++    "9.11 has two decimal places: it is 9.11.",
++7
++    "9.9 has one decimal place: it can be rewritten as 9.90.",
++8
++    "Now, compare 9.11 and 9.90 by looking at the decimal parts.",
++9
++    "Compare 11 with 90.",
++10
++    "90 is greater than 11, so 9.90 is greater than 9.11."
++11
++  ],
++12
++  "answer": "9.9 is bigger than 9.11."
++13
++}
++Extracting structured data from unstructured data
++For example, instructing the model to extract things like to-dos, due dates, and assignments from meeting notes.
++
++Request
++Structured Output
++Request
++Structured Output
++JSON
++
++1
++2
++3
++4
++5
++6
++7
++8
++9
++10
++11
++12
++13
++14
++15
++16
++17
++18
++19
++20
++21
++22
++23
++24
++25
++26
++27
++28
++29
++30
++31
++32
++33
++34
++35
++36
++37
++38
++39
++40
++41
++42
++43
++44
++45
++46
++47
++48
++49
++50
++51
++1
++POST /v1/chat/completions
++2
++{
++3
++  "model": "gpt-4o-2024-08-06",
++4
++  "messages": [
++5
++    {
++6
++      "role": "system",
++7
++      "content": "Extract action items, due dates, and owners from meeting notes."
++8
++    },
++9
++    {
++10
++      "role": "user",
++11
++      "content": "...meeting notes go here..."
++12
++    }
++13
++  ],
++14
++  "response_format": {
++15
++    "type": "json_schema",
++16
++    "json_schema": {
++17
++      "name": "action_items",
++18
++      "strict": true,
++19
++      "schema": {
++20
++        "type": "object",
++21
++        "properties": {
++22
++          "action_items": {
++23
++            "type": "array",
++24
++            "items": {
++25
++              "type": "object",
++26
++              "properties": {
++27
++                "description": {
++28
++                  "type": "string",
++29
++                  "description": "Description of the action item."
++30
++                },
++31
++                "due_date": {
++32
++                  "type": ["string", "null"],
++33
++                  "description": "Due date for the action item, can be null if not specified."
++34
++                },
++35
++                "owner": {
++36
++                  "type": ["string", "null"],
++37
++                  "description": "Owner responsible for the action item, can be null if not specified."
++38
++                }
++39
++              },
++40
++              "required": ["description", "due_date", "owner"],
++41
++              "additionalProperties": false
++42
++            },
++43
++            "description": "List of action items from the meeting."
++44
++          }
++45
++        },
++46
++        "required": ["action_items"],
++47
++        "additionalProperties": false
++48
++      }
++49
++    }
++50
++  }
++51
++}
++JSON
++
++1
++2
++3
++4
++5
++6
++7
++8
++9
++10
++11
++12
++13
++14
++15
++16
++17
++18
++19
++20
++21
++22
++23
++24
++25
++26
++27
++28
++29
++1
++{
++2
++  "action_items": [
++3
++    {
++4
++      "description": "Collaborate on optimizing the path planning algorithm",
++5
++      "due_date": "2024-06-30",
++6
++      "owner": "Jason Li"
++7
++    },
++8
++    {
++9
++      "description": "Reach out to industry partners for additional datasets",
++10
++      "due_date": "2024-06-25",
++11
++      "owner": "Aisha Patel"
++12
++    },
++13
++    {
++14
++      "description": "Explore alternative LIDAR sensor configurations and report findings",
++15
++      "due_date": "2024-06-27",
++16
++      "owner": "Kevin Nguyen"
++17
++    },
++18
++    {
++19
++      "description": "Schedule extended stress tests for the integrated navigation system",
++20
++      "due_date": "2024-06-28",
++21
++      "owner": "Emily Chen"
++22
++    },
++23
++    {
++24
++      "description": "Retest the system after bug fixes and update the team",
++25
++      "due_date": "2024-07-01",
++26
++      "owner": "David Park"
++27
++    }
++28
++  ]
++29
++}
++Under the hood
++We took a two part approach to improving reliability for model outputs that match JSON Schema. First, we trained our newest model gpt-4o-2024-08-06 to understand complicated schemas and how best to produce outputs that match them. However, model behavior is inherently non-deterministic—despite this model’s performance improvements (93% on our benchmark), it still did not meet the reliability that developers need to build robust applications. So we also took a deterministic, engineering-based approach to constrain the model’s outputs to achieve 100% reliability.
++
++Constrained decoding
++Our approach is based on a technique known as constrained sampling or constrained decoding. By default, when models are sampled to produce outputs, they are entirely unconstrained and can select any token from the vocabulary as the next output. This flexibility is what allows models to make mistakes; for example, they are generally free to sample a curly brace token at any time, even when that would not produce valid JSON. In order to force valid outputs, we constrain our models to only tokens that would be valid according to the supplied schema, rather than all available tokens.
++
++It can be challenging to implement this constraining in practice, since the tokens that are valid differ throughout a model’s output. Let’s say we have the following schema:
++
++JSON
++
++1
++2
++3
++4
++5
++6
++7
++8
++1
++{
++2
++  "type": "object",
++3
++  "properties": {
++4
++    "value": { "type": "number" }
++5
++  },
++6
++  "required": ["value"],
++7
++  "additionalProperties": false
++8
++}
++The tokens that are valid at the beginning of the output include things like {, {“, {\n, etc. However, once the model has already sampled {“val, then { is no longer a valid token. Thus we need to implement dynamic constrained decoding, and determine which tokens are valid after each token is generated, rather than upfront at the beginning of the response.
++
++To do this, we convert the supplied JSON Schema into a context-free grammar (CFG). A grammar is a set of rules that defines a language, and a context-free grammar is a grammar that conforms to specific rules. You can think of JSON and JSON Schema as particular languages with rules to define what is valid within the language. Just as it’s not valid in English to have a sentence with no verb, it is not valid in JSON to have a trailing comma.
++
++Thus, for each JSON Schema, we compute a grammar that represents that schema, and pre-process its components to make it easily accessible during model sampling. This is why the first request with a new schema incurs a latency penalty—we must preprocess the schema to generate this artifact that we can use efficiently during sampling.
++
++While sampling, after every token, our inference engine will determine which tokens are valid to be produced next based on the previously generated tokens and the rules within the grammar that indicate which tokens are valid next. We then use this list of tokens to mask the next sampling step, which effectively lowers the probability of invalid tokens to 0. Because we have preprocessed the schema, we can use a cached data structure to do this efficiently, with minimal latency overhead.
+
+# 2024-09-06 07:53:58.808780
++Introduction
++JSON is one of the most widely used formats in the world for applications to exchange data.
++
++Structured Outputs is a feature that ensures the model will always generate responses that adhere to your supplied JSON Schema, so you don't need to worry about the model omitting a required key, or hallucinating an invalid enum value.
++
++Some benefits of Structed Outputs include:
++
++Reliable type-safety: No need to validate or retry incorrectly formatted responses
++Explicit refusals: Safety-based model refusals are now programmatically detectable
++Simpler prompting: No need for strongly worded prompts to achieve consistent formatting
++In addition to supporting JSON Schema in the REST API, the OpenAI SDKs for Python and JavaScript also make it easy to define object schemas using Pydantic and Zod respectively. Below, you can see how to extract information from unstructured text that conforms to a schema defined in code.
++
++Getting a structured response
++python
++
++python
++from pydantic import BaseModel
++from openai import OpenAI
++
++client = OpenAI()
++
++class CalendarEvent(BaseModel):
++    name: str
++    date: str
++    participants: list[str]
++
++completion = client.beta.chat.completions.parse(
++    model="gpt-4o-2024-08-06",
++    messages=[
++        {"role": "system", "content": "Extract the event information."},
++        {"role": "user", "content": "Alice and Bob are going to a science fair on Friday."},
++    ],
++    response_format=CalendarEvent,
++)
++
++event = completion.choices[0].message.parsed
++Supported models
++Structured Outputs are available in our latest large language models, starting with GPT-4o:
++
++gpt-4o-mini-2024-07-18 and later
++gpt-4o-2024-08-06 and later
++
++use this functionality when needed
+
+# 2024-09-06 07:55:17.702423
++Traitement du morceau 1/9 pour l'étude : _Suite à votre demande pressante..._... ou l_adoption international dans tous ces États 1
++Erreur lors de l'extraction des informations du PDF (morceau 1/9) : module 'litellm' has no attribute 'beta'
++Erreur générale lors de l'extraction et de la synthèse des informations : cannot access local variable 'response' where it is not associated with a value
++Traceback (most recent call last):
++  File "C:\users\conta\autonomous\aider\get_studies_from_query.py", line 467, in extract_and_save_pdf_info
++    response = litellm.beta.chat.completions.parse(
++               ^^^^^^^^^^^^
++  File "C:\Users\conta\game\aider\aider\llm.py", line 24, in __getattr__
++    return getattr(self._lazy_module, name)
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++AttributeError: module 'litellm' has no attribute 'beta'
++
++During handling of the above exception, another exception occurred:
++
++Traceback (most recent call last):
++  File "C:\users\conta\autonomous\aider\get_studies_from_query.py", line 487, in extract_and_save_pdf_info
++    print(f"{Fore.RED}Contenu de la réponse : {response.choices[0].message.content[:500]}...")
++                                               ^^^^^^^^
++UnboundLocalError: cannot access local variable 'response' where it is not associated with a value
+
+# 2024-09-06 07:55:58.736742
++WARNING: Ignoring invalid distribution ~2p (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~3p (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~=p (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~harset-normalizer (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~ider-chat (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~ip (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~~p (C:\Python312\Lib\site-packages)
++Toutes les dépendances sont installées.
++Analyse en cours pour : 11. Votre démarche réseau.pdf
++Analyse déjà existante pour : 4. Comment financer votre VAE_.pdfAnalyse déjà existante pour : 4_. Comment financer votre VAE_.pdf
++Analyse déjà existante pour : A Methodology for the Assessment of AI Consciousness.pdf
++
++Analyse en cours pour : Advancing Object Goal Navigation Through LLM-enhanced Object Affinities Transfer.pdf
++Analyse en cours pour : AI ethics in computational psychiatry_ From the neuroscience of consciousness to the ethics of consc.pdf
++Analyse déjà existante pour : Après des vérifications_ nous vous informons que certains documents visés par votre demande relève d.pdfDébut de l'extraction des informations pour : 11. Votre démarche réseau
++Analyse déjà existante pour : Artificial conscious intelligence.pdf
++Encodage du contenu PDF en base64...
++Début de l'extraction des informations pour : AI ethics in computational psychiatry_ From the neuroscience of consciousness to the ethics of consc
++Encodage du contenu PDF en base64...
++Découpage du contenu PDF en morceaux...
++Analyse déjà existante pour : Artificial consciousness and the consciousness-attention dissociation.pdf
++
++Nombre de morceaux : 3Découpage du contenu PDF en morceaux...
++Analyse déjà existante pour : Artificial consciousness_ the missing ingredient for ethical AI_.pdf
++Analyse en cours pour : Artificial consciousness.pdfDébut de l'extraction des informations pour : Advancing Object Goal Navigation Through LLM-enhanced Object Affinities Transfer
++Encodage du contenu PDF en base64...Nombre de morceaux : 42
++
++Analyse des PDFs:   0%|                                                                         | 0/65 [00:00<?, ?it/s]
++Traitement du morceau 1/42 pour l'étude : AI ethics in computational psychiatry_ From the neuroscience of consciousness to the ethics of consc
++
++Traitement du morceau 1/3 pour l'étude : 11. Votre démarche réseauDébut de l'extraction des informations pour : Artificial consciousness
++Analyse déjà existante pour : Artificial intelligence and consciousness.pdf
++
++Encodage du contenu PDF en base64...Découpage du contenu PDF en morceaux...
++
++Découpage du contenu PDF en morceaux...Nombre de morceaux : 47
++
++Nombre de morceaux : 8Traitement du morceau 1/47 pour l'étude : Advancing Object Goal Navigation Through LLM-enhanced Object Affinities Transfer
++
++
++Traitement du morceau 1/8 pour l'étude : Artificial consciousnessAnalyse déjà existante pour : Artificial intelligence_ consciousness and conscience.pdf
++
++Analyse en cours pour : Autonomous LLM-Enhanced Adversarial Attack for Text-to-Motion.pdf
++Début de l'extraction des informations pour : Autonomous LLM-Enhanced Adversarial Attack for Text-to-Motion
++Encodage du contenu PDF en base64...
++Découpage du contenu PDF en morceaux...
++Nombre de morceaux : 30
++Traitement du morceau 1/30 pour l'étude : Autonomous LLM-Enhanced Adversarial Attack for Text-to-Motion
++Erreur lors de l'extraction des informations du PDF (morceau 1/47) : 20 validation errors for StudyInfo
++Auteurs
++  Input should be a valid list [type=list_type, input_value='', input_type=str]
++    For further information visit https://errors.pydantic.dev/2.8/v/list_type
++Date_de_publication
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Advanc...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Mots_cles
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Advanc...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Lien_Google_Drive
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Advanc...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Objectif_de_l_etude
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Advanc...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Methodologie
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Advanc...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Conclusions_de_l_etude
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Advanc...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Pertinence_axe_1
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Advanc...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Pertinence_axe_2
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Advanc...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Pertinence_axe_3
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Advanc...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Pertinence_objectif_recherche
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Advanc...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Axe_de_travail
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Advanc...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Selection
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Advanc...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Apports_et_contributions
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Advanc...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Verbatims_apports_contributions
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Advanc...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Extraits_Verbatim_Verrous
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Advanc...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Verrous_de_l_etude
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Advanc...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Donnees_chiffrees
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Advanc...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Date_de_creation
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Advanc...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Date_de_derniere_modification
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Advanc...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Contenu de la réponse : {"id":"","Nom":"Advancing Object Goal Navigation Through LLM-enhanced Object Affinities Transfer","Auteurs":"","Journal":"","Date de publication":"","DOI":"","Citation":"","Type":"","Mots-clés":"","lienOrigine":"","Lien Google Drive":"","Abstract":"","Objectif de l'étude":"","Méthodologie":"","Conclusions de l'étude":"","Pertinence au regard de l'axe de travail 1":"","Pertinence au regard de l'axe de travail 2":"","Pertinence de l'étude au regard de l'axe de travail 3":"","Pertinence au regard d...
++Traitement du morceau 2/47 pour l'étude : Advancing Object Goal Navigation Through LLM-enhanced Object Affinities Transfer
++Erreur lors de l'extraction des informations du PDF (morceau 1/30) : 20 validation errors for StudyInfo
++Auteurs
++  Input should be a valid list [type=list_type, input_value='', input_type=str]
++    For further information visit https://errors.pydantic.dev/2.8/v/list_type
++Date_de_publication
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Autono...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Mots_cles
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Autono...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Lien_Google_Drive
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Autono...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Objectif_de_l_etude
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Autono...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Methodologie
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Autono...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Conclusions_de_l_etude
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Autono...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Pertinence_axe_1
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Autono...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Pertinence_axe_2
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Autono...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Pertinence_axe_3
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Autono...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Pertinence_objectif_recherche
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Autono...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Axe_de_travail
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Autono...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Selection
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Autono...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Apports_et_contributions
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Autono...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Verbatims_apports_contributions
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Autono...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Extraits_Verbatim_Verrous
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Autono...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Verrous_de_l_etude
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Autono...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Donnees_chiffrees
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Autono...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Date_de_creation
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Autono...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Date_de_derniere_modification
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Autono...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Contenu de la réponse : {
++  "id": "",
++  "Nom": "Autonomous LLM-Enhanced Adversarial Attack for Text-to-Motion",
++  "Auteurs": "",
++  "Journal": "",
++  "Date de publication": "",
++  "DOI": "",
++  "Citation": "",
++  "Type": "",
++  "Mots-clés": "",
++  "lienOrigine": "",
++  "Lien Google Drive": "",
++  "Abstract": "",
++  "Objectif de l'étude": "",
++  "Méthodologie": "",
++  "Conclusions de l'étude": "",
++  "Pertinence au regard de l'axe de travail 1": "",
++  "Pertinence au regard de l'axe de travail 2": "",
++  "Pertinence de l'étude au rega...
++Traitement du morceau 2/30 pour l'étude : Autonomous LLM-Enhanced Adversarial Attack for Text-to-Motion
++Erreur lors de l'extraction des informations du PDF (morceau 1/8) : 20 validation errors for StudyInfo
++Auteurs
++  Input should be a valid list [type=list_type, input_value='', input_type=str]
++    For further information visit https://errors.pydantic.dev/2.8/v/list_type
++Date_de_publication
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Artifi...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Mots_cles
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Artifi...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Lien_Google_Drive
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Artifi...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Objectif_de_l_etude
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Artifi...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Methodologie
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Artifi...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Conclusions_de_l_etude
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Artifi...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Pertinence_axe_1
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Artifi...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Pertinence_axe_2
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Artifi...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Pertinence_axe_3
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Artifi...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Pertinence_objectif_recherche
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Artifi...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Axe_de_travail
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Artifi...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Selection
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Artifi...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Apports_et_contributions
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Artifi...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Verbatims_apports_contributions
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Artifi...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Extraits_Verbatim_Verrous
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Artifi...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Verrous_de_l_etude
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Artifi...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Donnees_chiffrees
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Artifi...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Date_de_creation
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Artifi...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Date_de_derniere_modification
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Artifi...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Contenu de la réponse : {
++    "id": "",
++    "Nom": "Artificial consciousness",
++    "Auteurs": "",
++    "Journal": "",
++    "Date de publication": "",
++    "DOI": "",
++    "Citation": "",
++    "Type": "",
++    "Mots-clés": "",
++    "lienOrigine": "",
++    "Lien Google Drive": "",
++    "Abstract": "",
++    "Objectif de l'étude": "",
++    "Méthodologie": "",
++    "Conclusions de l'étude": "",
++    "Pertinence au regard de l'axe de travail 1": "",
++    "Pertinence au regard de l'axe de travail 2": "",
++    "Pertinence de l'étude au regar...
++Traitement du morceau 2/8 pour l'étude : Artificial consciousness
++Erreur lors de l'extraction des informations du PDF (morceau 1/3) : 20 validation errors for StudyInfo
++Auteurs
++  Input should be a valid list [type=list_type, input_value='', input_type=str]
++    For further information visit https://errors.pydantic.dev/2.8/v/list_type
++Date_de_publication
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Votre ...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Mots_cles
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Votre ...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Lien_Google_Drive
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Votre ...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Objectif_de_l_etude
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Votre ...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Methodologie
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Votre ...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Conclusions_de_l_etude
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Votre ...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Pertinence_axe_1
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Votre ...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Pertinence_axe_2
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Votre ...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Pertinence_axe_3
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Votre ...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Pertinence_objectif_recherche
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Votre ...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Axe_de_travail
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Votre ...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Selection
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Votre ...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Apports_et_contributions
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Votre ...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Verbatims_apports_contributions
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Votre ...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Extraits_Verbatim_Verrous
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Votre ...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Verrous_de_l_etude
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Votre ...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Donnees_chiffrees
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Votre ...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Date_de_creation
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Votre ...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Date_de_derniere_modification
++  Field required [type=missing, input_value={'id': '', 'Nom': 'Votre ...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Contenu de la réponse : {
++    "id": "",
++    "Nom": "Votre démarche réseau",
++    "Auteurs": "",
++    "Journal": "",
++    "Date de publication": "",
++    "DOI": "",
++    "Citation": "",
++    "Type": "",
++    "Mots-clés": "",
++    "lienOrigine": "",
++    "Lien Google Drive": "",
++    "Abstract": "",
++    "Objectif de l'étude": "",
++    "Méthodologie": "",
++    "Conclusions de l'étude": "",
++    "Pertinence au regard de l'axe de travail 1": "",
++    "Pertinence au regard de l'axe de travail 2": "",
++    "Pertinence de l'étude au regard d...
++Traitement du morceau 2/3 pour l'étude : 11. Votre démarche réseau
++Erreur lors de l'extraction des informations du PDF (morceau 1/42) : 20 validation errors for StudyInfo
++Auteurs
++  Input should be a valid list [type=list_type, input_value='', input_type=str]
++    For further information visit https://errors.pydantic.dev/2.8/v/list_type
++Date_de_publication
++  Field required [type=missing, input_value={'id': '', 'Nom': 'AI eth...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Mots_cles
++  Field required [type=missing, input_value={'id': '', 'Nom': 'AI eth...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Lien_Google_Drive
++  Field required [type=missing, input_value={'id': '', 'Nom': 'AI eth...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Objectif_de_l_etude
++  Field required [type=missing, input_value={'id': '', 'Nom': 'AI eth...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Methodologie
++  Field required [type=missing, input_value={'id': '', 'Nom': 'AI eth...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Conclusions_de_l_etude
++  Field required [type=missing, input_value={'id': '', 'Nom': 'AI eth...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Pertinence_axe_1
++  Field required [type=missing, input_value={'id': '', 'Nom': 'AI eth...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Pertinence_axe_2
++  Field required [type=missing, input_value={'id': '', 'Nom': 'AI eth...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Pertinence_axe_3
++  Field required [type=missing, input_value={'id': '', 'Nom': 'AI eth...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Pertinence_objectif_recherche
++  Field required [type=missing, input_value={'id': '', 'Nom': 'AI eth...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Axe_de_travail
++  Field required [type=missing, input_value={'id': '', 'Nom': 'AI eth...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Selection
++  Field required [type=missing, input_value={'id': '', 'Nom': 'AI eth...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Apports_et_contributions
++  Field required [type=missing, input_value={'id': '', 'Nom': 'AI eth...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Verbatims_apports_contributions
++  Field required [type=missing, input_value={'id': '', 'Nom': 'AI eth...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Extraits_Verbatim_Verrous
++  Field required [type=missing, input_value={'id': '', 'Nom': 'AI eth...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Verrous_de_l_etude
++  Field required [type=missing, input_value={'id': '', 'Nom': 'AI eth...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Donnees_chiffrees
++  Field required [type=missing, input_value={'id': '', 'Nom': 'AI eth...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Date_de_creation
++  Field required [type=missing, input_value={'id': '', 'Nom': 'AI eth...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Date_de_derniere_modification
++  Field required [type=missing, input_value={'id': '', 'Nom': 'AI eth...ière modification': ''}, input_type=dict]
++    For further information visit https://errors.pydantic.dev/2.8/v/missing
++Contenu de la réponse : {
++    "id": "",
++    "Nom": "AI ethics in computational psychiatry: From the neuroscience of consciousness to the ethics of consc",
++    "Auteurs": "",
++    "Journal": "",
++    "Date de publication": "",
++    "DOI": "",
++    "Citation": "",
++    "Type": "",
++    "Mots-clés": "",
++    "lienOrigine": "",
++    "Lien Google Drive": "",
++    "Abstract": "",
++    "Objectif de l'étude": "",
++    "Méthodologie": "",
++    "Conclusions de l'étude": "",
++    "Pertinence au regard de l'axe de travail 1": "",
++    "Pertinen...
+
+# 2024-09-06 07:56:35.113169
++je n'arrive pas a interrompre les analyses avec ctrl c
+
+# 2024-09-06 07:57:31.037928
++d'autres choses à modifier?
+
+# 2024-09-06 08:04:24.990476
++d'autres choses ?
+
+# 2024-09-06 08:05:28.985586
++urs
++  Input should be a valid list [type=list_type, input_value='', input_type=str]
++    For further information visit https://errors.pydantic.dev/2.8/v/list_type
++Traitement du morceau 8/30 pour l'étude : Autonomous LLM-Enhanced Adversarial Attack for Text-to-Motion
++Erreur de validation : 1 validation error for StudyInfo
++Auteurs
++  Input should be a valid list [type=list_type, input_value='', input_type=str]
++    For further information visit https://errors.pydantic.dev/2.8/v/list_type
++Erreur de validation : 1 validation error for StudyInfo
++Auteurs
++  Input should be a valid list [type=list_type, input_value='', input_type=str]
++    For further information visit https://errors.pydantic.dev/2.8/v/list_type
++Traitement du morceau 8/8 pour l'étude : Artificial consciousnessTraitement du morceau 8/42 pour l'étude : AI ethics in computational psychiatry_ From the neuroscience of consciousness to the ethics of consc
++
++Erreur de validation : 1 validation error for StudyInfo
++Auteurs
++  Input should be a valid list [type=list_type, input_value='', input_type=str]
++    For further information visit https://errors.pydantic.dev/2.8/v/list_type
++Traitement du morceau 8/47 pour l'étude : Advancing Object Goal Navigation Through LLM-enhanced Object Affinities Transfer
++Erreur de validation : 1 validation error for StudyInfo
++Auteurs
++  Input should be a valid list [type=list_type, input_value='', input_type=str]
++    For further information visit https://errors.pydantic.dev/2.8/v/list_type
+
+# 2024-09-06 08:13:38.394266
++ur de validation : 1 validation error for StudyInfo
++Auteurs
++  Input should be a valid list [type=list_type, input_value='', input_type=str]
++    For further information visit https://errors.pydantic.dev/2.8/v/list_type
++Traitement du morceau 35/53 pour l'étude : Enhancing Trust in Autonomous Agents_ An Architecture for Accountability and Explainability through
++Erreur de validation : 1 validation error for StudyInfo
++Auteurs
++  Input should be a valid list [type=list_type, input_value='', input_type=str]
++    For further information visit https://errors.pydantic.dev/2.8/v/list_type
++Traitement du morceau 9/17 pour l'étude : Instruct Large Language Models to Drive like Humans
++Erreur de validation : 1 validation error for StudyInfo
++Auteurs
++  Input should be a valid list [type=list_type, input_value='', input_type=str]
++    For further information visit https://errors.pydantic.dev/2.8/v/list_type
++Traitement du morceau 28/317 pour l'étude : If llm is the wizard_ then code is the wand_ A survey on how code empowers large language models to
++Erreur de validation : 1 validation error for StudyInfo
++Auteurs
++  Input should be a valid list [type=list_type, input_value='', input_type=str]
++    For further information visit https://errors.pydantic.dev/2.8/v/list_type
++Traitement du morceau 39/56 pour l'étude : Donner un sens à l_intelligence artificielle_ pour une stratégie nationale et européenne
++Erreur de validation : 1 validation error for Stud
+
+# 2024-09-06 08:18:43.414883
++d'autres choses à changer?
+
+# 2024-09-06 08:27:02.879761
++les contenus des analyses sont vides :
++
++phique à la raison computationnelle
++Contenu de l'analyse :
++# Intelligence artificielle et écriture dynamique_ de la raison graphique à la raison computationnelle
++
++## id
++
++
++## Nom
++Intelligence artificielle et écriture dynamique: de la raison graphique à la raison computationnelle
++
++## Auteurs
++[]
++
++## Journal
++
++
++## Date_de_publication
++None
++
++## DOI
++
++
++## Citation
++
++
++## Type
++
++
++## Mots_cles
++[]
++
++## lienOrigine
++
++
++## Lien_Google_Drive
++None
++
++## Abstract
++
++
++## Objectif_de_l_etude
++
++
++## Methodologie
++
++
++## Conclusions_de_l_etude
+
+# 2024-09-06 08:28:11.944134
++ce va régler le problème?
+
+# 2024-09-06 08:29:16.969953
++non je parle du problème des analyses vides
+
+# 2024-09-06 08:31:35.545906
++les query ne marche plus : PS C:\users\conta\autonomous> python aider\get_studies_from_query.py "autonomous llm voyager" -n 20
++Le package python-dotenv n'est pas installé. Installation en cours...
++WARNING: Ignoring invalid distribution ~%p (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~ (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~-p (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~0p (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~1p (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~2p (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~3p (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~=p (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~harset-normalizer (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~ider-chat (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~ip (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~~p (C:\Python312\Lib\site-packages)
++Requirement already satisfied: python-dotenv in c:\python312\lib\site-packages (1.0.1)
++WARNING: Ignoring invalid distribution ~%p (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~ (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~-p (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~0p (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~1p (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~2p (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~3p (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~=p (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~harset-normalizer (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~ider-chat (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~ip (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~~p (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~%p (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~ (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~-p (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~0p (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~1p (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~2p (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~3p (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~=p (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~harset-normalizer (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~ider-chat (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~ip (C:\Python312\Lib\site-packages)
++WARNING: Ignoring invalid distribution ~~p (C:\Python312\Lib\site-packages)
++Toutes les dépendances sont installées.
++usage: get_studies_from_query.py [-h] [-q QUERY] [-n NUM_ARTICLES] [-o OUTPUT] [--analyze-all] [--model MODEL]
++                                 [--max-workers MAX_WORKERS] [--no-immediate-analysis] [--clean]
++get_studies_from_query.py: error: unrecognized arguments: autonomous llm voyager
+
+# 2024-09-06 08:35:09.528783
++PS C:\users\conta\autonomous> python -m flake8 --select=E9,F821,F823,F831,F406,F407,F701,F702,F704,F706 --show-source --isolated aider\get_studies_from_query.py
++Traceback (most recent call last):
++  File "<frozen runpy>", line 198, in _run_module_as_main
++  File "<frozen runpy>", line 88, in _run_code
++  File "C:\Python312\Lib\site-packages\flake8\__main__.py", line 7, in <module>
++    raise SystemExit(main())
++                     ^^^^^^
++  File "C:\Python312\Lib\site-packages\flake8\main\cli.py", line 23, in main
++    app.run(argv)
++  File "C:\Python312\Lib\site-packages\flake8\main\application.py", line 198, in run
++    self._run(argv)
++  File "C:\Python312\Lib\site-packages\flake8\main\application.py", line 187, in _run
++    self.run_checks()
++  File "C:\Python312\Lib\site-packages\flake8\main\application.py", line 103, in run_checks
++    self.file_checker_manager.run()
++  File "C:\Python312\Lib\site-packages\flake8\checker.py", line 238, in run
++    self.run_serial()
++  File "C:\Python312\Lib\site-packages\flake8\checker.py", line 221, in run_serial
++    ).run_checks()
++      ^^^^^^^^^^^^
++  File "C:\Python312\Lib\site-packages\flake8\checker.py", line 527, in run_checks
++    self.process_tokens()
++  File "C:\Python312\Lib\site-packages\flake8\checker.py", line 512, in process_tokens
++    self.handle_newline(token_type)
++  File "C:\Python312\Lib\site-packages\flake8\checker.py", line 542, in handle_newline
++    self.run_logical_checks()
++  File "C:\Python312\Lib\site-packages\flake8\checker.py", line 439, in run_logical_checks
++    comments, logical_line, mapping = self.processor.build_logical_line()
++                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "C:\Python312\Lib\site-packages\flake8\processor.py", line 237, in build_logical_line
++    comments, logical, mapping_list = self.build_logical_line_tokens()
++                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "C:\Python312\Lib\site-packages\flake8\processor.py", line 218, in build_logical_line_tokens
++    previous_text = self.lines[row_index][column_index]
++                    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
++IndexError: string index out of range
+
+# 2024-09-06 09:11:45.362085
++dans main.py, rajoute a chaque passage tous les fichiers dans le dossier analyses dans le chat de la session aider
+
+# 2024-09-06 09:13:59.496035
++d'autres changements a faire ?
+
+# 2024-09-06 09:16:13.202100
++je vois pas dans les debug les fichiers d'analyse ajoutés :
++
++Sélection des fichiers les plus pertinents...
++DEBUG: select_relevant_files function called
++DEBUG: Total files found: 44
++DEBUG: Journals and Todolists: 2
++DEBUG: Journals and Todolists files:
++  - todolist.md
++  - paper\todolist.md
++DEBUG: Discussions: 1
++DEBUG: Discussion files:
++  - paper\discussion.md
++DEBUG: Concepts: 0
++DEBUG: Concept files:
++DEBUG: Final selected files:
++  - todolist.md
++  - paper\todolist.md
++  - paper\discussion.md
++Fichiers sélectionnés : todolist.md, paper\todolist.md, paper\discussion.md
++Fichiers ajoutés au chat : todolist.md, paper\todolist.md, paper\discussion.md
++Les nouveaux fichiers ont été ajoutés au chat.
++template.md
++main.py
+
+# 2024-09-06 09:17:07.844077
++DEBUG: select_relevant_files function called
++DEBUG: Total files found: 28
++DEBUG: Journals and Todolists: 1
++DEBUG: Journals and Todolists files:
++  - todolist.md
++DEBUG: Discussions: 0
++DEBUG: Discussion files:
++DEBUG: Concepts: 0
++DEBUG: Concept files:
++DEBUG: Final selected files:
++  - todolist.md
++Selected relevant files:
++todolist.md
++Adding files from 'analyses' folder:
++Adding analyses\AutoManual_ Generating Instruction Manuals by LLM Agents via Interactive Environmental
++Learning.md
++Adding analyses\Autonomous corporate personhood.md
++Adding analyses\Can LLM-Augmented autonomous agents cooperate__ An evaluation of their cooperative
++capabilities thro.md
++Adding analyses\From Automation to Autonomy-Can the Law Keep up_.md
++Adding analyses\GoEX_ Perspectives and Designs Towards a Runtime for Autonomous LLM Applications.md
++Adding analyses\LARM_ Large Auto-Regressive Model for Long-Horizon Embodied Intelligence.md
++Adding analyses\LLB LLM LLD.md
++Adding analyses\LLM International and European Law Faculty of Law_ Tilburg University.md
++Adding analyses\Llm-assist_ Enhancing closed-loop planning with language-based reasoning.md
++Adding analyses\LLMSat_ A Large Language Model-Based Goal-Oriented Agent for Autonomous Space
++Exploration.md
++Adding analyses\Personal llm agents_ Insights and survey about the capability_ efficiency and
++security.md
++Adding analyses\Reason for future_ act for now_ A principled architecture for autonomous llm agents.md
++Adding analyses\The Embodied World Model Based on LLM with Visual Information and Prediction-Oriented
++Prompts.md
++Adding analyses\The Vision of Autonomic Computing_ Can LLMs Make It a Reality_.md
++Adding/Updating files from 'analyses' folder:
++Adding/Updating analyses\AutoManual_ Generating Instruction Manuals by LLM Agents via Interactive
++Environmental Learning.md
++Adding/Updating analyses\Autonomous corporate personhood.md
++Adding/Updating analyses\Can LLM-Augmented autonomous agents cooperate__ An evaluation of their
++cooperative capabilities thro.md
++Adding/Updating analyses\From Automation to Autonomy-Can the Law Keep up_.md
++Adding/Updating analyses\GoEX_ Perspectives and Designs Towards a Runtime for Autonomous LLM
++Applications.md
++Adding/Updating analyses\LARM_ Large Auto-Regressive Model for Long-Horizon Embodied Intelligence.md
++Adding/Updating analyses\LLB LLM LLD.md
++Adding/Updating analyses\LLM International and European Law Faculty of Law_ Tilburg University.md
++Adding/Updating analyses\Llm-assist_ Enhancing closed-loop planning with language-based reasoning.md
++Adding/Updating analyses\LLMSat_ A Large Language Model-Based Goal-Oriented Agent for Autonomous Space
++Exploration.md
++Adding/Updating analyses\Personal llm agents_ Insights and survey about the capability_ efficiency and
++security.md
++Adding/Updating analyses\Reason for future_ act for now_ A principled architecture for autonomous llm
++agents.md
++Adding/Updating analyses\The Embodied World Model Based on LLM with Visual Information and
++Prediction-Oriented Prompts.md
++Adding/Updating analyses\The Vision of Autonomic Computing_ Can LLMs Make It a Reality_.md
++Appuyez sur Entrée pour continuer ou tapez 'exit' pour quitter.
++Checking for updates in 'analyses' folder:
++Nouveaux fichiers détectés : git_operations.py, __init__.py, template.md, demandes\PKI.md,
++template.md_bak, feedback_analysis.json, paper\introduction_section.md,
++documentation\kin_etat_de_l_art.md, paper\existing_autonomous_ai_systems.md,
++paper\ai_components_role.md, run-aider.sh, paper\technical_components.md,
++paper\meta_analysis_literature_review_methodologies.md, paper\outline.md, documentation\digitalkin.md,
++utils.py, paper\methodology.md, SETUP.md, paper\discussion.md, ai_models.py, todolist.md, config.ini,
++setup_aider.bash, manage-aider.sh, knowledge_base.db, paper\todolist.md, paper\autonomous_kins.md,
++run_aider.php, composition_engine.py, community_interaction.py, run_commands.py, add_files.py,
++paper\ai_research_tools_analysis.md, requirements.txt, paper\results_analysis.md, __main__.py,
++files_to_add.txt, setup_aider.ps1, README.md, .env.example, conscience_ia\etat_de_l_art.md, main.py,
++paper\digitalkin_approach.md, true
++Sélection des fichiers les plus pertinents...
++DEBUG: select_relevant_files function called
++DEBUG: Total files found: 44
++DEBUG: Journals and Todolists: 2
++DEBUG: Journals and Todolists files:
++  - todolist.md
++  - paper\todolist.md
++DEBUG: Discussions: 1
++DEBUG: Discussion files:
++  - paper\discussion.md
++DEBUG: Concepts: 0
++DEBUG: Concept files:
++DEBUG: Final selected files:
++  - todolist.md
++  - paper\todolist.md
++  - paper\discussion.md
++Fichiers sélectionnés : todolist.md, paper\todolist.md, paper\discussion.md
++Fichiers ajoutés au chat : todolist.md, paper\todolist.md, paper\discussion.md
++Les nouveaux fichiers ont été ajoutés au chat.
++template.md
++main.py
++C:\Users\conta\auto
++
++Fichiers ajoutés au chat : todolist.md, paper\todolist.md, paper\discussion.md
++Les nouveaux fichiers ont été ajoutés au chat. --> devrait contenir les analyses
+
+# 2024-09-06 09:19:16.905063
++fais en sorte que dans les logs de main.py on voit bien les analyses dans : "Fichiers sélectionnés : paper\todolist.md, todolist.md, paper\discussion.md
++Fichiers ajoutés au chat : paper\todolist.md, todolist.md, paper\discussion.md
++Les nouveaux fichiers ont été ajoutés au chat."
+
+# 2024-09-06 09:51:59.691905
++je souhaites que tu créees un nouveau script appelé verification.md, qui lit le fichier de l'état de l'art, et pour chaque référence présente retourne dans un fichier <nom de l'etat de l'art>-verification.json si:
++- la référence est présente dans les analyses
++- la référence est présente dans les études
++- le lien de la référence pointe vers une page qui ne retourne pas de 404.
++
++Fais des appels GPT chaque fois que nécessaire
+
+# 2024-09-06 09:53:37.274953
++pour extraire les références, passe le fichier etat_de_l_art.md en contexte dans le prompt d'un appel GPT et demande lui de retourner un JSON
++
++ntroducing Structured Outputs in the API
++We are introducing Structured Outputs in the API—model outputs now reliably adhere to developer-supplied JSON Schemas.
++
++Structured Output in the API > Hero Image > Media Item
++Last year at DevDay, we introduced JSON mode—a useful building block for developers looking to build reliable applications with our models. While JSON mode improves model reliability for generating valid JSON outputs, it does not guarantee that the model’s response will conform to a particular schema. Today we’re introducing Structured Outputs in the API, a new feature designed to ensure model-generated outputs will exactly match JSON Schemas provided by developers.
++
++Generating structured data from unstructured inputs is one of the core use cases for AI in today’s applications. Developers use the OpenAI API to build powerful assistants that have the ability to fetch data and answer questions via function calling(opens in a new window), extract structured data for data entry, and build multi-step agentic workflows that allow LLMs to take actions. Developers have long been working around the limitations of LLMs in this area via open source tooling, prompting, and retrying requests repeatedly to ensure that model outputs match the formats needed to interoperate with their systems. Structured Outputs solves this problem by constraining OpenAI models to match developer-supplied schemas and by training our models to better understand complicated schemas.
++
++On our evals of complex JSON schema following, our new model gpt-4o-2024-08-06 with Structured Outputs scores a perfect 100%. In comparison, gpt-4-0613 scores less than 40%.
++
++Prompting Alone
++Structured Outputs (strict=false)
++Structured Outputs (strict=true)
++gpt-4-0613
++gpt-4-turbo-2024-04-09
++gpt-4o-2024-05-13
++gpt-4o-2024-08-06
++0
++10
++20
++30
++40
++50
++60
++70
++80
++90
++100
++With Structured Outputs, gpt-4o-2024-08-06 achieves 100% reliability in our evals, perfectly matching the output schemas.
++
++How to use Structured Outputs
++We’re introducing Structured Outputs in two forms in the API: 
++
++1. Function calling: Structured Outputs via tools is available by setting strict: true within your function definition. This feature works with all models that support tools, including all models gpt-4-0613 and gpt-3.5-turbo-0613 and later. When Structured Outputs are enabled, model outputs will match the supplied tool definition.
++
++Request
++Output JSON
++Request
++Output JSON
++JSON
++
++1
++2
++3
++4
++5
++6
++7
++8
++9
++10
++11
++12
++13
++14
++15
++16
++17
++18
++19
++20
++21
++22
++23
++24
++25
++26
++27
++28
++29
++30
++31
++32
++33
++34
++35
++36
++37
++38
++39
++40
++41
++42
++43
++44
++45
++46
++47
++48
++49
++50
++51
++52
++53
++54
++55
++56
++57
++58
++59
++60
++61
++62
++63
++64
++65
++66
++67
++68
++69
++70
++71
++72
++73
++74
++75
++76
++77
++78
++79
++80
++81
++82
++83
++84
++85
++86
++87
++88
++89
++90
++91
++1
++POST /v1/chat/completions
++2
++{
++3
++  "model": "gpt-4o-2024-08-06",
++4
++  "messages": [
++5
++    {
++6
++      "role": "system",
++7
++      "content": "You are a helpful assistant. The current date is August 6, 2024. You help users query for the data they are looking for by calling the query function."
++8
++    },
++9
++    {
++10
++      "role": "user",
++11
++      "content": "look up all my orders in may of last year that were fulfilled but not delivered on time"
++12
++    }
++13
++  ],
++14
++  "tools": [
++15
++    {
++16
++      "type": "function",
++17
++      "function": {
++18
++        "name": "query",
++19
++        "description": "Execute a query.",
++20
++        "strict": true,
++21
++        "parameters": {
++22
++          "type": "object",
++23
++          "properties": {
++24
++            "table_name": {
++25
++              "type": "string",
++26
++              "enum": ["orders"]
++27
++            },
++28
++            "columns": {
++29
++              "type": "array",
++30
++              "items": {
++31
++                "type": "string",
++32
++                "enum": [
++33
++                  "id",
++34
++                  "status",
++35
++                  "expected_delivery_date",
++36
++                  "delivered_at",
++37
++                  "shipped_at",
++38
++                  "ordered_at",
++39
++                  "canceled_at"
++40
++                ]
++41
++              }
++42
++            },
++43
++            "conditions": {
++44
++              "type": "array",
++45
++              "items": {
++46
++                "type": "object",
++47
++                "properties": {
++48
++                  "column": {
++49
++                    "type": "string"
++50
++                  },
++51
++                  "operator": {
++52
++                    "type": "string",
++53
++                    "enum": ["=", ">", "<", ">=", "<=", "!="]
++54
++                  },
++55
++                  "value": {
++56
++                    "anyOf": [
++57
++                      {
++58
++                        "type": "string"
++59
++                      },
++60
++                      {
++61
++                        "type": "number"
++62
++                      },
++63
++                      {
++64
++                        "type": "object",
++65
++                        "properties": {
++66
++                          "column_name": {
++67
++                            "type": "string"
++68
++                          }
++69
++                        },
++70
++                        "required": ["column_name"],
++71
++                        "additionalProperties": false
++72
++                      }
++73
++                    ]
++74
++                  }
++75
++                },
++76
++                "required": ["column", "operator", "value"],
++77
++                "additionalProperties": false
++78
++              }
++79
++            },
++80
++            "order_by": {
++81
++              "type": "string",
++82
++              "enum": ["asc", "desc"]
++83
++            }
++84
++          },
++85
++          "required": ["table_name", "columns", "conditions", "order_by"],
++86
++          "additionalProperties": false
++87
++        }
++88
++      }
++89
++    }
++90
++  ]
++91
++}
++JSON
++
++1
++2
++3
++4
++5
++6
++7
++8
++9
++10
++11
++12
++13
++14
++15
++16
++17
++18
++19
++20
++21
++22
++23
++24
++25
++26
++27
++28
++29
++1
++{
++2
++  "table_name": "orders",
++3
++  "columns": ["id", "status", "expected_delivery_date", "delivered_at"],
++4
++  "conditions": [
++5
++    {
++6
++      "column": "status",
++7
++      "operator": "=",
++8
++      "value": "fulfilled"
++9
++    },
++10
++    {
++11
++      "column": "ordered_at",
++12
++      "operator": ">=",
++13
++      "value": "2023-05-01"
++14
++    },
++15
++    {
++16
++      "column": "ordered_at",
++17
++      "operator": "<",
++18
++      "value": "2023-06-01"
++19
++    },
++20
++    {
++21
++      "column": "delivered_at",
++22
++      "operator": ">",
++23
++      "value": {
++24
++        "column_name": "expected_delivery_date"
++25
++      }
++26
++    }
++27
++  ],
++28
++  "order_by": "asc"
++29
++}
++2. A new option for the response_format parameter: developers can now supply a JSON Schema via json_schema, a new option for the response_format parameter. This is useful when the model is not calling a tool, but rather, responding to the user in a structured way. This feature works with our newest GPT-4o models: gpt-4o-2024-08-06, released today, and gpt-4o-mini-2024-07-18. When a response_format is supplied with strict: true, model outputs will match the supplied schema.
+
+# 2024-09-06 09:54:26.446084
++améliore et ajoute des prints
+
+# 2024-09-06 09:55:43.002604
++dans verifier_presence_dans_analyses, vérifie que le nom de l'étude correspond au nom d'un fichier dans le dossier etudes. Fais un appel GPT qui renvoie true ou false
++Meme chose pour verifier presence dans études 
+
+# 2024-09-06 10:00:16.359936
++PS C:\users\conta\autonomous> python aider\verification.py
++34 études ont été lues, ce qui est suffisant.
++Lecture du fichier '../conscience_ia/etat_de_l_art.md'...
++Traceback (most recent call last):
++  File "C:\users\conta\autonomous\aider\verification.py", line 139, in <module>
++    main()
++  File "C:\users\conta\autonomous\aider\verification.py", line 112, in main
++    contenu = lire_etat_de_lart(fichier_etat_de_lart)
++              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "C:\users\conta\autonomous\aider\verification.py", line 14, in lire_etat_de_lart
++    with open(fichier, 'r', encoding='utf-8') as f:
++         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++FileNotFoundError: [Errno 2] No such file or directory: '../conscience_ia/etat_de_l_art.md'
+
+# 2024-09-06 10:01:18.718261
++passons le nom du fichier en paramètre de la fonction
+
+# 2024-09-06 10:03:06.004925
++ os.getenv("OPENAI_API_KEY") la clé est dans le fichier .env
+
+# 2024-09-06 10:07:10.012514
++  File "C:\users\conta\autonomous\aider\verification.py", line 23, in extraire_references
++    raise ValueError("La clé API OpenAI n'est pas définie. Veuillez définir la variable d'environnement OPENAI_API_KEY.")
++ValueError: La clé API OpenAI n'est pas définie. Veuillez définir la variable d'environnement OPENAI_API_KEY.
++PS C:\users\conta\autonomous> python aider\verification.py conscience_ia\etat_de_l_art.md
++34 études ont été lues, ce qui est suffisant.
++Lecture du fichier 'conscience_ia\etat_de_l_art.md'...
++Fichier 'conscience_ia\etat_de_l_art.md' lu avec succès.
++Extraction des références à l'aide de GPT...
++Traceback (most recent call last):
++  File "C:\users\conta\autonomous\aider\verification.py", line 145, in <module>
++    main(fichier_etat_de_lart)
++  File "C:\users\conta\autonomous\aider\verification.py", line 114, in main
++    references = extraire_references(contenu)
++                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "C:\users\conta\autonomous\aider\verification.py", line 27, in extraire_references
++    response = openai.ChatCompletion.create(
++               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "C:\Python312\Lib\site-packages\openai\lib\_old_api.py", line 39, in __call__
++    raise APIRemovedInV1(symbol=self._symbol)
++openai.lib._old_api.APIRemovedInV1:
++
++You tried to access openai.ChatCompletion, but this is no longer supported in openai>=1.0.0 - see the README at https://github.com/openai/openai-python for the API.
++
++You can run `openai migrate` to automatically upgrade your codebase to use the 1.0.0 interface.
++
++Alternatively, you can pin your installation to the old version, e.g. `pip install openai==0.28`
++
++A detailed migration guide is available here: https://github.com/openai/openai-python/discussions/742
++
++PS C:\users\conta\autonomous> python aider\verification.py conscience_ia\etat_de_l_art.md
++34 études ont été lues, ce qui est suffisant.
++Lecture du fichier 'conscience_ia\etat_de_l_art.md'...
++Fichier 'conscience_ia\etat_de_l_art.md' lu avec succès.
++Extraction des références à l'aide de GPT...
++Traceback (most recent call last):
++  File "C:\users\conta\autonomous\aider\verification.py", line 146, in <module>
++    main(fichier_etat_de_lart)
++  File "C:\users\conta\autonomous\aider\verification.py", line 115, in main
++    references = extraire_references(contenu)
++                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "C:\users\conta\autonomous\aider\verification.py", line 24, in extraire_references
++    openai.api_key = os.getenv("OPENAI_API_KEY")
++    ^^^^^^
++NameError: name 'openai' is not defined. Did you mean: 'OpenAI'?
++PS C:\users\conta\autonomous> python aider\verification.py conscience_ia\etat_de_l_art.md
++34 études ont été lues, ce qui est suffisant.
++Lecture du fichier 'conscience_ia\etat_de_l_art.md'...
++Fichier 'conscience_ia\etat_de_l_art.md' lu avec succès.
++Extraction des références à l'aide de GPT...
++Traceback (most recent call last):
++  File "C:\users\conta\autonomous\aider\verification.py", line 128, in <module>
++    main(fichier_etat_de_lart)
++  File "C:\users\conta\autonomous\aider\verification.py", line 97, in main
++    references = extraire_references(contenu)
++                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "C:\users\conta\autonomous\aider\verification.py", line 28, in extraire_references
++    response = client.chat.completions.create(
++               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "C:\Python312\Lib\site-packages\openai\_utils\_utils.py", line 274, in wrapper
++    return func(*args, **kwargs)
++           ^^^^^^^^^^^^^^^^^^^^^
++  File "C:\Python312\Lib\site-packages\openai\resources\chat\completions.py", line 668, in create
++    return self._post(
++           ^^^^^^^^^^^
++  File "C:\Python312\Lib\site-packages\openai\_base_client.py", line 1260, in post
++    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
++                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "C:\Python312\Lib\site-packages\openai\_base_client.py", line 937, in request
++    return self._request(
++           ^^^^^^^^^^^^^^
++  File "C:\Python312\Lib\site-packages\openai\_base_client.py", line 1041, in _request
++    raise self._make_status_error_from_response(err.response) from None
++openai.BadRequestError: Error code: 400 - {'error': {'message': "Invalid parameter: 'response_format' of type 'json_object' is not supported with this model.", 'type': 'invalid_request_error', 'param': 'response_format', 'code': None}}
++
++Introducing Structured Outputs in the API
++We are introducing Structured Outputs in the API—model outputs now reliably adhere to developer-supplied JSON Schemas.
++
++Structured Output in the API > Hero Image > Media Item
++Last year at DevDay, we introduced JSON mode—a useful building block for developers looking to build reliable applications with our models. While JSON mode improves model reliability for generating valid JSON outputs, it does not guarantee that the model’s response will conform to a particular schema. Today we’re introducing Structured Outputs in the API, a new feature designed to ensure model-generated outputs will exactly match JSON Schemas provided by developers.
++
++Generating structured data from unstructured inputs is one of the core use cases for AI in today’s applications. Developers use the OpenAI API to build powerful assistants that have the ability to fetch data and answer questions via function calling(opens in a new window), extract structured data for data entry, and build multi-step agentic workflows that allow LLMs to take actions. Developers have long been working around the limitations of LLMs in this area via open source tooling, prompting, and retrying requests repeatedly to ensure that model outputs match the formats needed to interoperate with their systems. Structured Outputs solves this problem by constraining OpenAI models to match developer-supplied schemas and by training our models to better understand complicated schemas.
++
++On our evals of complex JSON schema following, our new model gpt-4o-2024-08-06 with Structured Outputs scores a perfect 100%. In comparison, gpt-4-0613 scores less than 40%.
++
++Prompting Alone
++Structured Outputs (strict=false)
++Structured Outputs (strict=true)
++gpt-4-0613
++gpt-4-turbo-2024-04-09
++gpt-4o-2024-05-13
++gpt-4o-2024-08-06
++0
++10
++20
++30
++40
++50
++60
++70
++80
++90
++100
++With Structured Outputs, gpt-4o-2024-08-06 achieves 100% reliability in our evals, perfectly matching the output schemas.
++
++How to use Structured Outputs
++We’re introducing Structured Outputs in two forms in the API: 
++
++1. Function calling: Structured Outputs via tools is available by setting strict: true within your function definition. This feature works with all models that support tools, including all models gpt-4-0613 and gpt-3.5-turbo-0613 and later. When Structured Outputs are enabled, model outputs will match the supplied tool definition.
++
++Request
++Output JSON
++Request
++Output JSON
++JSON
++
++1
++2
++3
++4
++5
++6
++7
++8
++9
++10
++11
++12
++13
++14
++15
++16
++17
++18
++19
++20
++21
++22
++23
++24
++25
++26
++27
++28
++29
++30
++31
++32
++33
++34
++35
++36
++37
++38
++39
++40
++41
++42
++43
++44
++45
++46
++47
++48
++49
++50
++51
++52
++53
++54
++55
++56
++57
++58
++59
++60
++61
++62
++63
++64
++65
++66
++67
++68
++69
++70
++71
++72
++73
++74
++75
++76
++77
++78
++79
++80
++81
++82
++83
++84
++85
++86
++87
++88
++89
++90
++91
++1
++POST /v1/chat/completions
++2
++{
++3
++  "model": "gpt-4o-2024-08-06",
++4
++  "messages": [
++5
++    {
++6
++      "role": "system",
++7
++      "content": "You are a helpful assistant. The current date is August 6, 2024. You help users query for the data they are looking for by calling the query function."
++8
++    },
++9
++    {
++10
++      "role": "user",
++11
++      "content": "look up all my orders in may of last year that were fulfilled but not delivered on time"
++12
++    }
++13
++  ],
++14
++  "tools": [
++15
++    {
++16
++      "type": "function",
++17
++      "function": {
++18
++        "name": "query",
++19
++        "description": "Execute a query.",
++20
++        "strict": true,
++21
++        "parameters": {
++22
++          "type": "object",
++23
++          "properties": {
++24
++            "table_name": {
++25
++              "type": "string",
++26
++              "enum": ["orders"]
++27
++            },
++28
++            "columns": {
++29
++              "type": "array",
++30
++              "items": {
++31
++                "type": "string",
++32
++                "enum": [
++33
++                  "id",
++34
++                  "status",
++35
++                  "expected_delivery_date",
++36
++                  "delivered_at",
++37
++                  "shipped_at",
++38
++                  "ordered_at",
++39
++                  "canceled_at"
++40
++                ]
++41
++              }
++42
++            },
++43
++            "conditions": {
++44
++              "type": "array",
++45
++              "items": {
++46
++                "type": "object",
++47
++                "properties": {
++48
++                  "column": {
++49
++                    "type": "string"
++50
++                  },
++51
++                  "operator": {
++52
++                    "type": "string",
++53
++                    "enum": ["=", ">", "<", ">=", "<=", "!="]
++54
++                  },
++55
++                  "value": {
++56
++                    "anyOf": [
++57
++                      {
++58
++                        "type": "string"
++59
++                      },
++60
++                      {
++61
++                        "type": "number"
++62
++                      },
++63
++                      {
++64
++                        "type": "object",
++65
++                        "properties": {
++66
++                          "column_name": {
++67
++                            "type": "string"
++68
++                          }
++69
++                        },
++70
++                        "required": ["column_name"],
++71
++                        "additionalProperties": false
++72
++                      }
++73
++                    ]
++74
++                  }
++75
++                },
++76
++                "required": ["column", "operator", "value"],
++77
++                "additionalProperties": false
++78
++              }
++79
++            },
++80
++            "order_by": {
++81
++              "type": "string",
++82
++              "enum": ["asc", "desc"]
++83
++            }
++84
++          },
++85
++          "required": ["table_name", "columns", "conditions", "order_by"],
++86
++          "additionalProperties": false
++87
++        }
++88
++      }
++89
++    }
++90
++  ]
++91
++}
++JSON
++
++1
++2
++3
++4
++5
++6
++7
++8
++9
++10
++11
++12
++13
++14
++15
++16
++17
++18
++19
++20
++21
++22
++23
++24
++25
++26
++27
++28
++29
++1
++{
++2
++  "table_name": "orders",
++3
++  "columns": ["id", "status", "expected_delivery_date", "delivered_at"],
++4
++  "conditions": [
++5
++    {
++6
++      "column": "status",
++7
++      "operator": "=",
++8
++      "value": "fulfilled"
++9
++    },
++10
++    {
++11
++      "column": "ordered_at",
++12
++      "operator": ">=",
++13
++      "value": "2023-05-01"
++14
++    },
++15
++    {
++16
++      "column": "ordered_at",
++17
++      "operator": "<",
++18
++      "value": "2023-06-01"
++19
++    },
++20
++    {
++21
++      "column": "delivered_at",
++22
++      "operator": ">",
++23
++      "value": {
++24
++        "column_name": "expected_delivery_date"
++25
++      }
++26
++    }
++27
++  ],
++28
++  "order_by": "asc"
++29
++}
++2. A new option for the response_format parameter: developers can now supply a JSON Schema via json_schema, a new option for the response_format parameter. This is useful when the model is not calling a tool, but rather, responding to the user in a structured way. This feature works with our newest GPT-4o models: gpt-4o-2024-08-06, released today, and gpt-4o-mini-2024-07-18. When a response_format is supplied with strict: true, model outputs will match the supplied schema.
+
+# 2024-09-06 10:08:26.261906
++ok go
+
+# 2024-09-06 10:10:59.215605
++PS C:\users\conta\autonomous> python aider\verification.py conscience_ia\etat_de_l_art.md
++34 études ont été lues, ce qui est suffisant.
++Lecture du fichier 'conscience_ia\etat_de_l_art.md'...
++Fichier 'conscience_ia\etat_de_l_art.md' lu avec succès.
++Extraction des références à l'aide de GPT...
++Traceback (most recent call last):
++  File "C:\users\conta\autonomous\aider\verification.py", line 145, in <module>
++    main(fichier_etat_de_lart)
++  File "C:\users\conta\autonomous\aider\verification.py", line 114, in main
++    references = extraire_references(contenu)
++                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "C:\users\conta\autonomous\aider\verification.py", line 27, in extraire_references
++    response = openai.ChatCompletion.create(
++               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "C:\Python312\Lib\site-packages\openai\lib\_old_api.py", line 39, in __call__
++    raise APIRemovedInV1(symbol=self._symbol)
++openai.lib._old_api.APIRemovedInV1:
++
++You tried to access openai.ChatCompletion, but this is no longer supported in openai>=1.0.0 - see the README at https://github.com/openai/openai-python for the API.
++
++You can run `openai migrate` to automatically upgrade your codebase to use the 1.0.0 interface.
++
++Alternatively, you can pin your installation to the old version, e.g. `pip install openai==0.28`
++
++A detailed migration guide is available here: https://github.com/openai/openai-python/discussions/742
++
++PS C:\users\conta\autonomous> python aider\verification.py conscience_ia\etat_de_l_art.md
++34 études ont été lues, ce qui est suffisant.
++Lecture du fichier 'conscience_ia\etat_de_l_art.md'...
++Fichier 'conscience_ia\etat_de_l_art.md' lu avec succès.
++Extraction des références à l'aide de GPT...
++Traceback (most recent call last):
++  File "C:\users\conta\autonomous\aider\verification.py", line 146, in <module>
++    main(fichier_etat_de_lart)
++  File "C:\users\conta\autonomous\aider\verification.py", line 115, in main
++    references = extraire_references(contenu)
++                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "C:\users\conta\autonomous\aider\verification.py", line 24, in extraire_references
++    openai.api_key = os.getenv("OPENAI_API_KEY")
++    ^^^^^^
++NameError: name 'openai' is not defined. Did you mean: 'OpenAI'?
++PS C:\users\conta\autonomous> python aider\verification.py conscience_ia\etat_de_l_art.md
++34 études ont été lues, ce qui est suffisant.
++Lecture du fichier 'conscience_ia\etat_de_l_art.md'...
++Fichier 'conscience_ia\etat_de_l_art.md' lu avec succès.
++Extraction des références à l'aide de GPT...
++Traceback (most recent call last):
++  File "C:\users\conta\autonomous\aider\verification.py", line 128, in <module>
++    main(fichier_etat_de_lart)
++  File "C:\users\conta\autonomous\aider\verification.py", line 97, in main
++    references = extraire_references(contenu)
++                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "C:\users\conta\autonomous\aider\verification.py", line 28, in extraire_references
++    response = client.chat.completions.create(
++               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "C:\Python312\Lib\site-packages\openai\_utils\_utils.py", line 274, in wrapper
++    return func(*args, **kwargs)
++           ^^^^^^^^^^^^^^^^^^^^^
++  File "C:\Python312\Lib\site-packages\openai\resources\chat\completions.py", line 668, in create
++    return self._post(
++           ^^^^^^^^^^^
++  File "C:\Python312\Lib\site-packages\openai\_base_client.py", line 1260, in post
++    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
++                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "C:\Python312\Lib\site-packages\openai\_base_client.py", line 937, in request
++    return self._request(
++           ^^^^^^^^^^^^^^
++  File "C:\Python312\Lib\site-packages\openai\_base_client.py", line 1041, in _request
++    raise self._make_status_error_from_response(err.response) from None
++openai.BadRequestError: Error code: 400 - {'error': {'message': "Invalid parameter: 'response_format' of type 'json_object' is not supported with this model.", 'type': 'invalid_request_error', 'param': 'response_format', 'code': None}}
++PS C:\users\conta\autonomous> python aider\verification.py conscience_ia\etat_de_l_art.md
++34 études ont été lues, ce qui est suffisant.
++Lecture du fichier 'conscience_ia\etat_de_l_art.md'...
++Fichier 'conscience_ia\etat_de_l_art.md' lu avec succès.
++Extraction des références à l'aide de GPT...
++Traceback (most recent call last):
++  File "C:\users\conta\autonomous\aider\verification.py", line 126, in <module>
++    main(fichier_etat_de_lart)
++  File "C:\users\conta\autonomous\aider\verification.py", line 95, in main
++    references = extraire_references(contenu)
++                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "C:\users\conta\autonomous\aider\verification.py", line 35, in extraire_references
++    references = json.loads(response.choices[0].message.content)
++                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "C:\Python312\Lib\json\__init__.py", line 346, in loads
++    return _default_decoder.decode(s)
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "C:\Python312\Lib\json\decoder.py", line 337, in decode
++    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
++               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "C:\Python312\Lib\json\decoder.py", line 355, in raw_decode
++    raise JSONDecodeError("Expecting value", s, err.value) from None
++json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+# 2024-09-06 10:13:54.335804
++FIXME in verification.py
+
+# 2024-09-06 10:14:09.065345
++le modele est gpt4_o
+
+# 2024-09-06 10:14:21.027869
++le modele est gpt4-o
+
+# 2024-09-06 10:15:43.150658
++0 références extraites.
++Vérification des références...
++Progression: 0référence [00:00, ?référence/s]
++Écriture des résultats dans 'conscience_ia\etat_de_l_art-verification.json'...
++Résultats écrits dans 'conscience_ia\etat_de_l_art-verification.json'.
++
++need more debug & fix
+
+# 2024-09-06 10:16:20.674597
++NON, le modele est gpt4-o !!!!!!
