@@ -10,7 +10,6 @@ from aider import __version__, models, utils
 import git
 from dotenv import load_dotenv
 from prompt_toolkit.enums import EditingMode
-import os
 
 # Add the parent directory to sys.path
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -315,8 +314,6 @@ def register_litellm_models(git_root, model_metadata_fname, io, verbose=False):
 import sys
 
 def main(argv=None, input=None, output=None, force_git_root=None, return_coder=False):
-    print("Debugging: sys module:", sys)
-    print("Debugging: sys.argv:", sys.argv)
     if argv is None:
         argv = sys.argv[1:]
 
