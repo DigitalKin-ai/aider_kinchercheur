@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from urllib.parse import quote, urlparse
 from tqdm import tqdm
 from colorama import init, Fore, Style
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 init(autoreset=True)  # Initialise colorama
 
@@ -154,15 +155,7 @@ def get_studies_from_query(query, num_articles=40):
             print(f"Erreur lors de la recherche sur Google Scholar: {e}")
         return None
 
-    # Obtenir les résultats de Google Scholar
-    scholar_results = google_scholar_request(query, num_articles)
-
-    if scholar_results is None:
-        print("Impossible d'obtenir les résultats de Google Scholar. Vérifiez votre clé API et la connexion internet.")
-        return
-
-    # Traiter chaque résultat
-    for result in tqdm(scholar_results.get('organic_results', []), desc="Téléchargement des articles"):
+    def process_result(result):
         url = result.get('link')
         title = result.get('title')
         
@@ -171,7 +164,7 @@ def get_studies_from_query(query, num_articles=40):
 
         if is_pdf_in_cache(title) or is_study_in_folder(title):
             print(f"{Fore.YELLOW}PDF déjà téléchargé pour : {title}")
-            continue
+            return
 
         # Liste des méthodes de téléchargement à essayer
         download_methods = [
@@ -216,7 +209,20 @@ def get_studies_from_query(query, num_articles=40):
         else:
             print(f"{Fore.RED}Impossible de trouver un PDF valide pour : {title}")
 
-        time.sleep(5)  # Attendre 5 secondes entre chaque article
+    # Obtenir les résultats de Google Scholar
+    scholar_results = google_scholar_request(query, num_articles)
+
+    if scholar_results is None:
+        print("Impossible d'obtenir les résultats de Google Scholar. Vérifiez votre clé API et la connexion internet.")
+        return
+
+    # Traiter chaque résultat en parallèle
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        futures = [executor.submit(process_result, result) for result in scholar_results.get('organic_results', [])]
+        for future in tqdm(as_completed(futures), total=len(futures), desc="Téléchargement des articles"):
+            future.result()  # This will raise any exceptions that occurred during execution
+
+    print(f"{Fore.GREEN}Tous les articles ont été traités.")
 
 if __name__ == "__main__":
     query = input("Entrez votre requête de recherche : ")
