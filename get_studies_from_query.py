@@ -358,15 +358,21 @@ class StudyExtractor:
         self.model = model
 
     def extract_and_save_pdf_info(self, pdf_content, url, title):
+        print(f"{Fore.CYAN}Début de l'extraction des informations pour : {title}")
+        
         # Encode PDF content to base64
+        print(f"{Fore.CYAN}Encodage du contenu PDF en base64...")
         pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
 
         # Split the PDF content into chunks
         chunk_size = 500000  # Adjust this value as needed
+        print(f"{Fore.CYAN}Découpage du contenu PDF en morceaux...")
         chunks = [pdf_base64[i:i+chunk_size] for i in range(0, len(pdf_base64), chunk_size)]
+        print(f"{Fore.CYAN}Nombre de morceaux : {len(chunks)}")
 
         extracted_info = {}
         for i, chunk in enumerate(chunks):
+            print(f"{Fore.CYAN}Traitement du morceau {i+1}/{len(chunks)}...")
             # Prepare the message for the LLM
             messages = [
                 {"role": "system", "content": "You are a helpful assistant that extracts information from scientific papers."},
@@ -403,6 +409,8 @@ class StudyExtractor:
             except Exception as e:
                 print(f"{Fore.RED}Erreur lors de l'extraction des informations du PDF : {e}")
                 return None
+
+        print(f"{Fore.CYAN}Extraction terminée. Début de la synthèse...")
 
         # Synthesize the results
         synthesis_messages = [
@@ -443,10 +451,14 @@ class StudyExtractor:
             self.io.tool_output(f"Nouvelle analyse ajoutée au chat : {md_filename}")
             self.io.append_chat_history(analysis_content, linebreak=True)
             
+            print(f"{Fore.GREEN}Extraction et synthèse terminées pour : {title}")
             return synthesized_info
         except Exception as e:
             print(f"{Fore.RED}Erreur lors de la synthèse des informations : {e}")
             return None
+
+        finally:
+            print(f"{Fore.CYAN}Fin du traitement pour : {title}")
 
 def extract_pdf_info(pdf_content, url, title, io):
     extractor = StudyExtractor(io)
