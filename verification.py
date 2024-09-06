@@ -1,15 +1,21 @@
 import json
 import os
 import openai
+import requests
+from tqdm import tqdm
 
 def lire_etat_de_lart(fichier):
+    print(f"Lecture du fichier '{fichier}'...")
     with open(fichier, 'r', encoding='utf-8') as f:
         contenu = f.read()
+    print(f"Fichier '{fichier}' lu avec succès.")
     return contenu
 
 def extraire_references(contenu):
-    # Utiliser GPT pour extraire les références
+    print("Extraction des références à l'aide de GPT...")
     openai.api_key = os.getenv("OPENAI_API_KEY")
+    if not openai.api_key:
+        raise ValueError("La clé API OpenAI n'est pas définie. Veuillez définir la variable d'environnement OPENAI_API_KEY.")
     
     response = openai.ChatCompletion.create(
         model="gpt-4o-2024-08-06",
@@ -39,7 +45,9 @@ def extraire_references(contenu):
         }
     )
     
-    return json.loads(response.choices[0].message.content)["references"]
+    references = json.loads(response.choices[0].message.content)["references"]
+    print(f"{len(references)} références extraites.")
+    return references
 
 def verifier_presence_dans_analyses(reference):
     # Cette fonction devrait vérifier si la référence est présente dans les analyses
@@ -52,7 +60,6 @@ def verifier_presence_dans_etudes(reference):
     return True  # Simulons que toutes les références sont présentes dans les études
 
 def verifier_lien(lien):
-    import requests
     try:
         response = requests.head(lien, allow_redirects=True, timeout=5)
         return response.status_code != 404
@@ -66,7 +73,8 @@ def main():
     
     resultats = []
     
-    for reference in references:
+    print("Vérification des références...")
+    for reference in tqdm(references, desc="Progression", unit="référence"):
         dans_analyses = verifier_presence_dans_analyses(reference["texte"])
         dans_etudes = verifier_presence_dans_etudes(reference["texte"])
         lien_valide = verifier_lien(reference["lien"])
@@ -81,8 +89,10 @@ def main():
     
     # Écriture des résultats dans un fichier JSON
     nom_fichier_sortie = os.path.splitext(fichier_etat_de_lart)[0] + "-verification.json"
+    print(f"Écriture des résultats dans '{nom_fichier_sortie}'...")
     with open(nom_fichier_sortie, 'w', encoding='utf-8') as f:
         json.dump(resultats, f, ensure_ascii=False, indent=4)
+    print(f"Résultats écrits dans '{nom_fichier_sortie}'.")
 
 if __name__ == "__main__":
     main()
