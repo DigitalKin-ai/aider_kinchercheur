@@ -564,10 +564,17 @@ Please provide the extracted information in a JSON format. If you can't find inf
                     if field in content:
                         setattr(synthesized_info, field, content[field])
 
-            # Vérifier si l'analyse est vide
-            if all(not value for value in synthesized_info.dict().values()):
-                print(f"{Fore.RED}L'analyse générée est vide. Utilisation des informations brutes.")
+            # Vérifier si l'analyse est vide ou insuffisante
+            non_empty_fields = sum(1 for value in synthesized_info.dict().values() if value)
+            if non_empty_fields < 5:  # Vous pouvez ajuster ce seuil selon vos besoins
+                print(f"{Fore.YELLOW}L'analyse générée est insuffisante. Utilisation des informations brutes.")
                 synthesized_info = StudyInfo(**extracted_info)
+            
+            # Vérifier à nouveau si l'analyse est toujours insuffisante
+            non_empty_fields = sum(1 for value in synthesized_info.dict().values() if value)
+            if non_empty_fields < 5:
+                print(f"{Fore.RED}L'analyse reste insuffisante même après utilisation des informations brutes. Abandon du traitement pour : {title}")
+                return None
 
             # Save the synthesized information to a markdown file
             safe_title = re.sub(r'[^\w\-_\. ]', '_', title)
