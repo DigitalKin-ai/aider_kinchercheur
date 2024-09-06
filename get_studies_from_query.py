@@ -121,12 +121,17 @@ def get_studies_from_query(query, num_articles=40, output_dir='etudes'):
         try:
             response = requests.get(scihub_url)
             if response.status_code == 200:
-                pdf_url = response.text.split('iframe src="')[1].split('"')[0]
-                if pdf_url.startswith('//'):
-                    pdf_url = 'https:' + pdf_url
-                pdf_response = requests.get(pdf_url)
-                if pdf_response.headers.get('content-type') == 'application/pdf':
-                    return pdf_response.content
+                # Utiliser une expression régulière pour trouver l'URL du PDF
+                pdf_url_match = re.search(r'<iframe[^>]*src="([^"]*)"', response.text)
+                if pdf_url_match:
+                    pdf_url = pdf_url_match.group(1)
+                    if pdf_url.startswith('//'):
+                        pdf_url = 'https:' + pdf_url
+                    pdf_response = requests.get(pdf_url)
+                    if pdf_response.headers.get('content-type') == 'application/pdf':
+                        return pdf_response.content
+                else:
+                    print("Impossible de trouver l'URL du PDF sur la page Sci-Hub")
         except Exception as e:
             print(f"Erreur lors de la tentative de téléchargement via Sci-Hub: {e}")
         return None
