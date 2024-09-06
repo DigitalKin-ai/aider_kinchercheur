@@ -268,11 +268,14 @@ def get_studies_from_query(query, num_articles=40, output_dir='etudes'):
                 # Extraire les informations du PDF immédiatement après le téléchargement
                 extracted_info = extract_pdf_info(pdf_content, url, title, io)
                 
-                # Sauvegarder les informations extraites dans un fichier JSON
-                json_filename = os.path.join(output_dir, f"{safe_title[:100]}.json")
-                with open(json_filename, 'w', encoding='utf-8') as f:
-                    json.dump(extracted_info, f, ensure_ascii=False, indent=2)
-                print(f"{Fore.GREEN}Informations extraites sauvegardées : {json_filename}")
+                if extracted_info is not None:
+                    # Sauvegarder les informations extraites dans un fichier JSON
+                    json_filename = os.path.join(output_dir, f"{safe_title[:100]}.json")
+                    with open(json_filename, 'w', encoding='utf-8') as f:
+                        json.dump(extracted_info, f, ensure_ascii=False, indent=2)
+                    print(f"{Fore.GREEN}Informations extraites sauvegardées : {json_filename}")
+                else:
+                    print(f"{Fore.YELLOW}L'étude n'a pas été traitée en raison de sa taille.")
 
             except IOError as e:
                 print(f"{Fore.RED}Erreur lors de l'écriture du fichier {filename}: {e}")
@@ -369,6 +372,10 @@ class StudyExtractor:
         print(f"{Fore.CYAN}Découpage du contenu PDF en morceaux...")
         chunks = [pdf_base64[i:i+chunk_size] for i in range(0, len(pdf_base64), chunk_size)]
         print(f"{Fore.CYAN}Nombre de morceaux : {len(chunks)}")
+
+        if len(chunks) > 50:
+            print(f"{Fore.YELLOW}L'étude a plus de 50 morceaux ({len(chunks)}). Elle ne sera pas traitée.")
+            return None
 
         extracted_info = {}
         for i, chunk in enumerate(chunks):
