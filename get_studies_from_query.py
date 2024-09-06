@@ -79,6 +79,7 @@ if not os.getenv('SEARCHAPI_KEY'):
     exit(1)
 
 def get_studies_from_query(query, num_articles=40, output_dir='etudes', max_workers=DEFAULT_MAX_WORKERS, analyze_immediately=True):
+    global interrupted
     # Fonction pour faire une requête à Google Scholar
     def google_scholar_request(query, num_articles):
         url = "https://www.searchapi.io/api/v1/search"
@@ -313,7 +314,9 @@ def get_studies_from_query(query, num_articles=40, output_dir='etudes', max_work
             
             for future in tqdm(as_completed(futures), total=len(futures), desc="Téléchargement des articles"):
                 if interrupted:
-                    executor.shutdown(wait=False, cancel_futures=True)
+                    for f in futures:
+                        f.cancel()
+                    executor.shutdown(wait=False)
                     print(f"{Fore.YELLOW}Interruption détectée. Arrêt des téléchargements.")
                     break
                 try:
@@ -322,15 +325,13 @@ def get_studies_from_query(query, num_articles=40, output_dir='etudes', max_work
                     print(f"{Fore.RED}Une tâche a dépassé le temps imparti.")
                 except Exception as e:
                     print(f"{Fore.RED}Une erreur s'est produite lors du traitement d'un article : {e}")
-                
-                if interrupted:
-                    break
 
         if not interrupted:
             print(f"{Fore.GREEN}Tous les articles ont été traités.")
         else:
             print(f"{Fore.YELLOW}Le traitement a été interrompu.")
     except KeyboardInterrupt:
+        interrupted = True
         print(f"\n{Fore.YELLOW}Interruption détectée. Arrêt des téléchargements.")
     
     # Vérifier le nombre de fichiers téléchargés
@@ -461,6 +462,9 @@ class StudyExtractor:
             extracted_info = {}
             chunks_to_process = chunks[:40] + chunks[-10:] if len(chunks) > 50 else chunks
             for i, chunk in enumerate(chunks_to_process):
+                if interrupted:
+                    print(f"{Fore.YELLOW}Interruption détectée. Arrêt de l'extraction.")
+                    return None
                 chunk_index = i if i < 40 else len(chunks) - (50 - i)
                 print(f"{Fore.CYAN}Traitement du morceau {chunk_index+1}/{len(chunks)} pour l'étude : {title}")
                 # Prepare the message for the LLM
@@ -558,7 +562,7 @@ class StudyExtractor:
             
             with open(md_filename, 'w', encoding='utf-8') as f:
                 f.write(f"# {title}\n\n")
-                for key, value in synthesized_info.items():
+                for key, value in synthesized_info.dict().items():
                     f.write(f"## {key}\n{value}\n\n")
             
             print(f"{Fore.GREEN}Analyse sauvegardée : {md_filename}")
@@ -576,7 +580,7 @@ class StudyExtractor:
             # Save the synthesized information to a JSON file
             json_filename = os.path.join('etudes', f"{safe_title[:100]}.json")
             with open(json_filename, 'w', encoding='utf-8') as f:
-                json.dump(synthesized_info, f, ensure_ascii=False, indent=2)
+                json.dump(synthesized_info.dict(), f, ensure_ascii=False, indent=2)
             print(f"{Fore.GREEN}Informations JSON sauvegardées : {json_filename}")
 
             return synthesized_info
@@ -592,6 +596,38 @@ def extract_pdf_info(pdf_content, url, title, io):
     extractor = StudyExtractor(io)
     return extractor.extract_and_save_pdf_info(pdf_content, url, title)
 
+def clean_orphan_files():
+    print(f"{Fore.CYAN}Nettoyage des fichiers orphelins...")
+    etudes_dir = 'etudes'
+    analyses_dir = 'analyses'
+    
+    # Obtenir la liste des fichiers PDF et JSON dans le dossier 'etudes'
+    pdf_files = set(f[:-4] for f in os.listdir(etudes_dir) if f.endswith('.pdf'))
+    json_files = set(f[:-5] for f in os.listdir(etudes_dir) if f.endswith('.json'))
+    
+    # Obtenir la liste des fichiers MD dans le dossier 'analyses'
+    md_files = set(f[:-3] for f in os.listdir(analyses_dir) if f.endswith('.md'))
+    
+    # Trouver les fichiers orphelins
+    orphan_pdfs = pdf_files - json_files - md_files
+    orphan_jsons = json_files - pdf_files - md_files
+    orphan_mds = md_files - pdf_files - json_files
+    
+    # Supprimer les fichiers orphelins
+    for orphan in orphan_pdfs:
+        os.remove(os.path.join(etudes_dir, f"{orphan}.pdf"))
+        print(f"{Fore.YELLOW}Suppression du PDF orphelin : {orphan}.pdf")
+    
+    for orphan in orphan_jsons:
+        os.remove(os.path.join(etudes_dir, f"{orphan}.json"))
+        print(f"{Fore.YELLOW}Suppression du JSON orphelin : {orphan}.json")
+    
+    for orphan in orphan_mds:
+        os.remove(os.path.join(analyses_dir, f"{orphan}.md"))
+        print(f"{Fore.YELLOW}Suppression de l'analyse orpheline : {orphan}.md")
+    
+    print(f"{Fore.GREEN}Nettoyage terminé.")
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Télécharger ou analyser des articles scientifiques.")
     parser.add_argument("-q", "--query", help="La requête de recherche pour télécharger des articles")
@@ -601,9 +637,13 @@ if __name__ == "__main__":
     parser.add_argument("--model", default="gpt-4o-mini", help="Modèle GPT à utiliser pour l'analyse (par défaut: gpt-4o-mini)")
     parser.add_argument("--max-workers", type=int, default=DEFAULT_MAX_WORKERS, help=f"Nombre maximum de workers pour le ThreadPoolExecutor (par défaut: {DEFAULT_MAX_WORKERS})")
     parser.add_argument("--no-immediate-analysis", action="store_true", help="Désactiver l'analyse immédiate après le téléchargement")
+    parser.add_argument("--clean", action="store_true", help="Nettoyer les fichiers orphelins")
     args = parser.parse_args()
 
     io = InputOutput()
+
+    if args.clean:
+        clean_orphan_files()
 
     if args.query:
         num_articles = min(100, max(1, args.num_articles))  # Limiter entre 1 et 100
