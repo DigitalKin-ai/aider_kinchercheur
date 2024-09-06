@@ -253,55 +253,63 @@ def get_studies_from_query(query, num_articles=40, output_dir='etudes'):
 
     print(f"{Fore.GREEN}Tous les articles ont été traités.")
 
-def extract_pdf_info(pdf_content, url, title):
-    # Encode PDF content to base64
-    pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
+class StudyExtractor:
+    def __init__(self, io):
+        self.io = io
 
-    # Prepare the message for the LLM
-    messages = [
-        {"role": "system", "content": "You are a helpful assistant that extracts information from scientific papers."},
-        {"role": "user", "content": f"""Please extract the following information from the given PDF:
+    def extract_and_save_pdf_info(self, pdf_content, url, title):
+        # Encode PDF content to base64
+        pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
 
-|id|Nom|Auteurs|Journal|Date de publication|DOI|Citation|Type|Mots-clés|lienOrigine|Lien Google Drive|Abstract|Objectif de l'étude|Méthodologie|Conclusions de l'étude|Pertinence au regard de l'axe de travail 1|Pertinence au regard de l'axe de travail 2|Pertinence de l'étude au regard de l'axe de travail 3|Pertinence au regard de l'objectif de recherche|Axe de travail|Sélection|Apports et contributions|Verbatims des apports et contributions|Extraits Verbatim des Verrous|Verrous de l'étude|Données chifrées|Date de création|Date de dernière modification|
+        # Prepare the message for the LLM
+        messages = [
+            {"role": "system", "content": "You are a helpful assistant that extracts information from scientific papers."},
+            {"role": "user", "content": f"""Please extract the following information from the given PDF:
 
-The PDF content is provided as a base64 encoded string: {pdf_base64}
+    |id|Nom|Auteurs|Journal|Date de publication|DOI|Citation|Type|Mots-clés|lienOrigine|Lien Google Drive|Abstract|Objectif de l'étude|Méthodologie|Conclusions de l'étude|Pertinence au regard de l'axe de travail 1|Pertinence au regard de l'axe de travail 2|Pertinence de l'étude au regard de l'axe de travail 3|Pertinence au regard de l'objectif de recherche|Axe de travail|Sélection|Apports et contributions|Verbatims des apports et contributions|Extraits Verbatim des Verrous|Verrous de l'étude|Données chifrées|Date de création|Date de dernière modification|
 
-Additional information:
-URL: {url}
-Title: {title}
+    The PDF content is provided as a base64 encoded string: {pdf_base64}
 
-Please provide the extracted information in a JSON format."""}
-    ]
+    Additional information:
+    URL: {url}
+    Title: {title}
 
-    # Make the API call
-    response = litellm.completion(
-        model="gpt-4",
-        messages=messages,
-    )
+    Please provide the extracted information in a JSON format."""}
+        ]
 
-    # Parse the extracted information
-    extracted_info = json.loads(response.choices[0].message.content)
-    
-    # Save the extracted information to a markdown file
-    safe_title = re.sub(r'[^\w\-_\. ]', '_', title)
-    md_filename = os.path.join('analyses', f"{safe_title[:100]}.md")
-    os.makedirs('analyses', exist_ok=True)
-    
-    with open(md_filename, 'w', encoding='utf-8') as f:
-        f.write(f"# {title}\n\n")
-        for key, value in extracted_info.items():
-            f.write(f"## {key}\n{value}\n\n")
-    
-    print(f"{Fore.GREEN}Analyse sauvegardée : {md_filename}")
-    
-    # Add the analysis to the current chat session
-    with open(md_filename, 'r', encoding='utf-8') as f:
-        analysis_content = f.read()
-    
-    self.io.tool_output(f"Nouvelle analyse ajoutée au chat : {md_filename}")
-    self.io.append_chat_history(analysis_content, linebreak=True)
-    
-    return extracted_info
+        # Make the API call
+        response = litellm.completion(
+            model="gpt-4",
+            messages=messages,
+        )
+
+        # Parse the extracted information
+        extracted_info = json.loads(response.choices[0].message.content)
+        
+        # Save the extracted information to a markdown file
+        safe_title = re.sub(r'[^\w\-_\. ]', '_', title)
+        md_filename = os.path.join('analyses', f"{safe_title[:100]}.md")
+        os.makedirs('analyses', exist_ok=True)
+        
+        with open(md_filename, 'w', encoding='utf-8') as f:
+            f.write(f"# {title}\n\n")
+            for key, value in extracted_info.items():
+                f.write(f"## {key}\n{value}\n\n")
+        
+        print(f"{Fore.GREEN}Analyse sauvegardée : {md_filename}")
+        
+        # Add the analysis to the current chat session
+        with open(md_filename, 'r', encoding='utf-8') as f:
+            analysis_content = f.read()
+        
+        self.io.tool_output(f"Nouvelle analyse ajoutée au chat : {md_filename}")
+        self.io.append_chat_history(analysis_content, linebreak=True)
+        
+        return extracted_info
+
+def extract_pdf_info(pdf_content, url, title, io):
+    extractor = StudyExtractor(io)
+    return extractor.extract_and_save_pdf_info(pdf_content, url, title)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Télécharger des articles scientifiques basés sur une requête.")
