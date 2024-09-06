@@ -483,17 +483,19 @@ def extract_pdf_info(pdf_content, url, title, io):
     return extractor.extract_and_save_pdf_info(pdf_content, url, title)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Télécharger des articles scientifiques basés sur une requête.")
-    parser.add_argument("query", help="La requête de recherche")
+    parser = argparse.ArgumentParser(description="Télécharger ou analyser des articles scientifiques.")
+    parser.add_argument("-q", "--query", help="La requête de recherche pour télécharger des articles")
     parser.add_argument("-n", "--num_articles", type=int, default=40, help="Nombre d'articles à télécharger (max 100)")
     parser.add_argument("-o", "--output", default="etudes", help="Dossier de sortie pour les PDFs")
-    parser.add_argument("--analyze-all", action="store_true", help="Analyser tous les PDFs après le téléchargement")
+    parser.add_argument("--analyze-all", action="store_true", help="Analyser tous les PDFs dans le dossier de sortie")
     parser.add_argument("--model", default="gpt-4o", help="Modèle GPT à utiliser pour l'analyse (par défaut: gpt-4o)")
     args = parser.parse_args()
 
-    num_articles = min(100, max(1, args.num_articles))  # Limiter entre 1 et 100
     io = InputOutput()
-    get_studies_from_query(args.query, num_articles, args.output)
+
+    if args.query:
+        num_articles = min(100, max(1, args.num_articles))  # Limiter entre 1 et 100
+        get_studies_from_query(args.query, num_articles, args.output)
 
     if args.analyze_all:
         run_all_analysis(io, model=args.model)
