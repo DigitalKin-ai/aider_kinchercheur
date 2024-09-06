@@ -4,6 +4,11 @@ import openai
 import requests
 from tqdm import tqdm
 
+def compter_etudes_lues():
+    dossier_etudes = "etudes"  # Assurez-vous que ce chemin est correct
+    fichiers_etudes = os.listdir(dossier_etudes)
+    return len(fichiers_etudes)
+
 def lire_etat_de_lart(fichier):
     print(f"Lecture du fichier '{fichier}'...")
     with open(fichier, 'r', encoding='utf-8') as f:
@@ -97,6 +102,12 @@ def verifier_lien(lien):
         return False
 
 def main():
+    nombre_etudes_lues = compter_etudes_lues()
+    if nombre_etudes_lues < 10:
+        print(f"Attention : Seulement {nombre_etudes_lues} études ont été lues. Il est recommandé d'en lire au moins 10.")
+    else:
+        print(f"{nombre_etudes_lues} études ont été lues, ce qui est suffisant.")
+
     fichier_etat_de_lart = "etat_de_lart.md"  # Remplacez par le nom réel de votre fichier
     contenu = lire_etat_de_lart(fichier_etat_de_lart)
     references = extraire_references(contenu)
