@@ -700,7 +700,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     # Exécution du script de recherche
     io.tool_output("Exécution du script de recherche...")
     try:
-        from scrape import main as scrape_main
+        from aider.scrape import main as scrape_main
         scrape_main()
         io.tool_output("Script de recherche exécuté avec succès.")
     except Exception as e:
