@@ -574,34 +574,30 @@ Please provide the extracted information in a JSON format. If you can't find inf
                 print(f"{Fore.RED}L'analyse reste insuffisante même après utilisation des informations brutes. Abandon du traitement pour : {title}")
                 return None
 
-            # Save the synthesized information to a markdown file
-            safe_title = re.sub(r'[^\w\-_\. ]', '_', title)
-            md_filename = os.path.join('analyses', f"{safe_title[:100]}.md")
+            # Save the synthesized information to the analyses.md file
+            md_filename = 'analyses.md'
             os.makedirs('analyses', exist_ok=True)
             
-            with open(md_filename, 'w', encoding='utf-8') as f:
+            with open(md_filename, 'a', encoding='utf-8') as f:
                 f.write(f"# {title}\n\n")
                 for key, value in synthesized_info.dict().items():
                     if value:  # N'écrit que les champs non vides
                         f.write(f"## {key}\n{value}\n\n")
+                f.write("---\n\n")  # Séparateur entre les analyses
             
-            print(f"{Fore.GREEN}Analyse sauvegardée : {md_filename}")
+            print(f"{Fore.GREEN}Analyse ajoutée à : {md_filename}")
             
             # Add the analysis to the current chat session
-            with open(md_filename, 'r', encoding='utf-8') as f:
-                analysis_content = f.read()
+            analysis_content = f"# {title}\n\n"
+            for key, value in synthesized_info.dict().items():
+                if value:
+                    analysis_content += f"## {key}\n{value}\n\n"
             
-            self.io.tool_output(f"Nouvelle analyse ajoutée au chat : {md_filename}")
+            self.io.tool_output(f"Nouvelle analyse ajoutée au chat et à {md_filename}")
             self.io.append_chat_history(analysis_content, linebreak=True)
             
             print(f"{Fore.GREEN}Extraction et synthèse terminées pour : {title}")
             print(f"{Fore.CYAN}Contenu de l'analyse :\n{analysis_content[:500]}...")  # Affiche les 500 premiers caractères
-
-            # Save the synthesized information to a JSON file
-            json_filename = os.path.join('etudes', f"{safe_title[:100]}.json")
-            with open(json_filename, 'w', encoding='utf-8') as f:
-                json.dump(synthesized_info.dict(), f, ensure_ascii=False, indent=2)
-            print(f"{Fore.GREEN}Informations JSON sauvegardées : {json_filename}")
 
             return synthesized_info
         except Exception as e:
@@ -619,19 +615,14 @@ def extract_pdf_info(pdf_content, url, title, io):
 def clean_orphan_files():
     print(f"{Fore.CYAN}Nettoyage des fichiers orphelins...")
     etudes_dir = 'etudes'
-    analyses_dir = 'analyses'
     
     # Obtenir la liste des fichiers PDF et JSON dans le dossier 'etudes'
     pdf_files = set(f[:-4] for f in os.listdir(etudes_dir) if f.endswith('.pdf'))
     json_files = set(f[:-5] for f in os.listdir(etudes_dir) if f.endswith('.json'))
     
-    # Obtenir la liste des fichiers MD dans le dossier 'analyses'
-    md_files = set(f[:-3] for f in os.listdir(analyses_dir) if f.endswith('.md'))
-    
     # Trouver les fichiers orphelins
-    orphan_pdfs = pdf_files - json_files - md_files
-    orphan_jsons = json_files - pdf_files - md_files
-    orphan_mds = md_files - pdf_files - json_files
+    orphan_pdfs = pdf_files - json_files
+    orphan_jsons = json_files - pdf_files
     
     # Supprimer les fichiers orphelins
     for orphan in orphan_pdfs:
@@ -641,10 +632,6 @@ def clean_orphan_files():
     for orphan in orphan_jsons:
         os.remove(os.path.join(etudes_dir, f"{orphan}.json"))
         print(f"{Fore.YELLOW}Suppression du JSON orphelin : {orphan}.json")
-    
-    for orphan in orphan_mds:
-        os.remove(os.path.join(analyses_dir, f"{orphan}.md"))
-        print(f"{Fore.YELLOW}Suppression de l'analyse orpheline : {orphan}.md")
     
     print(f"{Fore.GREEN}Nettoyage terminé.")
 
