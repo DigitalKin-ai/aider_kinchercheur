@@ -5,9 +5,7 @@ import sys
 import threading
 from pathlib import Path
 
-import os
 from aider import __version__, models, utils
-import sys
 
 import git
 from dotenv import load_dotenv
