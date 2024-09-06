@@ -76,7 +76,7 @@ if not os.getenv('SEARCHAPI_KEY'):
     print(f"{Fore.RED}Erreur : La clé SEARCHAPI_KEY n'a pas été trouvée dans le fichier .env")
     exit(1)
 
-def get_studies_from_query(query, num_articles=20, output_dir='etudes', max_workers=DEFAULT_MAX_WORKERS, analyze_immediately=True):
+def get_studies_from_query(query, num_articles=20, output_dir='etudes', max_workers=DEFAULT_MAX_WORKERS, analyze_immediately=True, io=None):
     global interrupted
     # Fonction pour faire une requête à Google Scholar
     def google_scholar_request(query, num_articles):
@@ -299,7 +299,8 @@ def get_studies_from_query(query, num_articles=20, output_dir='etudes', max_work
         return
 
     # Create an instance of InputOutput
-    io = InputOutput()
+    if io is None:
+        io = InputOutput()
 
     # Traiter chaque résultat en parallèle
     try:
@@ -338,7 +339,7 @@ def get_studies_from_query(query, num_articles=20, output_dir='etudes', max_work
     print(f"{Fore.GREEN}Nombre de PDFs téléchargés : {pdf_count}")
     print(f"{Fore.GREEN}Nombre de fichiers JSON créés : {json_count}")
 
-def run_all_analysis(io, model="gpt-4o-mini"):
+def run_all_analysis(io, model="gpt-4o-2024-08-06"):
     etudes_dir = 'etudes'
     analyses_dir = 'analyses'
     
