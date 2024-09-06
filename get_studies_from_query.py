@@ -272,6 +272,33 @@ def get_studies_from_query(query, num_articles=40, output_dir='etudes'):
     print(f"{Fore.GREEN}Nombre de PDFs téléchargés : {pdf_count}")
     print(f"{Fore.GREEN}Nombre de fichiers JSON créés : {json_count}")
 
+def run_all_analysis(io):
+    etudes_dir = 'etudes'
+    analyses_dir = 'analyses'
+    
+    if not os.path.exists(analyses_dir):
+        os.makedirs(analyses_dir)
+    
+    pdf_files = [f for f in os.listdir(etudes_dir) if f.endswith('.pdf')]
+    
+    for pdf_file in pdf_files:
+        pdf_path = os.path.join(etudes_dir, pdf_file)
+        analysis_file = os.path.join(analyses_dir, pdf_file.replace('.pdf', '.md'))
+        
+        if not os.path.exists(analysis_file):
+            print(f"{Fore.CYAN}Analyse en cours pour : {pdf_file}")
+            with open(pdf_path, 'rb') as f:
+                pdf_content = f.read()
+            
+            title = pdf_file[:-4]  # Remove .pdf extension
+            url = ""  # We don't have the original URL here
+            
+            extract_pdf_info(pdf_content, url, title, io)
+        else:
+            print(f"{Fore.YELLOW}Analyse déjà existante pour : {pdf_file}")
+    
+    print(f"{Fore.GREEN}Toutes les analyses ont été effectuées.")
+
 class StudyExtractor:
     def __init__(self, io):
         self.io = io
@@ -335,7 +362,12 @@ if __name__ == "__main__":
     parser.add_argument("query", help="La requête de recherche")
     parser.add_argument("-n", "--num_articles", type=int, default=40, help="Nombre d'articles à télécharger (max 100)")
     parser.add_argument("-o", "--output", default="etudes", help="Dossier de sortie pour les PDFs")
+    parser.add_argument("--analyze-all", action="store_true", help="Analyser tous les PDFs après le téléchargement")
     args = parser.parse_args()
 
     num_articles = min(100, max(1, args.num_articles))  # Limiter entre 1 et 100
+    io = InputOutput()
     get_studies_from_query(args.query, num_articles, args.output)
+
+    if args.analyze_all:
+        run_all_analysis(io)
