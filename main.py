@@ -674,24 +674,24 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
                 return True
             return False
         except OSError as e:
-            io.tool_error(f"Error checking file {file_path}: {str(e)}")
+            io.tool_error(f"Erreur lors de la vérification du fichier {file_path}: {str(e)}")
             return False
 
     def add_analyses_files(coder, io, analyses_folder, last_modified_times):
         if analyses_folder.exists() and analyses_folder.is_dir():
             analyses_files = [f for f in analyses_folder.iterdir() if f.is_file()]
-            io.tool_output("Adding/Updating files from 'analyses' folder:")
+            io.tool_output("Ajout/Mise à jour des fichiers du dossier 'analyses':")
             for file in analyses_files:
                 try:
                     if check_file_modified(str(file), last_modified_times):
-                        io.tool_output(f"Adding/Updating {file}")
+                        io.tool_output(f"Ajout/Mise à jour de {file}")
                         coder.add_file(str(file))
                 except Exception as e:
-                    io.tool_error(f"Error adding/updating file {file}: {str(e)}")
+                    io.tool_error(f"Erreur lors de l'ajout/mise à jour du fichier {file}: {str(e)}")
         else:
-            io.tool_output("The 'analyses' folder does not exist or is not a directory.")
+            io.tool_output("Le dossier 'analyses' n'existe pas ou n'est pas un répertoire.")
 
-    # Add all files from the 'analyses' folder to the chat
+    # Ajout de tous les fichiers du dossier 'analyses' au chat
     analyses_folder = Path('analyses')
     last_modified_times = {}
     add_analyses_files(coder, io, analyses_folder, last_modified_times)
@@ -703,17 +703,8 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             if user_input.lower() == 'exit':
                 break
 
-            # Check and update files from the 'analyses' folder before each run
-            if analyses_folder.exists() and analyses_folder.is_dir():
-                analyses_files = [f for f in analyses_folder.iterdir() if f.is_file()]
-                io.tool_output("Checking for updates in 'analyses' folder:")
-                for file in analyses_files:
-                    if check_file_modified(str(file), last_modified_times):
-                        io.tool_output(f"Updating {file}")
-                        try:
-                            coder.add_file(str(file))
-                        except Exception as e:
-                            io.tool_error(f"Error updating file {file}: {str(e)}")
+            # Vérification et mise à jour des fichiers du dossier 'analyses' avant chaque exécution
+            add_analyses_files(coder, io, analyses_folder, last_modified_times)
 
             coder.run(with_message="""INSTRUCTIONS IMPORTANTES POUR LA RÉDACTION DE L'ÉTAT DE L'ART :
 1. Format et structure :
@@ -750,6 +741,10 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
 7. Références et citations :
    - Utilisez un style de citation cohérent tout au long du document (par exemple, APA, MLA, etc.).
    - Assurez-vous que toutes les références dans le texte correspondent à la liste des références à la fin du document.
+
+8. Progression et suivi :
+   - Après chaque session de travail, résumez brièvement les modifications apportées et les sections complétées.
+   - Identifiez les prochaines étapes ou sections à aborder lors de la prochaine session.
 
 Continuez à travailler sur l'état de l'art en suivant ces directives, en vous concentrant sur une section à la fois et en intégrant de manière cohérente les nouvelles informations des études analysées.""")
         except SwitchCoder as switch:
