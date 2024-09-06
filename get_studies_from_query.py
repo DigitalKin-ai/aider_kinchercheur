@@ -22,10 +22,18 @@ def get_studies_from_query(query):
         print(f"Envoi de la requête à {url}")
         print(f"Headers: {headers}")
         print(f"Payload: {payload}")
-        response = requests.post(url, headers=headers, json=payload)
-        print(f"Statut de la réponse: {response.status_code}")
-        print(f"Contenu de la réponse: {response.text}")
-        return response.json()
+        try:
+            response = requests.post(url, headers=headers, json=payload)
+            response.raise_for_status()  # Raise an exception for bad status codes
+            print(f"Statut de la réponse: {response.status_code}")
+            print(f"Contenu de la réponse: {response.text}")
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            print(f"Erreur lors de la requête: {e}")
+            if hasattr(e, 'response'):
+                print(f"Statut de la réponse: {e.response.status_code}")
+                print(f"Contenu de la réponse: {e.response.text}")
+            return None
 
     # Fonction pour obtenir le PDF d'une étude
     def get_pdf(id):
@@ -35,6 +43,10 @@ def get_studies_from_query(query):
 
     # Obtenir les résultats de Google Scholar
     scholar_results = google_scholar_request(query)
+
+    if scholar_results is None:
+        print("Impossible d'obtenir les résultats de Google Scholar. Vérifiez votre clé API et la connexion internet.")
+        return
 
     # Traiter chaque résultat
     for result in scholar_results.get('organic_results', []):
