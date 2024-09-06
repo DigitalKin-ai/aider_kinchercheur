@@ -7,6 +7,9 @@ import hashlib
 from dotenv import load_dotenv
 from urllib.parse import quote, urlparse
 from tqdm import tqdm
+from colorama import init, Fore, Style
+
+init(autoreset=True)  # Initialise colorama
 
 load_dotenv()
 
@@ -38,24 +41,24 @@ def get_studies_from_query(query, num_articles=40):
             "num": num_articles,
             "time_period_min": 2010
         }
-        print(f"Envoi de la requête à {url}")
-        print(f"Paramètres: {params}")
+        print(f"{Fore.CYAN}Envoi de la requête à {url}")
+        print(f"{Fore.CYAN}Paramètres: {params}")
         try:
             response = requests.get(url, headers=headers, params=params)
-            print(f"Statut de la réponse: {response.status_code}")
+            print(f"{Fore.GREEN}Statut de la réponse: {response.status_code}")
             response.raise_for_status()  # Raise an exception for bad status codes
             return response.json()
         except requests.exceptions.RequestException as e:
-            print(f"Erreur lors de la requête: {e}")
+            print(f"{Fore.RED}Erreur lors de la requête: {e}")
             if hasattr(e, 'response'):
-                print(f"Statut de la réponse: {e.response.status_code}")
-                print(f"Contenu de la réponse: {e.response.text}")
+                print(f"{Fore.RED}Statut de la réponse: {e.response.status_code}")
+                print(f"{Fore.RED}Contenu de la réponse: {e.response.text}")
             else:
-                print("Pas de réponse du serveur")
+                print(f"{Fore.RED}Pas de réponse du serveur")
             return None
         except json.JSONDecodeError as e:
-            print(f"Erreur lors du décodage JSON: {e}")
-            print(f"Contenu de la réponse: {response.text}")
+            print(f"{Fore.RED}Erreur lors du décodage JSON: {e}")
+            print(f"{Fore.RED}Contenu de la réponse: {response.text}")
             return None
 
     # Fonction pour vérifier si un PDF est déjà en cache
@@ -163,11 +166,11 @@ def get_studies_from_query(query, num_articles=40):
         url = result.get('link')
         title = result.get('title')
         
-        print(f"\nTraitement de : {title}")
-        print(f"URL : {url}")
+        print(f"\n{Fore.CYAN}Traitement de : {Style.BRIGHT}{title}")
+        print(f"{Fore.CYAN}URL : {url}")
 
         if is_pdf_in_cache(title) or is_study_in_folder(title):
-            print(f"PDF déjà téléchargé pour : {title}")
+            print(f"{Fore.YELLOW}PDF déjà téléchargé pour : {title}")
             continue
 
         # Liste des méthodes de téléchargement à essayer
@@ -183,14 +186,14 @@ def get_studies_from_query(query, num_articles=40):
         successful_method = None
 
         for method_name, method_func in download_methods:
-            print(f"Essai de téléchargement via {method_name}...")
+            print(f"{Fore.BLUE}Essai de téléchargement via {method_name}...")
             try:
                 pdf_content = method_func()
                 if pdf_content:
                     successful_method = method_name
                     break
             except Exception as e:
-                print(f"Erreur lors de la tentative via {method_name}: {e}")
+                print(f"{Fore.RED}Erreur lors de la tentative via {method_name}: {e}")
             time.sleep(2)  # Attendre 2 secondes entre chaque tentative
 
         if pdf_content and isinstance(pdf_content, bytes):
@@ -203,7 +206,7 @@ def get_studies_from_query(query, num_articles=40):
             
             with open(filename, 'wb') as f:
                 f.write(pdf_content)
-            print(f"PDF sauvegardé via {successful_method} : {filename}")
+            print(f"{Fore.GREEN}PDF sauvegardé via {successful_method} : {filename}")
             
             # Sauvegarder dans le cache
             save_pdf_to_cache(title, pdf_content)
@@ -211,7 +214,7 @@ def get_studies_from_query(query, num_articles=40):
             # Ajouter à la todolist
             add_to_todolist(filename)
         else:
-            print(f"Impossible de trouver un PDF valide pour : {title}")
+            print(f"{Fore.RED}Impossible de trouver un PDF valide pour : {title}")
 
         time.sleep(5)  # Attendre 5 secondes entre chaque article
 
