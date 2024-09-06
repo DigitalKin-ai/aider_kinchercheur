@@ -123,7 +123,7 @@ def get_studies_from_query(query, num_articles=40, output_dir='etudes'):
             if response.status_code == 200:
                 # Utiliser une expression régulière pour trouver l'URL du PDF
                 pdf_url_match = re.search(r'<iframe[^>]*src="([^"]*)"', response.text)
-                if pdf_url_match:
+                if pdf_url_match and pdf_url_match.groups():
                     pdf_url = pdf_url_match.group(1)
                     if pdf_url.startswith('//'):
                         pdf_url = 'https:' + pdf_url
@@ -132,6 +132,8 @@ def get_studies_from_query(query, num_articles=40, output_dir='etudes'):
                         return pdf_response.content
                 else:
                     print("Impossible de trouver l'URL du PDF sur la page Sci-Hub")
+        except IndexError:
+            print("Erreur d'index lors de l'extraction de l'URL du PDF sur Sci-Hub")
         except Exception as e:
             print(f"Erreur lors de la tentative de téléchargement via Sci-Hub: {e}")
         return None
