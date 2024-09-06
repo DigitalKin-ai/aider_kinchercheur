@@ -4,7 +4,6 @@ from openai import OpenAI
 import requests
 from tqdm import tqdm
 from dotenv import load_dotenv
-from dotenv import load_dotenv
 
 def compter_etudes_lues():
     dossier_etudes = "etudes"  # Assurez-vous que ce chemin est correct
@@ -30,11 +29,10 @@ def extraire_references(contenu):
         messages=[
             {"role": "system", "content": "Vous êtes un assistant chargé d'extraire des références à partir d'un document d'état de l'art."},
             {"role": "user", "content": f"Extrayez toutes les références du texte suivant et retournez-les sous forme de liste JSON : \n\n{contenu}"}
-        ],
-        response_format={"type": "json_object"}
+        ]
     )
     
-    references = json.loads(response.choices[0].message.content)["references"]
+    references = json.loads(response.choices[0].message.content)
     print(f"{len(references)} références extraites.")
     return references
 
