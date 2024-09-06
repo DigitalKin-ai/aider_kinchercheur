@@ -490,7 +490,7 @@ class StudyExtractor:
             URL: {url}
             Title: {title}
 
-            Please provide the extracted information in a JSON format. If you can't find information for a field, leave it empty. Be concise and focus on the most important information."""}
+            Please provide the extracted information in a JSON format. If you can't find information for a field, leave it empty. Be concise and focus on the most important information. Make sure to extract as much relevant information as possible, especially for key fields like Abstract, Objectif de l'étude, Méthodologie, and Conclusions de l'étude."""}
                 ]
 
                 # Make the API call
