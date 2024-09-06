@@ -14,6 +14,7 @@ from tqdm import tqdm
 from colorama import init, Fore, Style
 import concurrent.futures
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from tqdm import tqdm
 import argparse
 from aider.llm import litellm
 from aider.io import InputOutput
@@ -337,7 +338,7 @@ def run_all_analysis(io, model="gpt-4o"):
     
     extractor = StudyExtractor(io, model=model)
     
-    for pdf_file in pdf_files:
+    def process_pdf(pdf_file):
         pdf_path = os.path.join(etudes_dir, pdf_file)
         analysis_file = os.path.join(analyses_dir, pdf_file.replace('.pdf', '.md'))
         
@@ -349,10 +350,22 @@ def run_all_analysis(io, model="gpt-4o"):
             title = pdf_file[:-4]  # Remove .pdf extension
             url = ""  # We don't have the original URL here
             
-            extractor.extract_and_save_pdf_info(pdf_content, url, title)
+            return extractor.extract_and_save_pdf_info(pdf_content, url, title)
         else:
             print(f"{Fore.YELLOW}Analyse déjà existante pour : {pdf_file}")
-    
+            return None
+
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        futures = [executor.submit(process_pdf, pdf_file) for pdf_file in pdf_files]
+        
+        for future in tqdm(as_completed(futures), total=len(futures), desc="Analyse des PDFs"):
+            try:
+                result = future.result()
+                if result:
+                    print(f"{Fore.GREEN}Analyse terminée pour un fichier.")
+            except Exception as e:
+                print(f"{Fore.RED}Une erreur s'est produite lors de l'analyse d'un PDF : {e}")
+
     print(f"{Fore.GREEN}Toutes les analyses ont été effectuées.")
 
 class StudyExtractor:
