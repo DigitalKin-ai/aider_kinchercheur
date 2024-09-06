@@ -253,14 +253,27 @@ def slimdown_html(soup):
     return soup
 
 
-def main(url):
-    scraper = Scraper()
-    content = scraper.scrape(url)
-    print(content)
+def main():
+    # Liste des URLs à scraper
+    urls = [
+        "https://example.com/research1",
+        "https://example.com/research2",
+        # Ajoutez d'autres URLs pertinentes ici
+    ]
 
+    scraper = Scraper()
+    for url in urls:
+        print(f"Scraping {url}...")
+        content = scraper.scrape(url)
+        if content:
+            # Sauvegarde du contenu dans un fichier dans le dossier 'analyses'
+            filename = f"analyses/{url.split('/')[-1]}.txt"
+            os.makedirs(os.path.dirname(filename), exist_ok=True)
+            with open(filename, 'w', encoding='utf-8') as f:
+                f.write(content)
+            print(f"Contenu sauvegardé dans {filename}")
+        else:
+            print(f"Échec du scraping pour {url}")
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python playw.py <URL>")
-        sys.exit(1)
-    main(sys.argv[1])
+    main()
