@@ -5,6 +5,7 @@ import time
 import re
 import hashlib
 import base64
+import signal
 from dotenv import load_dotenv
 from urllib.parse import quote, urlparse
 from tqdm import tqdm
@@ -18,6 +19,17 @@ from aider.io import InputOutput
 init(autoreset=True)  # Initialise colorama
 
 load_dotenv()
+
+# Variable globale pour gérer l'interruption
+interrupted = False
+
+def signal_handler(signum, frame):
+    global interrupted
+    interrupted = True
+    print(f"\n{Fore.YELLOW}Interruption demandée. Arrêt en cours...")
+
+# Configurer le gestionnaire de signal
+signal.signal(signal.SIGINT, signal_handler)
 
 # Nombre maximum de workers pour le ThreadPoolExecutor
 MAX_WORKERS = 5
@@ -264,6 +276,10 @@ def get_studies_from_query(query, num_articles=40, output_dir='etudes'):
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         futures = [executor.submit(process_result, result, io) for result in scholar_results.get('organic_results', [])]
         for future in tqdm(as_completed(futures), total=len(futures), desc="Téléchargement des articles"):
+            if interrupted:
+                executor.shutdown(wait=False)
+                print(f"{Fore.YELLOW}Interruption détectée. Arrêt des téléchargements.")
+                break
             try:
                 future.result()  # This will raise any exceptions that occurred during execution
             except concurrent.futures.TimeoutError:
@@ -271,7 +287,10 @@ def get_studies_from_query(query, num_articles=40, output_dir='etudes'):
             except Exception as e:
                 print(f"{Fore.RED}Une erreur s'est produite lors du traitement d'un article : {e}")
 
-    print(f"{Fore.GREEN}Tous les articles ont été traités.")
+    if not interrupted:
+        print(f"{Fore.GREEN}Tous les articles ont été traités.")
+    else:
+        print(f"{Fore.YELLOW}Le traitement a été interrompu.")
     
     # Vérifier le nombre de fichiers téléchargés
     pdf_count = len([f for f in os.listdir(output_dir) if f.endswith('.pdf')])
