@@ -408,13 +408,11 @@ class StudyExtractor:
             chunks = [pdf_base64[i:i+chunk_size] for i in range(0, len(pdf_base64), chunk_size)]
             print(f"{Fore.CYAN}Nombre de morceaux : {len(chunks)}")
 
-            if len(chunks) > 100:
-                print(f"{Fore.YELLOW}L'étude a plus de 100 morceaux ({len(chunks)}). Elle ne sera pas traitée.")
-                return None
-
             extracted_info = {}
-            for i, chunk in enumerate(chunks):
-                print(f"{Fore.CYAN}Traitement du morceau {i+1}/{len(chunks)} pour l'étude : {title}")
+            chunks_to_process = chunks[:40] + chunks[-10:] if len(chunks) > 50 else chunks
+            for i, chunk in enumerate(chunks_to_process):
+                chunk_index = i if i < 40 else len(chunks) - (50 - i)
+                print(f"{Fore.CYAN}Traitement du morceau {chunk_index+1}/{len(chunks)} pour l'étude : {title}")
                 # Prepare the message for the LLM
                 messages = [
                     {"role": "system", "content": "You are a helpful assistant that extracts information from scientific papers."},
