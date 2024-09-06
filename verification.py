@@ -101,14 +101,13 @@ def verifier_lien(lien):
     except requests.RequestException:
         return False
 
-def main():
+def main(fichier_etat_de_lart):
     nombre_etudes_lues = compter_etudes_lues()
     if nombre_etudes_lues < 10:
         print(f"Attention : Seulement {nombre_etudes_lues} études ont été lues. Il est recommandé d'en lire au moins 10.")
     else:
         print(f"{nombre_etudes_lues} études ont été lues, ce qui est suffisant.")
 
-    fichier_etat_de_lart = "conscience_ia/etat_de_lart.md"  # Assurez-vous que ce fichier est dans le même répertoire que le script
     contenu = lire_etat_de_lart(fichier_etat_de_lart)
     references = extraire_references(contenu)
     
@@ -136,4 +135,9 @@ def main():
     print(f"Résultats écrits dans '{nom_fichier_sortie}'.")
 
 if __name__ == "__main__":
-    main()
+    import sys
+    if len(sys.argv) != 2:
+        print("Usage: python verification.py <chemin_vers_etat_de_lart.md>")
+        sys.exit(1)
+    fichier_etat_de_lart = sys.argv[1]
+    main(fichier_etat_de_lart)
