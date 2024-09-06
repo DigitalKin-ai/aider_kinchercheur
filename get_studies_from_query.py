@@ -392,7 +392,7 @@ class StudyExtractor:
 
         extracted_info = {}
         for i, chunk in enumerate(chunks):
-            print(f"{Fore.CYAN}Traitement du morceau {i+1}/{len(chunks)}...")
+            print(f"{Fore.CYAN}Traitement du morceau {i+1}/{len(chunks)} pour l'étude : {title}")
             # Prepare the message for the LLM
             messages = [
                 {"role": "system", "content": "You are a helpful assistant that extracts information from scientific papers."},
