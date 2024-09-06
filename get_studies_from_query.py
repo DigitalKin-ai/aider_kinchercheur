@@ -334,7 +334,7 @@ def get_studies_from_query(query, num_articles=40, output_dir='etudes', max_work
     print(f"{Fore.GREEN}Nombre de PDFs téléchargés : {pdf_count}")
     print(f"{Fore.GREEN}Nombre de fichiers JSON créés : {json_count}")
 
-def run_all_analysis(io, model="gpt-4o"):
+def run_all_analysis(io, model="gpt-4o-mini"):
     etudes_dir = 'etudes'
     analyses_dir = 'analyses'
     
@@ -390,7 +390,7 @@ def run_all_analysis(io, model="gpt-4o"):
     print(f"{Fore.GREEN}Vérification terminée.")
 
 class StudyExtractor:
-    def __init__(self, io, model="gpt-4o"):
+    def __init__(self, io, model="gpt-4o-mini"):
         self.io = io
         self.model = model
 
@@ -522,7 +522,7 @@ if __name__ == "__main__":
     parser.add_argument("-n", "--num_articles", type=int, default=40, help="Nombre d'articles à télécharger (max 100)")
     parser.add_argument("-o", "--output", default="etudes", help="Dossier de sortie pour les PDFs")
     parser.add_argument("--analyze-all", action="store_true", help="Analyser tous les PDFs dans le dossier de sortie")
-    parser.add_argument("--model", default="gpt-4o", help="Modèle GPT à utiliser pour l'analyse (par défaut: gpt-4o)")
+    parser.add_argument("--model", default="gpt-4o-mini", help="Modèle GPT à utiliser pour l'analyse (par défaut: gpt-4o-mini)")
     parser.add_argument("--max-workers", type=int, default=DEFAULT_MAX_WORKERS, help=f"Nombre maximum de workers pour le ThreadPoolExecutor (par défaut: {DEFAULT_MAX_WORKERS})")
     parser.add_argument("--no-immediate-analysis", action="store_true", help="Désactiver l'analyse immédiate après le téléchargement")
     args = parser.parse_args()
