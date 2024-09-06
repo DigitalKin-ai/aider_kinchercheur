@@ -25,7 +25,6 @@ def get_studies_from_query(query):
             "time_period_min": 2010
         }
         print(f"Envoi de la requête à {url}")
-        print(f"Headers: {headers}")
         print(f"Payload: {payload}")
         try:
             response = requests.post(url, headers=headers, json=payload)
