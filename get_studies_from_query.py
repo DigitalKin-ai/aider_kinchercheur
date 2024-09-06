@@ -275,11 +275,15 @@ def get_studies_from_query(query, num_articles=20, output_dir='etudes', max_work
                     extracted_info = extract_pdf_info(pdf_content, url, title, io)
                     
                     if extracted_info is not None:
-                        # Sauvegarder les informations extraites dans un fichier JSON
-                        json_filename = os.path.join(output_dir, f"{safe_title[:100]}.json")
-                        with open(json_filename, 'w', encoding='utf-8') as f:
-                            json.dump(extracted_info, f, ensure_ascii=False, indent=2)
-                        print(f"{Fore.GREEN}Informations extraites sauvegardées : {json_filename}")
+                        # Sauvegarder les informations extraites dans le fichier analyses.md
+                        md_filename = 'analyses.md'
+                        with open(md_filename, 'a', encoding='utf-8') as f:
+                            f.write(f"# {title}\n\n")
+                            for key, value in extracted_info.items():
+                                if value:  # N'écrit que les champs non vides
+                                    f.write(f"## {key}\n{value}\n\n")
+                            f.write("---\n\n")  # Séparateur entre les analyses
+                        print(f"{Fore.GREEN}Informations extraites ajoutées à : {md_filename}")
                     else:
                         print(f"{Fore.YELLOW}L'étude n'a pas été traitée en raison de sa taille ou d'une erreur.")
                 else:
@@ -332,11 +336,14 @@ def get_studies_from_query(query, num_articles=20, output_dir='etudes', max_work
         interrupted = True
         print(f"\n{Fore.YELLOW}Interruption détectée. Arrêt des téléchargements.")
     
-    # Vérifier le nombre de fichiers téléchargés
+    # Vérifier le nombre de fichiers téléchargés et d'analyses ajoutées
     pdf_count = len([f for f in os.listdir(output_dir) if f.endswith('.pdf')])
-    json_count = len([f for f in os.listdir(output_dir) if f.endswith('.json')])
     print(f"{Fore.GREEN}Nombre de PDFs téléchargés : {pdf_count}")
-    print(f"{Fore.GREEN}Nombre de fichiers JSON créés : {json_count}")
+    
+    if os.path.exists('analyses.md'):
+        with open('analyses.md', 'r', encoding='utf-8') as f:
+            analysis_count = f.read().count('# ')
+        print(f"{Fore.GREEN}Nombre d'analyses ajoutées : {analysis_count}")
 
 def run_all_analysis(io, model="gpt-4o-2024-08-06"):
     etudes_dir = 'etudes'
@@ -616,22 +623,23 @@ def clean_orphan_files():
     print(f"{Fore.CYAN}Nettoyage des fichiers orphelins...")
     etudes_dir = 'etudes'
     
-    # Obtenir la liste des fichiers PDF et JSON dans le dossier 'etudes'
+    # Obtenir la liste des fichiers PDF dans le dossier 'etudes'
     pdf_files = set(f[:-4] for f in os.listdir(etudes_dir) if f.endswith('.pdf'))
-    json_files = set(f[:-5] for f in os.listdir(etudes_dir) if f.endswith('.json'))
+    
+    # Obtenir la liste des analyses dans le fichier analyses.md
+    analyses = set()
+    if os.path.exists('analyses.md'):
+        with open('analyses.md', 'r', encoding='utf-8') as f:
+            content = f.read()
+            analyses = set(re.findall(r'# (.+)', content))
     
     # Trouver les fichiers orphelins
-    orphan_pdfs = pdf_files - json_files
-    orphan_jsons = json_files - pdf_files
+    orphan_pdfs = pdf_files - analyses
     
     # Supprimer les fichiers orphelins
     for orphan in orphan_pdfs:
         os.remove(os.path.join(etudes_dir, f"{orphan}.pdf"))
         print(f"{Fore.YELLOW}Suppression du PDF orphelin : {orphan}.pdf")
-    
-    for orphan in orphan_jsons:
-        os.remove(os.path.join(etudes_dir, f"{orphan}.json"))
-        print(f"{Fore.YELLOW}Suppression du JSON orphelin : {orphan}.json")
     
     print(f"{Fore.GREEN}Nettoyage terminé.")
 
