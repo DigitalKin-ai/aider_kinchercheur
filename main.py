@@ -700,14 +700,20 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     # Exécution de la fonction get_studies_from_query
     io.tool_output("Exécution de la recherche d'études...")
     try:
-        from get_studies_from_query import get_studies_from_query
-        query = "votre requête ici"  # Remplacez par la requête appropriée
-        num_articles = 20  # Vous pouvez ajuster ce nombre selon vos besoins
-        output_dir = 'etudes'  # Assurez-vous que ce répertoire existe
-        get_studies_from_query(query, num_articles=num_articles, output_dir=output_dir)
+        from get_studies_from_query import get_studies_from_query, run_all_analysis, clean_orphan_files
+        query = io.user_input("Entrez votre requête de recherche : ")
+        num_articles = int(io.user_input("Combien d'articles voulez-vous rechercher ? (max 100) : "))
+        output_dir = 'etudes'
+        get_studies_from_query(query, num_articles=num_articles, output_dir=output_dir, io=io)
         io.tool_output("Recherche d'études terminée avec succès.")
+        
+        if io.confirm_ask("Voulez-vous analyser tous les PDFs téléchargés ?"):
+            run_all_analysis(io)
+        
+        if io.confirm_ask("Voulez-vous nettoyer les fichiers orphelins ?"):
+            clean_orphan_files()
     except Exception as e:
-        io.tool_error(f"Erreur lors de la recherche d'études : {str(e)}")
+        io.tool_error(f"Erreur lors de la recherche ou de l'analyse d'études : {str(e)}")
 
     # Ajout de tous les fichiers du dossier 'analyses' au chat
     analyses_folder = Path('analyses')
