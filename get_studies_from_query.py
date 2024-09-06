@@ -9,10 +9,17 @@ from urllib.parse import quote, urlparse
 from tqdm import tqdm
 from colorama import init, Fore, Style
 from concurrent.futures import ThreadPoolExecutor, as_completed
+import concurrent.futures
 
 init(autoreset=True)  # Initialise colorama
 
 load_dotenv()
+
+# Nombre maximum de workers pour le ThreadPoolExecutor
+MAX_WORKERS = 5
+
+# Temps d'attente entre les tentatives de téléchargement (en secondes)
+WAIT_TIME = 2
 
 def add_to_todolist(filename):
     with open('todolist.md', 'a') as f:
@@ -187,7 +194,7 @@ def get_studies_from_query(query, num_articles=40):
                     break
             except Exception as e:
                 print(f"{Fore.RED}Erreur lors de la tentative via {method_name}: {e}")
-            time.sleep(2)  # Attendre 2 secondes entre chaque tentative
+            time.sleep(WAIT_TIME)  # Attendre entre chaque tentative
 
         if pdf_content and isinstance(pdf_content, bytes):
             # Créer le dossier 'etudes' s'il n'existe pas
@@ -217,10 +224,15 @@ def get_studies_from_query(query, num_articles=40):
         return
 
     # Traiter chaque résultat en parallèle
-    with ThreadPoolExecutor(max_workers=5) as executor:
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         futures = [executor.submit(process_result, result) for result in scholar_results.get('organic_results', [])]
         for future in tqdm(as_completed(futures), total=len(futures), desc="Téléchargement des articles"):
-            future.result()  # This will raise any exceptions that occurred during execution
+            try:
+                future.result()  # This will raise any exceptions that occurred during execution
+            except concurrent.futures.TimeoutError:
+                print(f"{Fore.RED}Une tâche a dépassé le temps imparti.")
+            except Exception as e:
+                print(f"{Fore.RED}Une erreur s'est produite lors du traitement d'un article : {e}")
 
     print(f"{Fore.GREEN}Tous les articles ont été traités.")
 
