@@ -1,8 +1,10 @@
 import os
 import requests
 import json
+import time
+import re
 from dotenv import load_dotenv
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
 
 load_dotenv()
 
@@ -79,6 +81,44 @@ def get_studies_from_query(query):
             print(f"Erreur lors de la tentative de téléchargement via Sci-Hub: {e}")
         return None
 
+    def get_pdf_arxiv(url):
+        if 'arxiv.org' in url:
+            arxiv_id = url.split('/')[-1]
+            pdf_url = f"https://arxiv.org/pdf/{arxiv_id}.pdf"
+            try:
+                response = requests.get(pdf_url)
+                if response.headers.get('content-type') == 'application/pdf':
+                    return response.content
+            except Exception as e:
+                print(f"Erreur lors de la tentative de téléchargement depuis arXiv: {e}")
+        return None
+
+    def get_pdf_google_scholar(title):
+        query = f"{title} filetype:pdf"
+        url = "https://www.searchapi.io/api/v1/search"
+        headers = {
+            "Authorization": f"Bearer {os.getenv('SEARCHAPI_KEY')}",
+            "Content-Type": "application/json"
+        }
+        params = {
+            "engine": "google",
+            "q": query,
+            "num": 1
+        }
+        try:
+            response = requests.get(url, headers=headers, params=params)
+            response.raise_for_status()
+            result = response.json()
+            if 'organic_results' in result and result['organic_results']:
+                pdf_url = result['organic_results'][0].get('link')
+                if pdf_url:
+                    pdf_response = requests.get(pdf_url)
+                    if pdf_response.headers.get('content-type') == 'application/pdf':
+                        return pdf_response.content
+        except Exception as e:
+            print(f"Erreur lors de la recherche sur Google Scholar: {e}")
+        return None
+
     # Obtenir les résultats de Google Scholar
     scholar_results = google_scholar_request(query)
 
@@ -91,51 +131,44 @@ def get_studies_from_query(query):
         url = result.get('link')
         title = result.get('title')
         
-        # Essayer d'abord de télécharger directement le PDF
-        pdf_content = download_pdf(url) if url else None
-        
+        print(f"\nTraitement de : {title}")
+        print(f"URL : {url}")
+
+        # Liste des méthodes de téléchargement à essayer
+        download_methods = [
+            ("Téléchargement direct", lambda: download_pdf(url) if url else None),
+            ("arXiv", lambda: get_pdf_arxiv(url) if url else None),
+            ("OpenAccess Button", lambda: get_pdf_openaccessbutton(url or title)),
+            ("Google Scholar", lambda: get_pdf_google_scholar(title)),
+            ("Sci-Hub", lambda: get_pdf_scihub(url or title))
+        ]
+
+        pdf_content = None
+        successful_method = None
+
+        for method_name, method_func in download_methods:
+            print(f"Essai de téléchargement via {method_name}...")
+            pdf_content = method_func()
+            if pdf_content:
+                successful_method = method_name
+                break
+            time.sleep(2)  # Attendre 2 secondes entre chaque tentative
+
         if pdf_content:
             # Créer le dossier 'etudes' s'il n'existe pas
             os.makedirs('etudes', exist_ok=True)
             
-            # Sauvegarder le PDF
-            filename = f"etudes/{title.replace(' ', '_')[:50]}.pdf"
+            # Générer un nom de fichier sûr
+            safe_title = re.sub(r'[^\w\-_\. ]', '_', title)
+            filename = f"etudes/{safe_title[:50]}.pdf"
+            
             with open(filename, 'wb') as f:
                 f.write(pdf_content)
-            print(f"PDF sauvegardé : {filename}")
+            print(f"PDF sauvegardé via {successful_method} : {filename}")
         else:
-            # Si le téléchargement direct échoue, essayer avec openaccessbutton
-            pdf_result = get_pdf_openaccessbutton(url) if url else None
-            if not pdf_result or 'data' not in pdf_result:
-                pdf_result = get_pdf_openaccessbutton(title)
+            print(f"Impossible de trouver un PDF pour : {title}")
 
-            if pdf_result and 'data' in pdf_result:
-                doi = pdf_result['data'].get('doi')
-                if doi:
-                    # Créer le dossier 'etudes' s'il n'existe pas
-                    os.makedirs('etudes', exist_ok=True)
-                    
-                    # Sauvegarder le résultat dans un fichier
-                    filename = f"etudes/{doi.replace('/', '_')}.json"
-                    with open(filename, 'w') as f:
-                        json.dump(pdf_result, f, indent=2)
-                    print(f"Sauvegardé : {filename}")
-                else:
-                    print(f"Pas de DOI trouvé pour : {title}")
-            else:
-                # Si OpenAccess ne fonctionne pas, essayer avec Sci-Hub
-                pdf_content = get_pdf_scihub(url or title)
-                if pdf_content:
-                    # Créer le dossier 'etudes' s'il n'existe pas
-                    os.makedirs('etudes', exist_ok=True)
-                    
-                    # Sauvegarder le PDF
-                    filename = f"etudes/{title.replace(' ', '_')[:50]}.pdf"
-                    with open(filename, 'wb') as f:
-                        f.write(pdf_content)
-                    print(f"PDF sauvegardé via Sci-Hub : {filename}")
-                else:
-                    print(f"Pas de PDF trouvé pour : {title}")
+        time.sleep(5)  # Attendre 5 secondes entre chaque article
 
 if __name__ == "__main__":
     query = input("Entrez votre requête de recherche : ")
