@@ -654,6 +654,17 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     # Add selected files to the chat
     for file in selected_files:
         coder.add_file(file)
+
+    # Add all files from the 'analyses' folder to the chat
+    analyses_folder = Path('analyses')
+    if analyses_folder.exists() and analyses_folder.is_dir():
+        analyses_files = [f for f in analyses_folder.iterdir() if f.is_file()]
+        io.tool_output("Adding files from 'analyses' folder:")
+        for file in analyses_files:
+            io.tool_output(str(file))
+            coder.add_file(str(file))
+    else:
+        io.tool_output("The 'analyses' folder does not exist or is not a directory.")
         
     while True:
         io.tool_output("Appuyez sur Entrée pour continuer ou tapez 'exit' pour quitter.")
@@ -661,6 +672,15 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             user_input = io.user_input("")
             if user_input.lower() == 'exit':
                 break
+
+            # Add all files from the 'analyses' folder to the chat before each run
+            if analyses_folder.exists() and analyses_folder.is_dir():
+                analyses_files = [f for f in analyses_folder.iterdir() if f.is_file()]
+                io.tool_output("Updating files from 'analyses' folder:")
+                for file in analyses_files:
+                    io.tool_output(str(file))
+                    coder.add_file(str(file))
+
             coder.run(with_message="""IMPORTANT INSTRUCTIONS: 
                       - Don't use main.py or other scripts to write the SOTA, write it via text files mainly.
                       - Write the SOTA progressively, using template.md as the reference. Only do modifications one by one, leaving the () [] \{\} if they are still needed.
