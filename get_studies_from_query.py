@@ -10,7 +10,7 @@ def get_studies_from_query(query):
     def google_scholar_request(query):
         url = "https://www.searchapi.io/api/v1/search"
         headers = {
-            "Authorization": f"Bearer {os.getenv('SEARCHAPI_TOKEN')}",
+            "Authorization": f"Bearer {os.getenv('SEARCHAPI_KEY')}",
             "Content-Type": "application/json"
         }
         payload = {
