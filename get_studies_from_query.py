@@ -22,7 +22,7 @@ from aider.io import InputOutput
 init(autoreset=True)  # Initialise colorama
 
 # Définition des constantes globales
-DEFAULT_MAX_WORKERS = 5
+DEFAULT_MAX_WORKERS = 10
 DEFAULT_WAIT_TIME = 2
 
 load_dotenv()
