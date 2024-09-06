@@ -343,39 +343,72 @@ class StudyExtractor:
         # Encode PDF content to base64
         pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
 
-        # Prepare the message for the LLM
-        messages = [
-            {"role": "system", "content": "You are a helpful assistant that extracts information from scientific papers."},
-            {"role": "user", "content": f"""Please extract the following information from the given PDF:
+        # Split the PDF content into chunks
+        chunk_size = 500000  # Adjust this value as needed
+        chunks = [pdf_base64[i:i+chunk_size] for i in range(0, len(pdf_base64), chunk_size)]
 
-    |id|Nom|Auteurs|Journal|Date de publication|DOI|Citation|Type|Mots-clés|lienOrigine|Lien Google Drive|Abstract|Objectif de l'étude|Méthodologie|Conclusions de l'étude|Pertinence au regard de l'axe de travail 1|Pertinence au regard de l'axe de travail 2|Pertinence de l'étude au regard de l'axe de travail 3|Pertinence au regard de l'objectif de recherche|Axe de travail|Sélection|Apports et contributions|Verbatims des apports et contributions|Extraits Verbatim des Verrous|Verrous de l'étude|Données chifrées|Date de création|Date de dernière modification|
+        extracted_info = {}
+        for i, chunk in enumerate(chunks):
+            # Prepare the message for the LLM
+            messages = [
+                {"role": "system", "content": "You are a helpful assistant that extracts information from scientific papers."},
+                {"role": "user", "content": f"""Please extract the following information from the given PDF chunk:
 
-    The PDF content is provided as a base64 encoded string: {pdf_base64}
+        |id|Nom|Auteurs|Journal|Date de publication|DOI|Citation|Type|Mots-clés|lienOrigine|Lien Google Drive|Abstract|Objectif de l'étude|Méthodologie|Conclusions de l'étude|Pertinence au regard de l'axe de travail 1|Pertinence au regard de l'axe de travail 2|Pertinence de l'étude au regard de l'axe de travail 3|Pertinence au regard de l'objectif de recherche|Axe de travail|Sélection|Apports et contributions|Verbatims des apports et contributions|Extraits Verbatim des Verrous|Verrous de l'étude|Données chifrées|Date de création|Date de dernière modification|
 
-    Additional information:
-    URL: {url}
-    Title: {title}
+        This is chunk {i+1} of {len(chunks)} of the PDF content.
+        The PDF content chunk is provided as a base64 encoded string: {chunk}
 
-    Please provide the extracted information in a JSON format."""}
+        Additional information:
+        URL: {url}
+        Title: {title}
+
+        Please provide the extracted information in a JSON format. If you can't find information for a field, leave it empty."""}
+            ]
+
+            # Make the API call
+            response = litellm.completion(
+                model="gpt-4o",
+                messages=messages,
+            )
+
+            # Parse the extracted information
+            chunk_info = json.loads(response.choices[0].message.content)
+            
+            # Merge the chunk info into the main extracted_info
+            for key, value in chunk_info.items():
+                if key not in extracted_info or not extracted_info[key]:
+                    extracted_info[key] = value
+                elif value:
+                    extracted_info[key] += " " + value
+
+        # Synthesize the results
+        synthesis_messages = [
+            {"role": "system", "content": "You are a helpful assistant that synthesizes information from scientific papers."},
+            {"role": "user", "content": f"""Please synthesize the following information extracted from a scientific paper:
+
+        {json.dumps(extracted_info, indent=2)}
+
+        Provide a concise summary for each field, ensuring that the information is coherent and non-repetitive. 
+        Return the result in JSON format."""}
         ]
 
-        # Make the API call
-        response = litellm.completion(
+        synthesis_response = litellm.completion(
             model="gpt-4o",
-            messages=messages,
+            messages=synthesis_messages,
         )
 
-        # Parse the extracted information
-        extracted_info = json.loads(response.choices[0].message.content)
-        
-        # Save the extracted information to a markdown file
+        # Parse the synthesized information
+        synthesized_info = json.loads(synthesis_response.choices[0].message.content)
+
+        # Save the synthesized information to a markdown file
         safe_title = re.sub(r'[^\w\-_\. ]', '_', title)
         md_filename = os.path.join('analyses', f"{safe_title[:100]}.md")
         os.makedirs('analyses', exist_ok=True)
         
         with open(md_filename, 'w', encoding='utf-8') as f:
             f.write(f"# {title}\n\n")
-            for key, value in extracted_info.items():
+            for key, value in synthesized_info.items():
                 f.write(f"## {key}\n{value}\n\n")
         
         print(f"{Fore.GREEN}Analyse sauvegardée : {md_filename}")
@@ -387,7 +420,7 @@ class StudyExtractor:
         self.io.tool_output(f"Nouvelle analyse ajoutée au chat : {md_filename}")
         self.io.append_chat_history(analysis_content, linebreak=True)
         
-        return extracted_info
+        return synthesized_info
 
 def extract_pdf_info(pdf_content, url, title, io):
     extractor = StudyExtractor(io)
