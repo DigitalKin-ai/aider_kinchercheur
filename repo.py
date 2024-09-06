@@ -264,6 +264,10 @@ class GitRepo:
         staged_files = [path for path, _ in index.entries.keys()]
         files.update(self.normalize_path(path) for path in staged_files)
 
+        # Add untracked files
+        untracked_files = self.repo.untracked_files
+        files.update(self.normalize_path(path) for path in untracked_files)
+
         res = [fname for fname in files if not self.ignored_file(fname)]
 
         return res
