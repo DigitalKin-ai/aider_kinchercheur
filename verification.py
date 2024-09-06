@@ -25,14 +25,20 @@ def extraire_references(contenu):
         raise ValueError("La clé API OpenAI n'est pas définie dans le fichier .env. Veuillez ajouter OPENAI_API_KEY à votre fichier .env.")
     
     response = client.chat.completions.create(
-        model="gpt-4o",
+        model="gpt-4",  # Changé de "gpt-4o" à "gpt-4"
         messages=[
             {"role": "system", "content": "Vous êtes un assistant chargé d'extraire des références à partir d'un document d'état de l'art."},
             {"role": "user", "content": f"Extrayez toutes les références du texte suivant et retournez-les sous forme de liste JSON : \n\n{contenu}"}
         ]
     )
     
-    references = json.loads(response.choices[0].message.content)
+    try:
+        references = json.loads(response.choices[0].message.content)
+    except json.JSONDecodeError:
+        print("Erreur lors du décodage JSON. Contenu de la réponse :")
+        print(response.choices[0].message.content)
+        references = []
+    
     print(f"{len(references)} références extraites.")
     return references
 
