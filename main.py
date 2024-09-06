@@ -697,14 +697,17 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         else:
             io.tool_output("Le dossier 'analyses' n'existe pas ou n'est pas un répertoire.")
 
-    # Exécution du script de recherche
-    io.tool_output("Exécution du script de recherche...")
+    # Exécution de la fonction get_studies_from_query
+    io.tool_output("Exécution de la recherche d'études...")
     try:
-        from aider.scrape import main as scrape_main
-        scrape_main()
-        io.tool_output("Script de recherche exécuté avec succès.")
+        from get_studies_from_query import get_studies_from_query
+        query = "votre requête ici"  # Remplacez par la requête appropriée
+        num_articles = 20  # Vous pouvez ajuster ce nombre selon vos besoins
+        output_dir = 'etudes'  # Assurez-vous que ce répertoire existe
+        get_studies_from_query(query, num_articles=num_articles, output_dir=output_dir)
+        io.tool_output("Recherche d'études terminée avec succès.")
     except Exception as e:
-        io.tool_error(f"Erreur lors de l'exécution du script de recherche : {str(e)}")
+        io.tool_error(f"Erreur lors de la recherche d'études : {str(e)}")
 
     # Ajout de tous les fichiers du dossier 'analyses' au chat
     analyses_folder = Path('analyses')
