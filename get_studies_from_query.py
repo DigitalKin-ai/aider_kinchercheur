@@ -220,7 +220,7 @@ def get_studies_from_query(query, num_articles=40, output_dir='etudes'):
                 add_to_todolist(filename)
 
                 # Extraire les informations du PDF immédiatement après le téléchargement
-                extracted_info = extract_pdf_info(pdf_content, url, title)
+                extracted_info = extract_pdf_info(pdf_content, url, title, self.io)
                 
                 # Sauvegarder les informations extraites dans un fichier JSON
                 json_filename = os.path.join(output_dir, f"{safe_title[:100]}.json")
@@ -279,8 +279,28 @@ Please provide the extracted information in a JSON format."""}
         messages=messages,
     )
 
-    # Parse and return the extracted information
+    # Parse the extracted information
     extracted_info = json.loads(response.choices[0].message.content)
+    
+    # Save the extracted information to a markdown file
+    safe_title = re.sub(r'[^\w\-_\. ]', '_', title)
+    md_filename = os.path.join('analyses', f"{safe_title[:100]}.md")
+    os.makedirs('analyses', exist_ok=True)
+    
+    with open(md_filename, 'w', encoding='utf-8') as f:
+        f.write(f"# {title}\n\n")
+        for key, value in extracted_info.items():
+            f.write(f"## {key}\n{value}\n\n")
+    
+    print(f"{Fore.GREEN}Analyse sauvegardée : {md_filename}")
+    
+    # Add the analysis to the current chat session
+    with open(md_filename, 'r', encoding='utf-8') as f:
+        analysis_content = f.read()
+    
+    self.io.tool_output(f"Nouvelle analyse ajoutée au chat : {md_filename}")
+    self.io.append_chat_history(analysis_content, linebreak=True)
+    
     return extracted_info
 
 if __name__ == "__main__":
