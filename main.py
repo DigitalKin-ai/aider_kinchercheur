@@ -314,6 +314,8 @@ def register_litellm_models(git_root, model_metadata_fname, io, verbose=False):
         return 1
 
 
+import sys
+
 def main(argv=None, input=None, output=None, force_git_root=None, return_coder=False):
     if argv is None:
         argv = sys.argv[1:]
