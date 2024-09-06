@@ -50,14 +50,44 @@ def extraire_references(contenu):
     return references
 
 def verifier_presence_dans_analyses(reference):
-    # Cette fonction devrait vérifier si la référence est présente dans les analyses
-    # Vous devrez implémenter la logique spécifique en fonction de la structure de vos données
-    return True  # Simulons que toutes les références sont présentes dans les analyses
+    dossier_analyses = "analyses"  # Assurez-vous que ce chemin est correct
+    fichiers_analyses = os.listdir(dossier_analyses)
+    
+    for fichier in fichiers_analyses:
+        nom_fichier, _ = os.path.splitext(fichier)
+        if nom_fichier.lower() in reference.lower():
+            contenu = lire_fichier(os.path.join(dossier_analyses, fichier))
+            return verifier_presence_gpt(reference, contenu)
+    
+    return False
 
 def verifier_presence_dans_etudes(reference):
-    # Cette fonction devrait vérifier si la référence est présente dans les études
-    # Vous devrez implémenter la logique spécifique en fonction de la structure de vos données
-    return True  # Simulons que toutes les références sont présentes dans les études
+    dossier_etudes = "etudes"  # Assurez-vous que ce chemin est correct
+    fichiers_etudes = os.listdir(dossier_etudes)
+    
+    for fichier in fichiers_etudes:
+        nom_fichier, _ = os.path.splitext(fichier)
+        if nom_fichier.lower() in reference.lower():
+            contenu = lire_fichier(os.path.join(dossier_etudes, fichier))
+            return verifier_presence_gpt(reference, contenu)
+    
+    return False
+
+def lire_fichier(chemin_fichier):
+    with open(chemin_fichier, 'r', encoding='utf-8') as f:
+        return f.read()
+
+def verifier_presence_gpt(reference, contenu):
+    response = openai.ChatCompletion.create(
+        model="gpt-4o-2024-08-06",
+        messages=[
+            {"role": "system", "content": "Vous êtes un assistant chargé de vérifier si une référence est présente dans un texte."},
+            {"role": "user", "content": f"La référence suivante est-elle présente dans le texte ? Répondez par 'true' ou 'false'.\n\nRéférence : {reference}\n\nTexte : {contenu[:2000]}"}  # Limite de 2000 caractères pour éviter de dépasser les limites de l'API
+        ]
+    )
+    
+    reponse = response.choices[0].message.content.strip().lower()
+    return reponse == 'true'
 
 def verifier_lien(lien):
     try:
