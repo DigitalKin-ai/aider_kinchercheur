@@ -6,6 +6,7 @@ import re
 import hashlib
 import base64
 import signal
+import sys
 from dotenv import load_dotenv
 from urllib.parse import quote, urlparse
 from tqdm import tqdm
@@ -27,6 +28,7 @@ def signal_handler(signum, frame):
     global interrupted
     interrupted = True
     print(f"\n{Fore.YELLOW}Interruption demandée. Arrêt en cours...")
+    sys.exit(0)
 
 # Configurer le gestionnaire de signal
 signal.signal(signal.SIGINT, signal_handler)
