@@ -368,6 +368,20 @@ def run_all_analysis(io, model="gpt-4o"):
 
     print(f"{Fore.GREEN}Toutes les analyses ont été effectuées.")
 
+    # Vérification des analyses pour le mot "ÉCARTÉ"
+    print(f"{Fore.CYAN}Vérification des analyses pour le mot 'ÉCARTÉ'...")
+    for analysis_file in os.listdir(analyses_dir):
+        if analysis_file.endswith('.md'):
+            file_path = os.path.join(analyses_dir, analysis_file)
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+                if "ÉCARTÉ" in content:
+                    print(f"{Fore.YELLOW}Le mot 'ÉCARTÉ' a été trouvé dans {analysis_file}. Suppression de l'analyse du chat...")
+                    io.tool_output(f"Suppression de l'analyse {analysis_file} du chat.")
+                    io.append_chat_history(f"L'analyse {analysis_file} a été supprimée car elle contient le mot 'ÉCARTÉ'.", linebreak=True)
+
+    print(f"{Fore.GREEN}Vérification terminée.")
+
 class StudyExtractor:
     def __init__(self, io, model="gpt-4o"):
         self.io = io
