@@ -439,8 +439,19 @@ class StudyExtractor:
                 )
 
                 # Parse the extracted information
-                chunk_info = json.loads(response.choices[0].message.content)
-                
+                try:
+                    chunk_info = json.loads(response.choices[0].message.content)
+                except json.JSONDecodeError:
+                    print(f"{Fore.YELLOW}Réponse non-JSON reçue. Tentative de nettoyage...")
+                    content = response.choices[0].message.content
+                    # Tentative de nettoyage de la réponse
+                    content = content.strip()
+                    if content.startswith("```json"):
+                        content = content.split("```json")[1]
+                    if content.endswith("```"):
+                        content = content.rsplit("```", 1)[0]
+                    chunk_info = json.loads(content)
+
                 # Merge the chunk info into the main extracted_info
                 for key, value in chunk_info.items():
                     if key not in extracted_info or not extracted_info[key]:
@@ -449,6 +460,7 @@ class StudyExtractor:
                         extracted_info[key] += " " + value
             except Exception as e:
                 print(f"{Fore.RED}Erreur lors de l'extraction des informations du PDF : {e}")
+                print(f"{Fore.RED}Contenu de la réponse : {response.choices[0].message.content[:500]}...")
                 continue  # Continue with the next chunk instead of returning None
 
         if not extracted_info:
@@ -475,7 +487,18 @@ class StudyExtractor:
             )
 
             # Parse the synthesized information
-            synthesized_info = json.loads(synthesis_response.choices[0].message.content)
+            try:
+                synthesized_info = json.loads(synthesis_response.choices[0].message.content)
+            except json.JSONDecodeError:
+                print(f"{Fore.YELLOW}Réponse de synthèse non-JSON reçue. Tentative de nettoyage...")
+                content = synthesis_response.choices[0].message.content
+                # Tentative de nettoyage de la réponse
+                content = content.strip()
+                if content.startswith("```json"):
+                    content = content.split("```json")[1]
+                if content.endswith("```"):
+                    content = content.rsplit("```", 1)[0]
+                synthesized_info = json.loads(content)
 
             # Save the synthesized information to a markdown file
             safe_title = re.sub(r'[^\w\-_\. ]', '_', title)
@@ -508,6 +531,7 @@ class StudyExtractor:
             return synthesized_info
         except Exception as e:
             print(f"{Fore.RED}Erreur lors de la synthèse des informations : {e}")
+            print(f"{Fore.RED}Contenu de la réponse de synthèse : {synthesis_response.choices[0].message.content[:500]}...")
             return None
 
         finally:
