@@ -655,14 +655,26 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     for file in selected_files:
         coder.add_file(file)
 
+    def check_file_modified(file_path, last_modified_times):
+        current_mtime = os.path.getmtime(file_path)
+        if file_path not in last_modified_times or current_mtime > last_modified_times[file_path]:
+            last_modified_times[file_path] = current_mtime
+            return True
+        return False
+
     # Add all files from the 'analyses' folder to the chat
     analyses_folder = Path('analyses')
+    last_modified_times = {}
     if analyses_folder.exists() and analyses_folder.is_dir():
         analyses_files = [f for f in analyses_folder.iterdir() if f.is_file()]
         io.tool_output("Adding files from 'analyses' folder:")
         for file in analyses_files:
-            io.tool_output(str(file))
-            coder.add_file(str(file))
+            try:
+                io.tool_output(str(file))
+                coder.add_file(str(file))
+                last_modified_times[str(file)] = os.path.getmtime(str(file))
+            except Exception as e:
+                io.tool_error(f"Error adding file {file}: {str(e)}")
     else:
         io.tool_output("The 'analyses' folder does not exist or is not a directory.")
         
@@ -673,19 +685,25 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             if user_input.lower() == 'exit':
                 break
 
-            # Add all files from the 'analyses' folder to the chat before each run
+            # Check and update files from the 'analyses' folder before each run
             if analyses_folder.exists() and analyses_folder.is_dir():
                 analyses_files = [f for f in analyses_folder.iterdir() if f.is_file()]
-                io.tool_output("Updating files from 'analyses' folder:")
+                io.tool_output("Checking for updates in 'analyses' folder:")
                 for file in analyses_files:
-                    io.tool_output(str(file))
-                    coder.add_file(str(file))
+                    if check_file_modified(str(file), last_modified_times):
+                        io.tool_output(f"Updating {file}")
+                        try:
+                            coder.add_file(str(file))
+                        except Exception as e:
+                            io.tool_error(f"Error updating file {file}: {str(e)}")
 
             coder.run(with_message="""IMPORTANT INSTRUCTIONS: 
-                      - Don't use main.py or other scripts to write the SOTA, write it via text files mainly.
-                      - Write the SOTA progressively, using template.md as the reference. Only do modifications one by one, leaving the () [] {} if they are still needed.
-                      - Make sure you have downloaded and read at least 10 studies.
-                      - Make sure you only reference studies that you have downloaded and read.""")
+                      - Écrivez l'état de l'art principalement via des fichiers texte, pas dans main.py ou d'autres scripts.
+                      - Rédigez l'état de l'art progressivement, en utilisant template.md comme référence. Faites des modifications une par une, en laissant les () [] {} s'ils sont encore nécessaires.
+                      - Assurez-vous d'avoir téléchargé et lu au moins 10 études.
+                      - Ne référencez que les études que vous avez téléchargées et lues.
+                      - Concentrez-vous sur la synthèse des informations importantes de chaque étude.
+                      - Organisez l'état de l'art de manière logique, en regroupant les informations par thèmes ou concepts clés.""")
         except SwitchCoder as switch:
             kwargs = dict(io=io, from_coder=coder)
             kwargs.update(switch.kwargs)
