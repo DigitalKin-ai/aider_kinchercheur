@@ -671,3 +671,49 @@ if __name__ == "__main__":
 
     if args.analyze_all:
         run_all_analysis(io, model=args.model)
+import requests
+from bs4 import BeautifulSoup
+
+def get_studies_from_query(query):
+    """
+    Fonction pour récupérer les études à partir d'une requête.
+    
+    Args:
+    query (str): La requête de recherche.
+    
+    Returns:
+    list: Une liste de dictionnaires contenant les informations des études.
+    """
+    # URL de base pour la recherche PubMed
+    base_url = "https://pubmed.ncbi.nlm.nih.gov/"
+    
+    # Effectuer la requête
+    response = requests.get(f"{base_url}?term={query}")
+    
+    # Vérifier si la requête a réussi
+    if response.status_code != 200:
+        print(f"Erreur lors de la requête : {response.status_code}")
+        return []
+    
+    # Parser le contenu HTML
+    soup = BeautifulSoup(response.content, 'html.parser')
+    
+    # Trouver tous les articles
+    articles = soup.find_all('article', class_='full-docsum')
+    
+    # Liste pour stocker les informations des études
+    studies = []
+    
+    # Extraire les informations de chaque article
+    for article in articles:
+        title = article.find('a', class_='docsum-title').text.strip()
+        authors = article.find('span', class_='full-authors').text.strip()
+        citation = article.find('span', class_='citation-part').text.strip()
+        
+        studies.append({
+            'title': title,
+            'authors': authors,
+            'citation': citation
+        })
+    
+    return studies
