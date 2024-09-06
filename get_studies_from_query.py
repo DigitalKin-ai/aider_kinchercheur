@@ -19,7 +19,12 @@ def get_studies_from_query(query):
             "num": 40,
             "time_period_min": 2010
         }
+        print(f"Envoi de la requête à {url}")
+        print(f"Headers: {headers}")
+        print(f"Payload: {payload}")
         response = requests.post(url, headers=headers, json=payload)
+        print(f"Statut de la réponse: {response.status_code}")
+        print(f"Contenu de la réponse: {response.text}")
         return response.json()
 
     # Fonction pour obtenir le PDF d'une étude
