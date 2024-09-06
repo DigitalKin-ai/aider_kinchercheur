@@ -315,6 +315,8 @@ def register_litellm_models(git_root, model_metadata_fname, io, verbose=False):
 import sys
 
 def main(argv=None, input=None, output=None, force_git_root=None, return_coder=False):
+    print("Debugging: sys module:", sys)
+    print("Debugging: sys.argv:", sys.argv)
     if argv is None:
         argv = sys.argv[1:]
 
