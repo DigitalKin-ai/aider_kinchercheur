@@ -330,6 +330,23 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     else:
         git_root = get_git_root()
 
+    # Création de l'objet io
+    io = InputOutput(
+        args.pretty,
+        args.yes,
+        args.input_history_file,
+        args.chat_history_file,
+        input=input,
+        output=output,
+        user_input_color=args.user_input_color,
+        tool_output_color=args.tool_output_color,
+        tool_error_color=args.tool_error_color,
+        dry_run=args.dry_run,
+        encoding=args.encoding,
+        llm_history_file=args.llm_history_file,
+        editingmode=EditingMode.VI if args.vim else EditingMode.EMACS,
+    )
+
     # Appel à generation.py
     from generation import generer_cdc
     cdc, todolist = generer_cdc(folder, demande)
