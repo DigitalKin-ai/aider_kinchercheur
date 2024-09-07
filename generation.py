@@ -287,7 +287,7 @@ if __name__ == "__main__":
     import sys
     if len(sys.argv) != 3:
         logger.error("Arguments insuffisants")
-        print("Usage: python initialisation.py <dossier> <demande>")
+        print("Usage: python generation.py <dossier> <demande>")
         sys.exit(1)
     
     folder = sys.argv[1]
@@ -297,13 +297,12 @@ if __name__ == "__main__":
     logger.info(f"Demande: {demande}")
     
     # Définir folder_path ici
-    project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    folder_path = os.path.join(project_dir, folder)
+    folder_path = os.path.abspath(folder)
     
-    cdc, todolist, prompt = generer_cdc(folder, demande)
-    logger.info(f"Génération terminée pour le dossier: {folder}")
+    cdc, todolist, prompt = generer_cdc(folder_path, demande)
+    logger.info(f"Génération terminée pour le dossier: {folder_path}")
     
-    print(f"Cahier des charges généré et enregistré dans {os.path.join(folder_path, 'demande.md')}")
+    print(f"Cahier des charges généré et enregistré dans {os.path.join(folder_path, 'cdc.md')}")
     print(f"Liste des tâches générée et enregistrée dans {os.path.join(folder_path, 'todolist.md')}")
     print(f"Prompt optimisé généré et enregistré dans {os.path.join(folder_path, 'prompt.md')}")
     print("Contenu du cahier des charges :")
