@@ -520,13 +520,6 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         if right_repo_root:
             return main(argv, input, output, right_repo_root, return_coder=return_coder)
 
-    if args.just_check_update:
-        update_available = check_version(io, just_check=True, verbose=args.verbose)
-        return 0 if not update_available else 1
-
-    if args.check_update:
-        check_version(io, verbose=args.verbose)
-
     if args.models:
         models.print_matching_models(io, args.models)
         return 0
@@ -769,6 +762,13 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         else:
             io.tool_output("Le dossier 'analyses' n'existe pas ou n'est pas un répertoire. Continuons sans.")
 
+    # S'assurer que le dossier principal existe
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+        io.tool_output(f"Dossier principal créé: {folder_path}")
+    else:
+        io.tool_output(f"Dossier principal existant: {folder_path}")
+
     # Création du dossier 'analyses' s'il n'existe pas
     analyses_folder = Path(folder_path) / 'analyses'
     if not analyses_folder.exists():
@@ -777,19 +777,15 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     else:
         io.tool_output(f"Dossier 'analyses' existant: {analyses_folder}")
 
-    # S'assurer que le dossier principal existe
-    if not os.path.exists(folder_path):
-        os.makedirs(folder_path)
-        io.tool_output(f"Dossier principal créé: {folder_path}")
-    else:
-        io.tool_output(f"Dossier principal existant: {folder_path}")
-
     # Ajout de tous les fichiers du dossier 'analyses' au chat
     last_modified_times = {}
     try:
         add_analyses_files(coder, io, analyses_folder, last_modified_times)
     except Exception as e:
         io.tool_error(f"Erreur lors de l'ajout des fichiers d'analyses : {str(e)}")
+
+    # Création du fichier demande.md avec la demande
+    #TODO
     
     # Création du fichier sortie.md s'il n'existe pas
     sortie_file = Path(folder) / 'sortie.md'
