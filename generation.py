@@ -96,10 +96,13 @@ Demande à partir de laquelle générer le CDC:
     # Obtenir le chemin absolu du répertoire du projet (parent du répertoire 'aider')
     project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     
-    # Créer le dossier dans le répertoire du projet
+    # Créer le dossier dans le répertoire du projet s'il n'existe pas
     folder_path = os.path.join(project_dir, folder)
-    os.makedirs(folder_path, exist_ok=True)
-    logger.info(f"Dossier créé/vérifié: {folder_path}")
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+        logger.info(f"Dossier créé: {folder_path}")
+    else:
+        logger.info(f"Dossier existant: {folder_path}")
     
     # Enregistrer la réponse dans le fichier demande.md
     demande_file = os.path.join(folder_path, "demande.md")

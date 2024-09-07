@@ -765,8 +765,15 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         else:
             io.tool_output("Le dossier 'analyses' n'existe pas ou n'est pas un répertoire. Continuons sans.")
 
-    # Ajout de tous les fichiers du dossier 'analyses' au chat, s'il existe
+    # Création du dossier 'analyses' s'il n'existe pas
     analyses_folder = Path('analyses')
+    if not analyses_folder.exists():
+        analyses_folder.mkdir(parents=True, exist_ok=True)
+        io.tool_output(f"Dossier 'analyses' créé: {analyses_folder}")
+    else:
+        io.tool_output(f"Dossier 'analyses' existant: {analyses_folder}")
+
+    # Ajout de tous les fichiers du dossier 'analyses' au chat
     last_modified_times = {}
     add_analyses_files(coder, io, analyses_folder, last_modified_times)
     
