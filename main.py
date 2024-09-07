@@ -831,7 +831,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         with open(demande_file, 'r', encoding='utf-8') as f:
             demande = f.read()
     
-        # Exécuter la boucle simplifiée
+        # Exécuter la boucle détaillée
         coder.run(with_message=f"""
         Contexte de la demande initiale :
         {demande}
@@ -843,17 +843,25 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         {todolist}
 
         Pour chaque étape du processus détaillé, applique le processus suivant:
-        - Crée un fichier prompt.md, dans une arborescence étant le miroir des étapes de todolist.md. Ce fichier doit contenir le prompt qui permettra l'execution de l'étape.
-        - Si l'étape est trop complexe pour être réalisée en un prompt, refais le même principe dans un sous-dossier avec des sous-étapes.
-        - Exécute l'étape, en suivant le prompt que tu viens de créer.
-        - Vérifie que le travail effectué remplit le Cahier des Charges décrit dans cdc.md pour l'étape. Si ce n'est pas le cas, rééfectue une étape de travail ou décompose en sous-étapes si ce n'est pas suffisant.
-        - Une fois les critères du CDC remplis, mets à jour le statut de l'étape dans todolist.md, jusqu'à ce que les critères du CDC global (niveau 0) soient remplis.
+        1. Crée un fichier prompt.md dans une arborescence miroir des étapes de todolist.md. Ce fichier doit contenir le prompt pour exécuter l'étape.
+        2. Si l'étape est trop complexe pour un seul prompt, crée un sous-dossier avec des sous-étapes.
+        3. Exécute l'étape en suivant le prompt créé.
+        4. Vérifie que le travail effectué remplit les critères du CDC pour l'étape (dans cdc.md).
+        5. Si les critères ne sont pas remplis, recommence l'étape ou décompose-la en sous-étapes.
+        6. Une fois les critères remplis, mets à jour le statut de l'étape dans todolist.md.
+        7. Répète ce processus jusqu'à ce que tous les critères du CDC global (niveau 0) soient remplis.
 
         Contenu de todolist.md:
         {todolist}
 
         Contenu de cdc.md:
         {cdc}
+
+        Instructions supplémentaires:
+        - Utilise les fonctions fournies (find_next_step, create_prompt_file, check_cdc_criteria, update_todolist_status, check_global_cdc_criteria) pour gérer le flux de travail.
+        - Assure-toi de créer et mettre à jour les fichiers prompt.md pour chaque étape.
+        - Vérifie régulièrement le statut global du projet en utilisant check_global_cdc_criteria().
+        - Informe l'utilisateur de l'avancement à chaque étape majeure.
         """)
 
         io.tool_output("Processus terminé.")
