@@ -10,7 +10,7 @@ import git
 from dotenv import load_dotenv
 from prompt_toolkit.enums import EditingMode
 
-DEFAULT_MODEL_NAME = "gpt-4o"  # ou le modèle par défaut que vous souhaitez utiliser
+DEFAULT_MODEL_NAME = "gpt-4o-mini"  # ou le modèle par défaut que vous souhaitez utiliser
 
 # Add the parent directory to sys.path
 current_dir = os.path.dirname(os.path.abspath(__file__))
