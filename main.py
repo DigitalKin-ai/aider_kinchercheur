@@ -330,6 +330,10 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     else:
         git_root = get_git_root()
 
+    # Définir folder_path ici
+    project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    folder_path = os.path.join(project_dir, folder)
+
     conf_fname = Path(".aider.conf.yml")
 
     default_config_files = [conf_fname.resolve()]  # CWD
