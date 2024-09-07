@@ -4,11 +4,17 @@ import re
 def is_demande(filename):
     return re.search(r'demande\.md', filename.lower()) is not None
 
+def is_cdc(filename):
+    return re.search(r'cdc\.md', filename.lower()) is not None
+
 def is_todolist(filename):
     return re.search(r'todolist\.md', filename.lower()) is not None
 
 def is_prompt(filename):
     return re.search(r'prompt\.md', filename.lower()) is not None
+
+def is_sortie(filename):
+    return re.search(r'sortie\.md', filename.lower()) is not None
 
 def is_analyse(filename):
     return filename.lower().startswith('analyses/')
@@ -26,7 +32,7 @@ def select_relevant_files(folder):
         for file in files:
             full_path = os.path.join(root, file)
             if is_text_file(file):
-                if is_demande(file) or is_todolist(file) or is_prompt(file):
+                if is_demande(file) or is_cdc(file) or is_todolist(file) or is_prompt(file):
                     relevant_files.append(full_path)
                 elif is_analyse(os.path.relpath(full_path, folder)):
                     relevant_files.append(full_path)
