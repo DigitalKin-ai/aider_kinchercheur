@@ -836,6 +836,12 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         Contexte de la demande initiale :
         {demande}
 
+        Cahier des charges :
+        {cdc}
+
+        Liste des tâches :
+        {todolist}
+
         Pour chaque étape du processus détaillé, applique le processus suivant:
         - Crée un fichier prompt.md, dans une arborescence étant le miroir des étapes de todolist.md. Ce fichier doit contenir le prompt qui permettra l'execution de l'étape.
         - Si l'étape est trop complexe pour être réalisée en un prompt, refais le même principe dans un sous-dossier avec des sous-étapes.
