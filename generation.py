@@ -1,11 +1,19 @@
 import os
+import logging
 from dotenv import load_dotenv
 from sendchat import simple_send_with_retries
 
 # Charger les variables d'environnement depuis le fichier .env
 load_dotenv()
 
+# Configuration du logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
 def generer_cdc(folder, demande):
+    logger.info(f"Début de la génération du cahier des charges pour le dossier: {folder}")
+    logger.info(f"Demande reçue: {demande}")
+
     prompt = f"""# Prompt pour le Générateur de Cahier des Charges (KinSpecifier)
 
 ## Identité et Rôle
@@ -81,15 +89,20 @@ Demande à partir de laquelle générer le CDC:
     model_name = "claude-3-5-sonnet-20240620"  # Vous pouvez ajuster le modèle selon vos besoins
     messages = [{"role": "user", "content": prompt}]
     
+    logger.info(f"Envoi de la demande au modèle: {model_name}")
     response = simple_send_with_retries(model_name, messages)
+    logger.info("Réponse reçue du modèle")
     
     # Créer le dossier dans le répertoire parent s'il n'existe pas
     parent_folder = os.path.join("..", folder)
     os.makedirs(parent_folder, exist_ok=True)
+    logger.info(f"Dossier créé/vérifié: {parent_folder}")
     
     # Enregistrer la réponse dans le fichier demande.md
-    with open(os.path.join(parent_folder, "demande.md"), "w", encoding="utf-8") as f:
+    demande_file = os.path.join(parent_folder, "demande.md")
+    with open(demande_file, "w", encoding="utf-8") as f:
         f.write(response)
+    logger.info(f"Cahier des charges enregistré dans: {demande_file}")
     
     # Générer la todolist
     todolist_prompt = f"""# Prompt pour KinDecomposeur
@@ -160,12 +173,17 @@ Cahier des charges généré :
 {response}
 """
 
+    logger.info("Envoi de la demande pour la génération de la liste des tâches")
     todolist_messages = [{"role": "user", "content": todolist_prompt}]
     todolist_response = simple_send_with_retries(model_name, todolist_messages)
+    logger.info("Réponse reçue pour la liste des tâches")
     
-    with open(os.path.join(parent_folder, "todolist.md"), "w", encoding="utf-8") as f:
+    todolist_file = os.path.join(parent_folder, "todolist.md")
+    with open(todolist_file, "w", encoding="utf-8") as f:
         f.write(todolist_response)
+    logger.info(f"Liste des tâches enregistrée dans: {todolist_file}")
     
+    logger.info("Génération du cahier des charges et de la liste des tâches terminée")
     return response, todolist_response
 
 # Exemple d'utilisation :
@@ -176,16 +194,24 @@ Cahier des charges généré :
 if __name__ == "__main__":
     import sys
     if len(sys.argv) != 3:
+        logger.error("Arguments insuffisants")
         print("Usage: python initialisation.py <dossier> <demande>")
         sys.exit(1)
     
     folder = sys.argv[1]
     demande = sys.argv[2]
     
+    logger.info(f"Démarrage du script avec le dossier: {folder}")
+    logger.info(f"Demande: {demande}")
+    
     cdc, todolist = generer_cdc(folder, demande)
+    logger.info(f"Génération terminée pour le dossier: {folder}")
+    
     print(f"Cahier des charges généré et enregistré dans ../{folder}/demande.md")
     print(f"Liste des tâches générée et enregistrée dans ../{folder}/todolist.md")
     print("Contenu du cahier des charges :")
     print(cdc)
     print("\nContenu de la liste des tâches :")
     print(todolist)
+    
+    logger.info("Script terminé avec succès")
