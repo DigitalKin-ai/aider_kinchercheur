@@ -28,15 +28,19 @@ def is_text_file(filename):
     text_extensions = ['.md', '.txt', '.py', '.js', '.html', '.css', '.json', '.yml', '.yaml', '.ini', '.cfg']
     return any(filename.lower().endswith(ext) for ext in text_extensions)
 
-def select_relevant_files(folder):
-    print(f"DEBUG: select_relevant_files function called for folder: {folder}")
+def select_relevant_files(folder_or_files):
+    print(f"DEBUG: select_relevant_files function called for: {folder_or_files}")
     
-    all_files = [os.path.join(root, file) for root, dirs, files in os.walk(folder) for file in files]
+    if isinstance(folder_or_files, list):
+        all_files = folder_or_files
+    else:
+        all_files = [os.path.join(root, file) for root, dirs, files in os.walk(folder_or_files) for file in files]
     
     relevant_files = []
     
     for full_path in all_files:
         file = os.path.basename(full_path)
+        folder = os.path.dirname(full_path)
         if is_text_file(file):
             if (is_demande(full_path, folder) or 
                 is_cdc(full_path, folder) or 
