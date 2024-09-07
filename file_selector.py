@@ -1,46 +1,50 @@
 import os
 import re
 
-def is_demande(filename):
-    return re.search(r'demande\.md', filename.lower()) is not None # TODO: Doit vérifier que c'est le bon folder
+import os
 
-def is_cdc(filename):
-    return re.search(r'cdc\.md', filename.lower()) is not None# TODO: Doit vérifier que c'est le bon folder
+def is_in_correct_folder(filename, folder):
+    return os.path.dirname(filename) == folder
 
-def is_todolist(filename):
-    return re.search(r'todolist\.md', filename.lower()) is not None# TODO: Doit vérifier que c'est le bon folder
+def is_demande(filename, folder):
+    return re.search(r'demande\.md', filename.lower()) is not None and is_in_correct_folder(filename, folder)
 
-def is_prompt(filename):
-    return re.search(r'prompt\.md', filename.lower()) is not None# TODO: Doit vérifier que c'est le bon folder
+def is_cdc(filename, folder):
+    return re.search(r'cdc\.md', filename.lower()) is not None and is_in_correct_folder(filename, folder)
 
-def is_sortie(filename):
-    return re.search(r'sortie\.md', filename.lower()) is not None# TODO: Doit vérifier que c'est le bon folder
+def is_todolist(filename, folder):
+    return re.search(r'todolist\.md', filename.lower()) is not None and is_in_correct_folder(filename, folder)
 
-def is_analyse(filename):
-    return filename.lower().startswith('analyses/')# TODO: Doit vérifier que c'est le bon folder
+def is_prompt(filename, folder):
+    return re.search(r'prompt\.md', filename.lower()) is not None and is_in_correct_folder(filename, folder)
+
+def is_sortie(filename, folder):
+    return re.search(r'sortie\.md', filename.lower()) is not None and is_in_correct_folder(filename, folder)
+
+def is_analyse(filename, folder):
+    return filename.lower().startswith('analyses/') and is_in_correct_folder(filename, os.path.join(folder, 'analyses'))
 
 def is_text_file(filename):
     text_extensions = ['.md', '.txt', '.py', '.js', '.html', '.css', '.json', '.yml', '.yaml', '.ini', '.cfg']
     return any(filename.lower().endswith(ext) for ext in text_extensions)
 
-def select_relevant_files(folder_or_files):# autoriser seulement l'appel a folder
-    print(f"DEBUG: select_relevant_files function called for: {folder_or_files}")
+def select_relevant_files(folder):
+    print(f"DEBUG: select_relevant_files function called for folder: {folder}")
     
-    if isinstance(folder_or_files, list):
-        all_files = folder_or_files
-        base_folder = os.path.commonpath(all_files)
-    else:
-        base_folder = folder_or_files
-        all_files = [os.path.join(root, file) for root, dirs, files in os.walk(base_folder) for file in files]
+    all_files = [os.path.join(root, file) for root, dirs, files in os.walk(folder) for file in files]
     
     relevant_files = []
     
     for full_path in all_files:
         file = os.path.basename(full_path)
         if is_text_file(file):
-            if is_demande(file) or is_cdc(file) or is_todolist(file) or is_prompt(file):
+            if (is_demande(full_path, folder) or 
+                is_cdc(full_path, folder) or 
+                is_todolist(full_path, folder) or 
+                is_prompt(full_path, folder) or
+                is_sortie(full_path, folder)):
                 relevant_files.append(full_path)
-            elif is_analyse(os.path.relpath(full_path, base_folder)):
+            elif is_analyse(full_path, folder):
                 relevant_files.append(full_path)
     
     print("DEBUG: Final selected files:")
