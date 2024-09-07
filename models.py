@@ -601,6 +601,8 @@ class Model:
         """Fast path for common models. Avoids forcing litellm import."""
 
         model = self.name
+        if model is None:
+            raise ValueError("Model name is not set. Please specify a valid model.")
         if model in OPENAI_MODELS or model.startswith("openai/"):
             var = "OPENAI_API_KEY"
         elif model in ANTHROPIC_MODELS or model.startswith("anthropic/"):
