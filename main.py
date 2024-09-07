@@ -766,7 +766,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             io.tool_output("Le dossier 'analyses' n'existe pas ou n'est pas un répertoire. Continuons sans.")
 
     # Création du dossier 'analyses' s'il n'existe pas
-    analyses_folder = Path('analyses')
+    analyses_folder = Path(folder_path) / 'analyses'
     if not analyses_folder.exists():
         analyses_folder.mkdir(parents=True, exist_ok=True)
         io.tool_output(f"Dossier 'analyses' créé: {analyses_folder}")
@@ -775,7 +775,10 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
 
     # Ajout de tous les fichiers du dossier 'analyses' au chat
     last_modified_times = {}
-    add_analyses_files(coder, io, analyses_folder, last_modified_times)
+    try:
+        add_analyses_files(coder, io, analyses_folder, last_modified_times)
+    except Exception as e:
+        io.tool_error(f"Erreur lors de l'ajout des fichiers d'analyses : {str(e)}")
     
     # Création du fichier etat_de_lart.md s'il n'existe pas
     etat_de_lart_file = Path(folder) / 'etat_de_lart.md'
