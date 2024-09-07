@@ -1,6 +1,7 @@
+import os
 from sendchat import simple_send_with_retries
 
-def generer_cdc(demande):
+def generer_cdc(folder, demande):
     prompt = f"""# Prompt pour le Générateur de Cahier des Charges (CDC)
 
 ## Identité et Rôle
@@ -51,8 +52,16 @@ Demande à partir de laquelle générer le CDC:
     messages = [{"role": "user", "content": prompt}]
     
     response = simple_send_with_retries(model_name, messages)
+    
+    # Créer le dossier s'il n'existe pas
+    os.makedirs(folder, exist_ok=True)
+    
+    # Enregistrer la réponse dans le fichier demande.md
+    with open(os.path.join(folder, "demande.md"), "w", encoding="utf-8") as f:
+        f.write(response)
+    
     return response
 
 # Exemple d'utilisation :
-# cdc = generer_cdc("Créer une application de gestion de tâches pour une petite entreprise")
+# cdc = generer_cdc("mon_dossier", "Créer une application de gestion de tâches pour une petite entreprise")
 # print(cdc)
