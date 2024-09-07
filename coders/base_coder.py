@@ -1625,15 +1625,15 @@ class Coder:
                     return self.add_files_to_chat(selected_files)
         return False
 
-    def add_files_to_chat(self, files):
+    def add_files_to_chat(files):
         added_files = []
         for file in files:
-            if self.io.confirm_ask(f"Voulez-vous ajouter {file} au chat ?"):
-                self.abs_fnames.add(self.abs_root_path(file))
+            if io.confirm_ask(f"Voulez-vous ajouter {file} au chat ?"):
+                coder.add_rel_fname(file)
                 added_files.append(file)
         
         if added_files:
-            self.io.tool_output(f"Fichiers ajoutés au chat : {', '.join(added_files)}")
+            io.tool_output(f"Fichiers ajoutés au chat : {', '.join(added_files)}")
             return True
         return False
 
