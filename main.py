@@ -765,30 +765,6 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         else:
             io.tool_output("Le dossier 'analyses' n'existe pas ou n'est pas un répertoire. Continuons sans.")
 
-    def find_next_step(todolist):
-        # Implémentez la logique pour trouver la prochaine étape non terminée
-        # Retournez le nom de l'étape ou None si toutes les étapes sont terminées
-        pass
-
-    def create_prompt_file(step):
-        # Créez le fichier prompt.md dans l'arborescence appropriée
-        # Retournez le chemin du fichier créé
-        pass
-
-    def check_cdc_criteria(step):
-        # Vérifiez si l'étape remplit les critères du CDC
-        # Retournez True si les critères sont remplis, False sinon
-        pass
-
-    def update_todolist_status(step):
-        # Mettez à jour le statut de l'étape dans todolist.md
-        pass
-
-    def check_global_cdc_criteria():
-        # Vérifiez si tous les critères du CDC global sont remplis
-        # Retournez True si tous les critères sont remplis, False sinon
-        pass
-
     # Ajout de tous les fichiers du dossier 'analyses' au chat, s'il existe
     analyses_folder = Path('analyses')
     last_modified_times = {}
@@ -808,20 +784,20 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         
     try:
         # Lire le contenu des fichiers
-        todolist_file = Path(folder) / 'todolist.md'
-        cdc_file = Path(folder) / 'cdc.md'
         demande_file = Path(folder) / 'demande.md'
+        cdc_file = Path(folder) / 'cdc.md'
+        todolist_file = Path(folder) / 'todolist.md'
         prompt_file = Path(folder) / 'prompt.md'
-    
-        with open(todolist_file, 'r', encoding='utf-8') as f:
-            todolist = f.read()
-    
-        with open(cdc_file, 'r', encoding='utf-8') as f:
-            cdc = f.read()
     
         with open(demande_file, 'r', encoding='utf-8') as f:
             demande = f.read()
+    
+        with open(cdc_file, 'r', encoding='utf-8') as f:
+            cdc = f.read()
 
+        with open(todolist_file, 'r', encoding='utf-8') as f:
+            todolist = f.read()
+    
         with open(prompt_file, 'r', encoding='utf-8') as f:
             prompt = f.read()
     
