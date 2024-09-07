@@ -577,20 +577,21 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
                     file_contents[key] = f.read()
             else:
                 io.tool_error(f"Le fichier {filename} n'existe pas dans le dossier {folder}.")
+                file_contents[key] = f"Contenu de {filename} non disponible"
     
         # Exécuter la boucle détaillée
         coder.run(with_message=f"""
         Contexte de la demande initiale {folder}/demande.md :
-        {demande}
+        {file_contents['demande']}
 
         Cahier des charges global (niveau 0) {folder}/cdc.md :
-        {cdc}
+        {file_contents['cdc']}
 
         Liste des tâches à réaliser {folder}/todolist.md:
-        {todolist}
+        {file_contents['todolist']}
 
         Prompt Général {folder}/prompt.md:
-        {prompt}
+        {file_contents['prompt']}
 
         Pour chaque étape du processus détaillé, applique le processus suivant:
         1. Crée un fichier prompt.md dans une arborescence miroir des étapes présentées dans {folder}/todolist.md. Ce fichier doit contenir le prompt pour exécuter l'étape en question.
