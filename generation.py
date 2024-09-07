@@ -93,8 +93,11 @@ Demande à partir de laquelle générer le CDC:
     response = simple_send_with_retries(model_name, messages)
     logger.info("Réponse reçue du modèle")
     
-    # Créer le dossier dans le répertoire parent s'il n'existe pas
-    parent_folder = os.path.join("..", folder)
+    # Obtenir le chemin absolu du répertoire contenant le script
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # Créer le dossier dans le répertoire parent du répertoire 'aider'
+    parent_folder = os.path.join(os.path.dirname(script_dir), folder)
     os.makedirs(parent_folder, exist_ok=True)
     logger.info(f"Dossier créé/vérifié: {parent_folder}")
     
@@ -207,8 +210,8 @@ if __name__ == "__main__":
     cdc, todolist = generer_cdc(folder, demande)
     logger.info(f"Génération terminée pour le dossier: {folder}")
     
-    print(f"Cahier des charges généré et enregistré dans ../{folder}/demande.md")
-    print(f"Liste des tâches générée et enregistrée dans ../{folder}/todolist.md")
+    print(f"Cahier des charges généré et enregistré dans {parent_folder}/demande.md")
+    print(f"Liste des tâches générée et enregistrée dans {parent_folder}/todolist.md")
     print("Contenu du cahier des charges :")
     print(cdc)
     print("\nContenu de la liste des tâches :")
