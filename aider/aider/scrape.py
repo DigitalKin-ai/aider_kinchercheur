@@ -131,7 +131,9 @@ class Scraper:
 
     # Internals...
     def scrape_with_playwright(self, url):
-        import playwright
+        import playwright  # noqa: F401
+        from playwright.sync_api import Error as PlaywrightError
+        from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
         from playwright.sync_api import sync_playwright
 
         with sync_playwright() as p:
@@ -156,9 +158,9 @@ class Scraper:
                 response = None
                 try:
                     response = page.goto(url, wait_until="networkidle", timeout=5000)
-                except playwright._impl._errors.TimeoutError:
+                except PlaywrightTimeoutError:
                     self.print_error(f"Timeout while loading {url}")
-                except playwright._impl._errors.Error as e:
+                except PlaywrightError as e:
                     self.print_error(f"Error navigating to {url}: {str(e)}")
                     return None, None
 
@@ -169,7 +171,7 @@ class Scraper:
                         content_type = response.header_value("content-type")
                         if content_type:
                             mime_type = content_type.split(";")[0]
-                except playwright._impl._errors.Error as e:
+                except PlaywrightError as e:
                     self.print_error(f"Error retrieving page content: {str(e)}")
                     content = None
                     mime_type = None
@@ -222,7 +224,10 @@ class Scraper:
         if not self.pandoc_available:
             return page_source
 
-        md = pypandoc.convert_text(page_source, "markdown", format="html")
+        try:
+            md = pypandoc.convert_text(page_source, "markdown", format="html")
+        except OSError:
+            return page_source
 
         md = re.sub(r"</div>", "      ", md)
         md = re.sub(r"<div>", "     ", md)
@@ -253,27 +258,14 @@ def slimdown_html(soup):
     return soup
 
 
-def main():
-    # Liste des URLs à scraper
-    urls = [
-        "https://example.com/research1",
-        "https://example.com/research2",
-        # Ajoutez d'autres URLs pertinentes ici
-    ]
-
+def main(url):
     scraper = Scraper()
-    for url in urls:
-        print(f"Scraping {url}...")
-        content = scraper.scrape(url)
-        if content:
-            # Sauvegarde du contenu dans un fichier dans le dossier 'analyses'
-            filename = f"analyses/{url.split('/')[-1]}.txt"
-            os.makedirs(os.path.dirname(filename), exist_ok=True)
-            with open(filename, 'w', encoding='utf-8') as f:
-                f.write(content)
-            print(f"Contenu sauvegardé dans {filename}")
-        else:
-            print(f"Échec du scraping pour {url}")
+    content = scraper.scrape(url)
+    print(content)
+
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) < 2:
+        print("Usage: python playw.py <URL>")
+        sys.exit(1)
+    main(sys.argv[1])

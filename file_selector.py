@@ -2,9 +2,9 @@ import os
 import re
 import random
 
-def is_journal_or_todolist(filename):
+def is_demande_or_todolist(filename):
     patterns = [
-        r'.*journal.*',
+        r'.*demande.*',
         r'.*todolist.*'
     ]
     return any(re.search(pattern, filename.lower()) for pattern in patterns)
@@ -12,8 +12,8 @@ def is_journal_or_todolist(filename):
 def is_discussion(filename):
     return re.search(r'.*discussion.*', filename.lower()) is not None
 
-def is_concept(filename):
-    return re.search(r'.*concept.*', filename.lower()) is not None
+def is_analyse(filename):
+    return re.search(r'.*analyses.*', filename.lower()) is not None
 
 def is_text_file(filename):
     text_extensions = ['.md', '.txt', '.py', '.js', '.html', '.css', '.json', '.yml', '.yaml', '.ini', '.cfg']
@@ -25,13 +25,13 @@ def select_relevant_files(file_list, max_files=20):
     
     text_files = [file for file in file_list if is_text_file(file)]
     
-    journals_and_todolists = [file for file in text_files if is_journal_or_todolist(file)]
+    demandes_and_todolists = [file for file in text_files if is_demande_or_todolist(file)]
     discussions = [file for file in text_files if is_discussion(file)]
-    concepts = [file for file in text_files if is_concept(file)]
+    analyses = [file for file in text_files if is_analyse(file)]
     
-    print(f"DEBUG: Journals and Todolists: {len(journals_and_todolists)}")
-    print("DEBUG: Journals and Todolists files:")
-    for file in journals_and_todolists:
+    print(f"DEBUG: Demandes and Todolists: {len(demandes_and_todolists)}")
+    print("DEBUG: Demandes and Todolists files:")
+    for file in demandes_and_todolists:
         print(f"  - {file}")
     
     print(f"DEBUG: Discussions: {len(discussions)}")
@@ -39,18 +39,18 @@ def select_relevant_files(file_list, max_files=20):
     for file in discussions:
         print(f"  - {file}")
     
-    print(f"DEBUG: Concepts: {len(concepts)}")
-    print("DEBUG: Concept files:")
-    for file in concepts:
+    print(f"DEBUG: analyses: {len(analyses)}")
+    print("DEBUG: analyse files:")
+    for file in analyses:
         print(f"  - {file}")
     
-    relevant_files = journals_and_todolists.copy()
+    relevant_files = demandes_and_todolists.copy()
     
     # Add up to 3 random discussion files
     relevant_files.extend(random.sample(discussions, min(3, len(discussions))))
     
-    # Add up to 3 random concept files
-    relevant_files.extend(random.sample(concepts, min(3, len(concepts))))
+    # Add up to 3 random analyse files
+    relevant_files.extend(random.sample(analyses, min(3, len(analyses))))
     
     # Ensure we don't exceed max_files
     relevant_files = relevant_files[:max_files]

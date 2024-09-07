@@ -1,4 +1,5 @@
 import configparser
+import json
 import os
 import re
 import sys
@@ -17,10 +18,9 @@ from aider.format_settings import format_settings, scrub_sensitive_info
 from aider.history import ChatSummary
 from aider.io import InputOutput
 from aider.llm import litellm  # noqa: F401; properly init litellm on launch
-from aider.repo import GitRepo, UnableToCountRepoFiles
+from aider.repo import ANY_GIT_ERROR, GitRepo
 from aider.report import report_uncaught_exceptions
 from aider.versioncheck import check_version, install_from_main_branch, install_upgrade
-from aider.file_selector import select_relevant_files
 
 from .dump import dump  # noqa: F401
 
@@ -57,9 +57,9 @@ def make_new_repo(git_root, io):
     try:
         repo = git.Repo.init(git_root)
         check_gitignore(git_root, io, False)
-    except git.exc.GitCommandError as err:  # issue #1233
+    except ANY_GIT_ERROR as err:  # issue #1233
         io.tool_error(f"Unable to create git repo in {git_root}")
-        io.tool_error(str(err))
+        io.tool_output(str(err))
         return
 
     io.tool_output(f"Git repository created in {git_root}")
@@ -72,7 +72,7 @@ def setup_git(git_root, io):
     if git_root:
         repo = git.Repo(git_root)
     elif Path.cwd() == Path.home():
-        io.tool_error("You should probably run aider in a directory, not your home dir.")
+        io.tool_warning("You should probably run aider in a directory, not your home dir.")
         return
     elif io.confirm_ask("No git repo found, create one to track aider's changes (recommended)?"):
         git_root = str(Path.cwd().resolve())
@@ -90,7 +90,7 @@ def setup_git(git_root, io):
             pass
         try:
             user_email = config.get_value("user", "email", None)
-        except configparser.NoSectionError:
+        except (configparser.NoSectionError, configparser.NoOptionError):
             pass
 
     if user_name and user_email:
@@ -99,10 +99,10 @@ def setup_git(git_root, io):
     with repo.config_writer() as git_config:
         if not user_name:
             git_config.set_value("user", "name", "Your Name")
-            io.tool_error('Update git name with: git config user.name "Your Name"')
+            io.tool_warning('Update git name with: git config user.name "Your Name"')
         if not user_email:
             git_config.set_value("user", "email", "you@example.com")
-            io.tool_error('Update git email with: git config user.email "you@example.com"')
+            io.tool_warning('Update git email with: git config user.email "you@example.com"')
 
     return repo.working_tree_dir
 
@@ -115,7 +115,7 @@ def check_gitignore(git_root, io, ask=True):
         repo = git.Repo(git_root)
         if repo.ignored(".aider"):
             return
-    except git.exc.InvalidGitRepositoryError:
+    except ANY_GIT_ERROR:
         pass
 
     pat = ".aider*"
@@ -208,8 +208,8 @@ def parse_lint_cmds(lint_cmds, io):
             res[lang] = cmd
         else:
             io.tool_error(f'Unable to parse --lint-cmd "{lint_cmd}"')
-            io.tool_error('The arg should be "language: cmd --args ..."')
-            io.tool_error('For example: --lint-cmd "python: flake8 --select=E9"')
+            io.tool_output('The arg should be "language: cmd --args ..."')
+            io.tool_output('For example: --lint-cmd "python: flake8 --select=E9"')
             err = True
     if err:
         return
@@ -302,20 +302,20 @@ def sanity_check_repo(repo, io):
     try:
         repo.get_tracked_files()
         return True
-    except UnableToCountRepoFiles as exc:
+    except ANY_GIT_ERROR as exc:
         error_msg = str(exc)
 
         if "version in (1, 2)" in error_msg:
             io.tool_error("Aider only works with git repos with version number 1 or 2.")
-            io.tool_error(
+            io.tool_output(
                 "You may be able to convert your repo: git update-index --index-version=2"
             )
-            io.tool_error("Or run aider --no-git to proceed without using git.")
-            io.tool_error("https://github.com/paul-gauthier/aider/issues/211")
+            io.tool_output("Or run aider --no-git to proceed without using git.")
+            io.tool_output("https://github.com/paul-gauthier/aider/issues/211")
             return False
 
         io.tool_error("Unable to read git repository, it may be corrupt?")
-        io.tool_error(error_msg)
+        io.tool_output(error_msg)
         return False
 
 
@@ -369,12 +369,14 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     if args.dark_mode:
         args.user_input_color = "#32FF32"
         args.tool_error_color = "#FF3333"
+        args.tool_warning_color = "#FFFF00"
         args.assistant_output_color = "#00FFFF"
         args.code_theme = "monokai"
 
     if args.light_mode:
         args.user_input_color = "green"
         args.tool_error_color = "red"
+        args.tool_warning_color = "#FFA500"
         args.assistant_output_color = "blue"
         args.code_theme = "default"
 
@@ -383,21 +385,31 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
 
     editing_mode = EditingMode.VI if args.vim else EditingMode.EMACS
 
-    io = InputOutput(
-        args.pretty,
-        args.yes,
-        args.input_history_file,
-        args.chat_history_file,
-        input=input,
-        output=output,
-        user_input_color=args.user_input_color,
-        tool_output_color=args.tool_output_color,
-        tool_error_color=args.tool_error_color,
-        dry_run=args.dry_run,
-        encoding=args.encoding,
-        llm_history_file=args.llm_history_file,
-        editingmode=editing_mode,
-    )
+    def get_io(pretty):
+        return InputOutput(
+            pretty,
+            args.yes,
+            args.input_history_file,
+            args.chat_history_file,
+            input=input,
+            output=output,
+            user_input_color=args.user_input_color,
+            tool_output_color=args.tool_output_color,
+            tool_error_color=args.tool_error_color,
+            dry_run=args.dry_run,
+            encoding=args.encoding,
+            llm_history_file=args.llm_history_file,
+            editingmode=editing_mode,
+        )
+
+    io = get_io(args.pretty)
+    try:
+        io.rule()
+    except UnicodeEncodeError as err:
+        if not io.pretty:
+            raise err
+        io = get_io(False)
+        io.tool_warning("Terminal does not support pretty output (UnicodeDecodeError)")
 
     if args.gui and not return_coder:
         if not check_streamlit_install(io):
@@ -419,7 +431,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
                 io.tool_error(f"{fname} is a directory, not provided alone.")
                 good = False
         if not good:
-            io.tool_error(
+            io.tool_output(
                 "Provide either a single directory of a git repo, or a list of one or more files."
             )
             return 1
@@ -457,8 +469,8 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     if args.check_update:
         check_version(io, verbose=args.verbose)
 
-    if args.models:
-        models.print_matching_models(io, args.models)
+    if args.list_models:
+        models.print_matching_models(io, args.list_models)
         return 0
 
     if args.git:
@@ -500,8 +512,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
 
     if args.verbose:
         io.tool_output("Model info:")
-        for key, value in main_model.info.items():
-            io.tool_output(f"  {key}: {value}")
+        io.tool_output(json.dumps(main_model.info, indent=4))
 
     lint_cmds = parse_lint_cmds(args.lint_cmd, io)
     if lint_cmds is None:
@@ -510,7 +521,8 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     if args.show_model_warnings:
         problem = models.sanity_check_models(io, main_model)
         if problem:
-            io.tool_output("You can skip this sanity check with --no-show-model-warnings")
+            io.tool_output("You can skip this check with --no-show-model-warnings")
+            io.tool_output()
             try:
                 if not io.confirm_ask("Proceed anyway?"):
                     return 1
@@ -539,7 +551,9 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     if not sanity_check_repo(repo, io):
         return 1
 
-    commands = Commands(io, None, verify_ssl=args.verify_ssl, args=args, parser=parser)
+    commands = Commands(
+        io, None, verify_ssl=args.verify_ssl, args=args, parser=parser, verbose=args.verbose
+    )
 
     summarizer = ChatSummary(
         [main_model.weak_model, main_model],
@@ -579,6 +593,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             map_mul_no_files=args.map_multiplier_no_files,
             num_cache_warming_pings=args.cache_keepalive_pings,
             suggest_shell_commands=args.suggest_shell_commands,
+            chat_language=args.chat_language,
         )
     except ValueError as err:
         io.tool_error(str(err))
@@ -587,7 +602,6 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     if return_coder:
         return coder
 
-    io.tool_output()
     coder.show_announcements()
 
     if args.show_prompts:
@@ -639,13 +653,13 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     io.tool_output('Use /help <question> for help, run "aider --help" to see cmd line args')
 
     if git_root and Path.cwd().resolve() != Path(git_root).resolve():
-        io.tool_error(
+        io.tool_warning(
             "Note: in-chat filenames are always relative to the git working dir, not the current"
             " working dir."
         )
 
-        io.tool_error(f"Cur working dir: {Path.cwd()}")
-        io.tool_error(f"Git working dir: {git_root}")
+        io.tool_output(f"Cur working dir: {Path.cwd()}")
+        io.tool_output(f"Git working dir: {git_root}")
 
     if args.message:
         io.add_to_input_history(args.message)
@@ -676,49 +690,10 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     thread.daemon = True
     thread.start()
 
-    # Select relevant files
-    all_files = [f for f in os.listdir() if os.path.isfile(f)]
-    selected_files = select_relevant_files(all_files)
-
-    io.tool_output("Fichiers pertinents sélectionnés :")
-    for file in selected_files:
-        io.tool_output(file)
-
-    # Add selected files to the chat
-    for file in selected_files:
-        coder.add_file(file)
-
-    # Add all files from the 'analyses' folder to the chat
-    analyses_folder = Path('analyses')
-    if analyses_folder.exists() and analyses_folder.is_dir():
-        analyses_files = [f for f in analyses_folder.iterdir() if f.is_file()]
-        io.tool_output("Ajout des fichiers du dossier 'analyses' :")
-        for file in analyses_files:
-            io.tool_output(str(file))
-            coder.add_file(str(file))
-    else:
-        io.tool_output("Le dossier 'analyses' n'existe pas ou n'est pas un répertoire.")
-        
     while True:
-        io.tool_output("Appuyez sur Entrée pour continuer ou tapez 'exit' pour quitter.")
         try:
-            user_input = io.user_input("")
-            if user_input.lower() == 'exit':
-                break
-
-            # Add all files from the 'analyses' folder to the chat before each run
-            if analyses_folder.exists() and analyses_folder.is_dir():
-                analyses_files = [f for f in analyses_folder.iterdir() if f.is_file()]
-                io.tool_output("Mise à jour des fichiers du dossier 'analyses' :")
-                for file in analyses_files:
-                    io.tool_output(str(file))
-                    coder.add_file(str(file))
-
-            coder.run(with_message="""INSTRUCTIONS IMPORTANTES : 
-                      - N'utilisez pas main.py ou d'autres scripts pour écrire l'état de l'art, écrivez-le principalement via des fichiers texte.
-                      - Écrivez l'état de l'art progressivement, en utilisant template.md comme référence. Ne faites que des modifications une par une, en laissant les () [] {} s'ils sont encore nécessaires.
-                      - Assurez-vous d'avoir téléchargé et lu au moins 10 études.
-                      - Assurez-vous de ne référencer que les études que vous avez téléchargées et lues.""")
+            coder.run()
+            return
         except SwitchCoder as switch:
             kwargs = dict(io=io, from_coder=coder)
             kwargs.update(switch.kwargs)
@@ -729,9 +704,6 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
 
             if switch.kwargs.get("show_announcements") is not False:
                 coder.show_announcements()
-        except Exception as e:
-            io.tool_error(f"Une erreur s'est produite : {str(e)}")
-            break
 
 
 def load_slow_imports():

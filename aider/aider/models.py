@@ -386,6 +386,7 @@ MODEL_SETTINGS = [
         use_repo_map=True,
         examples_as_sys_msg=True,
         reminder="sys",
+        max_tokens=8192,
     ),
     ModelSettings(
         "deepseek/deepseek-coder",
@@ -394,6 +395,7 @@ MODEL_SETTINGS = [
         examples_as_sys_msg=True,
         reminder="sys",
         caches_by_default=True,
+        max_tokens=8192,
     ),
     ModelSettings(
         "openrouter/deepseek/deepseek-coder",
@@ -742,11 +744,11 @@ def sanity_check_model(io, model):
 
     if model.missing_keys:
         show = True
-        io.tool_error(f"Model {model}: Environment variables status:")
+        io.tool_warning(f"Warning: {model} expects these environment variables")
         for key in model.missing_keys:
             value = os.environ.get(key, "")
             status = "✓ Set" if value else "✗ Not set"
-            io.tool_error(f"- {key}: {status}")
+            io.tool_output(f"- {key}: {status}")
 
         if platform.system() == "Windows" or True:
             io.tool_output(
@@ -756,12 +758,12 @@ def sanity_check_model(io, model):
 
     elif not model.keys_in_environment:
         show = True
-        io.tool_output(f"Model {model}: Unknown which environment variables are required.")
+        io.tool_warning(f"Warning for {model}: Unknown which environment variables are required.")
 
     if not model.info:
         show = True
-        io.tool_output(
-            f"Model {model}: Unknown context window size and costs, using sane defaults."
+        io.tool_warning(
+            f"Warning for {model}: Unknown context window size and costs, using sane defaults."
         )
 
         possible_matches = fuzzy_match_models(model.name)
@@ -771,7 +773,7 @@ def sanity_check_model(io, model):
                 io.tool_output(f"- {match}")
 
     if show:
-        io.tool_output(f"For more info, see: {urls.model_warnings}\n")
+        io.tool_output(f"For more info, see: {urls.model_warnings}")
 
     return show
 
