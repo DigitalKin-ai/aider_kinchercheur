@@ -1,5 +1,9 @@
 import os
+from dotenv import load_dotenv
 from sendchat import simple_send_with_retries
+
+# Charger les variables d'environnement depuis le fichier .env
+load_dotenv()
 
 def generer_cdc(folder, demande):
     prompt = f"""# Prompt pour le Générateur de Cahier des Charges (CDC)
