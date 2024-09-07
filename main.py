@@ -790,14 +790,14 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     except Exception as e:
         io.tool_error(f"Erreur lors de l'ajout des fichiers d'analyses : {str(e)}")
     
-    # Création du fichier etat_de_lart.md s'il n'existe pas
-    etat_de_lart_file = Path(folder) / 'etat_de_lart.md'
-    if not etat_de_lart_file.exists():
-        with open(etat_de_lart_file, 'w', encoding='utf-8') as f:
+    # Création du fichier sortie.md s'il n'existe pas
+    sortie_file = Path(folder) / 'sortie.md'
+    if not sortie_file.exists():
+        with open(sortie_file, 'w', encoding='utf-8') as f:
             f.write("# État de l'art\n\n(Contenu à remplir)")
-        io.tool_output("Fichier etat_de_lart.md créé.")
+        io.tool_output("Fichier sortie.md créé.")
     
-    coder.add_file(str(etat_de_lart_file))
+    coder.add_file(str(sortie_file))
         
     try:
         # Lire le contenu des fichiers
