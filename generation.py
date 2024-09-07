@@ -193,7 +193,7 @@ Chemins des fichiers :
     logger.info("Génération du cahier des charges et de la liste des tâches terminée")
 
     # Génération du prompt optimisé
-    prompt_optimise_prompt = f"""# Prompt pour KinPromptGenerator
+    prompt_prompt = f"""# Prompt pour KinPromptGenerator
 
 ## Identité et Rôle
 Vous êtes KinPromptGenerator, un assistant IA spécialisé dans la création de prompts optimisés. Votre rôle est de générer un prompt détaillé et structuré qui permettra à un autre assistant IA d'accomplir une tâche spécifique selon les spécifications et le processus définis.
@@ -253,33 +253,36 @@ Le prompt généré doit suivre cette structure :
 3. Assurez-vous que le prompt couvre tous les aspects nécessaires pour atteindre les objectifs spécifiés.
 4. Présentez le prompt généré dans votre réponse, en utilisant une structure claire et des sections bien définies.
 
-Cahier des charges :
+Demande initiale :
+{demande}
+
+Cahier des charges à respecter :
 {response}
 
-Todolist :
+Todolist à implémenter:
 {todolist_response}
 
 Veuillez générer un prompt optimisé basé sur ces informations.
 """
 
-    logger.info("Envoi de la demande pour la génération du prompt optimisé")
-    prompt_optimise_messages = [{"role": "user", "content": prompt_optimise_prompt}]
-    prompt_optimise_response = simple_send_with_retries(model_name, prompt_optimise_messages)
+    logger.info("Envoi de la demande pour la génération du prompt")
+    prompt_messages = [{"role": "user", "content": prompt_prompt}]
+    prompt_response = simple_send_with_retries(model_name, prompt_messages)
     logger.info("Réponse reçue pour le prompt optimisé")
     
-    prompt_optimise_file = os.path.join(folder_path, "prompt_optimise.md")
-    with open(prompt_optimise_file, "w", encoding="utf-8") as f:
-        f.write(prompt_optimise_response)
-    logger.info(f"Prompt optimisé enregistré dans: {prompt_optimise_file}")
+    prompt_file = os.path.join(folder_path, "prompt.md")
+    with open(prompt_file, "w", encoding="utf-8") as f:
+        f.write(prompt_response)
+    logger.info(f"Prompt optimisé enregistré dans: {prompt_file}")
     
     logger.info("Génération du cahier des charges, de la liste des tâches et du prompt optimisé terminée")
-    return response, todolist_response, prompt_optimise_response
+    return response, todolist_response, prompt_response
 
 # Exemple d'utilisation :
-# cdc, todolist, prompt_optimise = generer_cdc("mon_dossier", "Créer une application de gestion de tâches pour une petite entreprise")
+# cdc, todolist, prompt = generer_cdc("mon_dossier", "Créer une application de gestion de tâches pour une petite entreprise")
 # print(cdc)
 # print(todolist)
-# print(prompt_optimise)
+# print(prompt)
 
 if __name__ == "__main__":
     import sys
@@ -298,17 +301,17 @@ if __name__ == "__main__":
     project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     folder_path = os.path.join(project_dir, folder)
     
-    cdc, todolist, prompt_optimise = generer_cdc(folder, demande)
+    cdc, todolist, prompt = generer_cdc(folder, demande)
     logger.info(f"Génération terminée pour le dossier: {folder}")
     
     print(f"Cahier des charges généré et enregistré dans {os.path.join(folder_path, 'demande.md')}")
     print(f"Liste des tâches générée et enregistrée dans {os.path.join(folder_path, 'todolist.md')}")
-    print(f"Prompt optimisé généré et enregistré dans {os.path.join(folder_path, 'prompt_optimise.md')}")
+    print(f"Prompt optimisé généré et enregistré dans {os.path.join(folder_path, 'prompt.md')}")
     print("Contenu du cahier des charges :")
     print(cdc)
     print("\nContenu de la liste des tâches :")
     print(todolist)
     print("\nContenu du prompt optimisé :")
-    print(prompt_optimise)
+    print(prompt)
     
     logger.info("Script terminé avec succès")
