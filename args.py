@@ -488,12 +488,6 @@ def get_parser(default_config_files, git_root):
         default=False,
     )
     group.add_argument(
-        "--check-update",
-        action=argparse.BooleanOptionalAction,
-        help="Check for new aider versions on launch",
-        default=True,
-    )
-    group.add_argument(
         "--apply",
         metavar="FILE",
         help="Apply the changes from the given file instead of running the chat (debug)",
