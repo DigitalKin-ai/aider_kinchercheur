@@ -742,7 +742,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     coder.add_file(str(sortie_file))
 
     # Select relevant files
-    selected_files = select_relevant_files(folder_path)
+    selected_files = select_relevant_files(added_files)
 
     io.tool_output("Fichiers sélectionnés :")
     for file in selected_files:

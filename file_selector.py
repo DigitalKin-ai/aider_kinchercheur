@@ -23,7 +23,13 @@ def is_text_file(filename):
     text_extensions = ['.md', '.txt', '.py', '.js', '.html', '.css', '.json', '.yml', '.yaml', '.ini', '.cfg']
     return any(filename.lower().endswith(ext) for ext in text_extensions)
 
-def select_relevant_files(folder):
+def select_relevant_files(folder_or_files):
+    if isinstance(folder_or_files, list):
+        # Si c'est une liste, on la traite directement
+        all_files = folder_or_files
+    else:
+        # Si c'est un dossier, on liste les fichiers
+        folder = folder_or_files
     print(f"DEBUG: select_relevant_files function called for folder: {folder}")
     
     relevant_files = []
