@@ -729,58 +729,47 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     analyses_folder = Path('analyses')
     last_modified_times = {}
     add_analyses_files(coder, io, analyses_folder, last_modified_times)
+    
+    # Création du fichier etat_de_lart.md s'il n'existe pas
+    etat_de_lart_file = Path('etat_de_lart.md')
+    if not etat_de_lart_file.exists():
+        with open(etat_de_lart_file, 'w', encoding='utf-8') as f:
+            f.write("# État de l'art\n\n(Contenu à remplir)")
+        io.tool_output("Fichier etat_de_lart.md créé.")
+    
+    coder.add_file(str(etat_de_lart_file))
         
     while True:
-        io.tool_output("Appuyez sur Entrée pour continuer ou tapez 'exit' pour quitter.")
-        try:
-            user_input = io.user_input("")
-            if user_input.lower() == 'exit':
-                break
+        io.tool_output("Menu principal:")
+        io.tool_output("1. Travailler sur l'état de l'art")
+        io.tool_output("2. Analyser de nouvelles études")
+        io.tool_output("3. Voir le résumé des progrès")
+        io.tool_output("4. Quitter")
+        
+        choice = io.user_input("Choisissez une option (1-4): ")
+        
+        if choice == '1':
+            section = io.user_input("Sur quelle section voulez-vous travailler ? (ex: Introduction, Méthodologie, etc.) : ")
+            coder.run(with_message=f"""Travaillons sur la section '{section}' de l'état de l'art. 
+            Utilisez le fichier etat_de_lart.md pour écrire et organiser le contenu.
+            Assurez-vous d'intégrer les informations pertinentes des études analysées.
+            Suivez la structure du template.md et les directives pour la rédaction de l'état de l'art.""")
+        elif choice == '2':
+            # Code pour analyser de nouvelles études (similaire à celui au début de la boucle)
+            pass
+        elif choice == '3':
+            # Afficher un résumé des progrès
+            with open(etat_de_lart_file, 'r', encoding='utf-8') as f:
+                content = f.read()
+            io.tool_output("Résumé des progrès de l'état de l'art:")
+            io.tool_output(content[:500] + "..." if len(content) > 500 else content)
+        elif choice == '4':
+            break
+        else:
+            io.tool_output("Option non valide. Veuillez choisir entre 1 et 4.")
 
-            # Vérification et mise à jour des fichiers du dossier 'analyses' avant chaque exécution
-            add_analyses_files(coder, io, analyses_folder, last_modified_times)
-
-            coder.run(with_message="""INSTRUCTIONS IMPORTANTES POUR LA RÉDACTION DE L'ÉTAT DE L'ART :
-1. Format et structure :
-   - Utilisez principalement des fichiers texte pour l'état de l'art, pas main.py ou d'autres scripts.
-   - Suivez la structure de template.md comme référence.
-   - Faites des modifications progressives, une section à la fois.
-   - Laissez les marqueurs () [] {} s'ils sont encore nécessaires pour les sections incomplètes.
-
-2. Contenu et sources :
-   - Assurez-vous d'avoir lu et analysé au moins 10 études pertinentes.
-   - Ne citez et ne référencez que les études que vous avez effectivement lues et analysées.
-   - Concentrez-vous sur la synthèse des informations clés de chaque étude.
-
-3. Organisation et présentation :
-   - Structurez l'état de l'art de manière logique et cohérente.
-   - Regroupez les informations par thèmes, concepts clés ou approches méthodologiques.
-   - Utilisez des sous-sections pour améliorer la lisibilité et la navigation dans le document.
-
-4. Analyse critique :
-   - Comparez et contrastez les différentes études et leurs résultats.
-   - Identifiez les tendances, les consensus et les divergences dans la littérature.
-   - Mettez en évidence les lacunes ou les questions non résolues dans la recherche actuelle.
-
-5. Mise à jour et révision :
-   - Intégrez régulièrement les nouvelles études ajoutées au dossier 'analyses'.
-   - Révisez et affinez le contenu existant à mesure que vous ajoutez de nouvelles informations.
-   - Assurez-vous que l'état de l'art reste cohérent et à jour tout au long du processus de rédaction.
-
-6. Style et langage :
-   - Utilisez un langage clair, précis et académique.
-   - Évitez le jargon excessif, mais incluez les termes techniques pertinents avec des explications si nécessaire.
-   - Assurez-vous que chaque paragraphe se concentre sur une idée principale et contribue à l'argument global.
-
-7. Références et citations :
-   - Utilisez un style de citation cohérent tout au long du document (par exemple, APA, MLA, etc.).
-   - Assurez-vous que toutes les références dans le texte correspondent à la liste des références à la fin du document.
-
-8. Progression et suivi :
-   - Après chaque session de travail, résumez brièvement les modifications apportées et les sections complétées.
-   - Identifiez les prochaines étapes ou sections à aborder lors de la prochaine session.
-
-Continuez à travailler sur l'état de l'art en suivant ces directives, en vous concentrant sur une section à la fois et en intégrant de manière cohérente les nouvelles informations des études analysées.""")
+        # Vérification et mise à jour des fichiers du dossier 'analyses' avant chaque exécution
+        add_analyses_files(coder, io, analyses_folder, last_modified_times)
         except SwitchCoder as switch:
             kwargs = dict(io=io, from_coder=coder)
             kwargs.update(switch.kwargs)
