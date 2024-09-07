@@ -2,28 +2,28 @@ import os
 import re
 
 def is_demande(filename):
-    return re.search(r'demande\.md', filename.lower()) is not None
+    return re.search(r'demande\.md', filename.lower()) is not None # TODO: Doit vérifier que c'est le bon folder
 
 def is_cdc(filename):
-    return re.search(r'cdc\.md', filename.lower()) is not None
+    return re.search(r'cdc\.md', filename.lower()) is not None# TODO: Doit vérifier que c'est le bon folder
 
 def is_todolist(filename):
-    return re.search(r'todolist\.md', filename.lower()) is not None
+    return re.search(r'todolist\.md', filename.lower()) is not None# TODO: Doit vérifier que c'est le bon folder
 
 def is_prompt(filename):
-    return re.search(r'prompt\.md', filename.lower()) is not None
+    return re.search(r'prompt\.md', filename.lower()) is not None# TODO: Doit vérifier que c'est le bon folder
 
 def is_sortie(filename):
-    return re.search(r'sortie\.md', filename.lower()) is not None
+    return re.search(r'sortie\.md', filename.lower()) is not None# TODO: Doit vérifier que c'est le bon folder
 
 def is_analyse(filename):
-    return filename.lower().startswith('analyses/')
+    return filename.lower().startswith('analyses/')# TODO: Doit vérifier que c'est le bon folder
 
 def is_text_file(filename):
     text_extensions = ['.md', '.txt', '.py', '.js', '.html', '.css', '.json', '.yml', '.yaml', '.ini', '.cfg']
     return any(filename.lower().endswith(ext) for ext in text_extensions)
 
-def select_relevant_files(folder_or_files):
+def select_relevant_files(folder_or_files):# autoriser seulement l'appel a folder
     print(f"DEBUG: select_relevant_files function called for: {folder_or_files}")
     
     if isinstance(folder_or_files, list):
