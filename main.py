@@ -484,7 +484,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     for file in specific_files:
         file_path = Path(folder) / file
         if file_path.exists():
-            coder.add_file(str(file_path))
+            coder.add_rel_fname(str(file_path))
             added_files.append(str(file_path))
             io.tool_output(f"Fichier {file} ajouté au chat.")
         else:
@@ -499,7 +499,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     relevant_files = select_relevant_files(folder)
     for file in relevant_files:
         if file not in added_files:
-            coder.add_file(file)
+            coder.add_rel_fname(file)
             added_files.append(file)
             io.tool_output(f"Fichier pertinent ajouté au chat : {file}")
 
