@@ -65,3 +65,17 @@ Demande à partir de laquelle générer le CDC:
 # Exemple d'utilisation :
 # cdc = generer_cdc("mon_dossier", "Créer une application de gestion de tâches pour une petite entreprise")
 # print(cdc)
+
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) != 3:
+        print("Usage: python initialisation.py <dossier> <demande>")
+        sys.exit(1)
+    
+    folder = sys.argv[1]
+    demande = sys.argv[2]
+    
+    cdc = generer_cdc(folder, demande)
+    print(f"Cahier des charges généré et enregistré dans {folder}/demande.md")
+    print("Contenu du cahier des charges :")
+    print(cdc)
