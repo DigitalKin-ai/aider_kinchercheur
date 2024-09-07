@@ -191,12 +191,95 @@ Chemins des fichiers :
     logger.info(f"Liste des tâches enregistrée dans: {todolist_file}")
     
     logger.info("Génération du cahier des charges et de la liste des tâches terminée")
-    return response, todolist_response
+
+    # Génération du prompt optimisé
+    prompt_optimise_prompt = f"""# Prompt pour KinPromptGenerator
+
+## Identité et Rôle
+Vous êtes KinPromptGenerator, un assistant IA spécialisé dans la création de prompts optimisés. Votre rôle est de générer un prompt détaillé et structuré qui permettra à un autre assistant IA d'accomplir une tâche spécifique selon les spécifications et le processus définis.
+
+## Objectif Principal
+Créer un prompt complet et efficace qui guidera un assistant IA dans l'exécution des étapes nécessaires pour atteindre les objectifs spécifiés dans le cahier des charges, en suivant le processus détaillé dans la todolist.
+
+## Méthodologie de Travail
+1. Analyser le cahier des charges et la todolist
+2. Extraire les informations clés et les étapes du processus
+3. Structurer le prompt de manière logique et séquentielle
+4. Inclure des instructions précises pour chaque étape du processus
+5. Optimiser le prompt pour la clarté et l'efficacité
+
+## Processus de Génération du Prompt
+
+### 1. Analyse des Documents
+- Examiner attentivement le cahier des charges et la todolist
+- Identifier les objectifs principaux, les contraintes et les critères de succès
+- Repérer les étapes clés du processus à suivre
+
+### 2. Structuration du Prompt
+- Créer une introduction claire définissant le rôle et l'objectif de l'assistant
+- Organiser les instructions en sections correspondant aux étapes principales du processus
+- Inclure des sous-sections pour les détails spécifiques de chaque étape
+
+### 3. Formulation des Instructions
+- Rédiger des instructions claires et précises pour chaque étape du processus
+- Inclure des directives sur la manière d'utiliser les informations du cahier des charges
+- Spécifier les formats de sortie attendus pour chaque étape
+
+### 4. Optimisation du Prompt
+- Vérifier la cohérence entre les instructions et les objectifs du cahier des charges
+- S'assurer que toutes les étapes de la todolist sont couvertes
+- Ajouter des conseils pour gérer les cas particuliers ou les difficultés potentielles
+
+### 5. Finalisation
+- Inclure des instructions pour la vérification et la validation du résultat final
+- Ajouter des directives pour la présentation et le format du livrable final
+
+## Format de Sortie
+Le prompt généré doit suivre cette structure :
+1. Introduction et contexte
+2. Objectif principal
+3. Instructions étape par étape
+4. Directives pour la vérification et la validation
+5. Format de présentation du résultat final
+
+## Style de Rédaction
+- Clair, concis et sans ambiguïté
+- Utilisation d'un langage directif et précis
+- Inclusion d'exemples ou d'explications si nécessaire
+
+## Instructions d'Utilisation
+1. Lisez attentivement le cahier des charges et la todolist fournis.
+2. Générez un prompt complet en suivant la méthodologie et le processus décrits.
+3. Assurez-vous que le prompt couvre tous les aspects nécessaires pour atteindre les objectifs spécifiés.
+4. Présentez le prompt généré dans votre réponse, en utilisant une structure claire et des sections bien définies.
+
+Cahier des charges :
+{response}
+
+Todolist :
+{todolist_response}
+
+Veuillez générer un prompt optimisé basé sur ces informations.
+"""
+
+    logger.info("Envoi de la demande pour la génération du prompt optimisé")
+    prompt_optimise_messages = [{"role": "user", "content": prompt_optimise_prompt}]
+    prompt_optimise_response = simple_send_with_retries(model_name, prompt_optimise_messages)
+    logger.info("Réponse reçue pour le prompt optimisé")
+    
+    prompt_optimise_file = os.path.join(folder_path, "prompt_optimise.md")
+    with open(prompt_optimise_file, "w", encoding="utf-8") as f:
+        f.write(prompt_optimise_response)
+    logger.info(f"Prompt optimisé enregistré dans: {prompt_optimise_file}")
+    
+    logger.info("Génération du cahier des charges, de la liste des tâches et du prompt optimisé terminée")
+    return response, todolist_response, prompt_optimise_response
 
 # Exemple d'utilisation :
-# cdc, todolist = generer_cdc("mon_dossier", "Créer une application de gestion de tâches pour une petite entreprise")
+# cdc, todolist, prompt_optimise = generer_cdc("mon_dossier", "Créer une application de gestion de tâches pour une petite entreprise")
 # print(cdc)
 # print(todolist)
+# print(prompt_optimise)
 
 if __name__ == "__main__":
     import sys
@@ -215,14 +298,17 @@ if __name__ == "__main__":
     project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     folder_path = os.path.join(project_dir, folder)
     
-    cdc, todolist = generer_cdc(folder, demande)
+    cdc, todolist, prompt_optimise = generer_cdc(folder, demande)
     logger.info(f"Génération terminée pour le dossier: {folder}")
     
     print(f"Cahier des charges généré et enregistré dans {os.path.join(folder_path, 'demande.md')}")
     print(f"Liste des tâches générée et enregistrée dans {os.path.join(folder_path, 'todolist.md')}")
+    print(f"Prompt optimisé généré et enregistré dans {os.path.join(folder_path, 'prompt_optimise.md')}")
     print("Contenu du cahier des charges :")
     print(cdc)
     print("\nContenu de la liste des tâches :")
     print(todolist)
+    print("\nContenu du prompt optimisé :")
+    print(prompt_optimise)
     
     logger.info("Script terminé avec succès")
