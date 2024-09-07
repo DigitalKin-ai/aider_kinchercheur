@@ -768,10 +768,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     # Ajout de tous les fichiers du dossier 'analyses' au chat, s'il existe
     analyses_folder = Path('analyses')
     last_modified_times = {}
-    try:
-        add_analyses_files(coder, io, analyses_folder, last_modified_times)
-    except Exception as e:
-        io.tool_output(f"Erreur lors de l'ajout des fichiers d'analyse : {str(e)}. Continuons sans.")
+    add_analyses_files(coder, io, analyses_folder, last_modified_times)
     
     # Création du fichier etat_de_lart.md s'il n'existe pas
     etat_de_lart_file = Path(folder) / 'etat_de_lart.md'
