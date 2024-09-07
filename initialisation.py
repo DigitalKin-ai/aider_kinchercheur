@@ -57,11 +57,12 @@ Demande à partir de laquelle générer le CDC:
     
     response = simple_send_with_retries(model_name, messages)
     
-    # Créer le dossier s'il n'existe pas
-    os.makedirs(folder, exist_ok=True)
+    # Créer le dossier dans le répertoire parent s'il n'existe pas
+    parent_folder = os.path.join("..", folder)
+    os.makedirs(parent_folder, exist_ok=True)
     
     # Enregistrer la réponse dans le fichier demande.md
-    with open(os.path.join(folder, "demande.md"), "w", encoding="utf-8") as f:
+    with open(os.path.join(parent_folder, "demande.md"), "w", encoding="utf-8") as f:
         f.write(response)
     
     return response
@@ -80,6 +81,6 @@ if __name__ == "__main__":
     demande = sys.argv[2]
     
     cdc = generer_cdc(folder, demande)
-    print(f"Cahier des charges généré et enregistré dans {folder}/demande.md")
+    print(f"Cahier des charges généré et enregistré dans ../{folder}/demande.md")
     print("Contenu du cahier des charges :")
     print(cdc)
