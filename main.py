@@ -342,7 +342,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         return 1
 
     # Import generation module here to avoid circular import
-    from generation import generer_cdc
+    from .generation import generer_cdc
 
     # Définir folder_path ici
     folder_path = os.path.abspath(folder)
