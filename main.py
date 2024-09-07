@@ -331,8 +331,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         git_root = get_git_root()
 
     # Définir folder_path ici
-    project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    folder_path = os.path.join(project_dir, folder)
+    folder_path = os.path.abspath(folder)
 
     conf_fname = Path(".aider.conf.yml")
 
@@ -405,8 +404,8 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
 
     # Appel à generation.py
     from generation import generer_cdc
-    cdc, todolist = generer_cdc(folder, demande)
-    io.tool_output(f"Cahier des charges et liste des tâches générés pour le dossier : {folder}")
+    cdc, todolist, prompt = generer_cdc(folder_path, demande)
+    io.tool_output(f"Cahier des charges, liste des tâches et prompt générés pour le dossier : {folder_path}")
 
     conf_fname = Path(".aider.conf.yml")
 
@@ -776,6 +775,13 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         io.tool_output(f"Dossier 'analyses' créé: {analyses_folder}")
     else:
         io.tool_output(f"Dossier 'analyses' existant: {analyses_folder}")
+
+    # S'assurer que le dossier principal existe
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+        io.tool_output(f"Dossier principal créé: {folder_path}")
+    else:
+        io.tool_output(f"Dossier principal existant: {folder_path}")
 
     # Ajout de tous les fichiers du dossier 'analyses' au chat
     last_modified_times = {}
