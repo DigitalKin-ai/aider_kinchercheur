@@ -817,68 +817,33 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     coder.add_file(str(etat_de_lart_file))
         
     try:
-        while True:
-            # Lire le contenu de todolist.md
-            todolist_file = Path(folder) / 'todolist.md'
-            with open(todolist_file, 'r', encoding='utf-8') as f:
-                todolist = f.read()
+        # Lire le contenu des fichiers
+        todolist_file = Path(folder) / 'todolist.md'
+        cdc_file = Path(folder) / 'cdc.md'
+        
+        with open(todolist_file, 'r', encoding='utf-8') as f:
+            todolist = f.read()
+        
+        with open(cdc_file, 'r', encoding='utf-8') as f:
+            cdc = f.read()
+        
+        # Exécuter la boucle simplifiée
+        coder.run(with_message=f"""
+        Pour chaque étape du processus détaillé, applique le processus suivant:
+        - Crée un fichier prompt.md, dans une arborescence étant le miroir des étapes de todolist.md. Ce fichier doit contenir le prompt qui permettra l'execution de l'étape.
+        - Si l'étape est trop complexe pour être réalisée en un prompt, refais le même principe dans un sous-dossier avec des sous-étapes.
+        - Exécute l'étape, en suivant le prompt que tu viens de créer.
+        - Vérifie que le travail effectué remplit le Cahier des Charges décrit dans cdc.md pour l'étape. Si ce n'est pas le cas, rééfectue une étape de travail ou décompose en sous-étapes si ce n'est pas suffisant.
+        - Une fois les critères du CDC remplis, mets à jour le statut de l'étape dans todolist.md, jusqu'à ce que les critères du CDC global (niveau 0) soient remplis.
 
-            # Trouver la prochaine étape à réaliser
-            steps = [line.strip() for line in todolist.split('\n') if line.startswith('- [ ]')]
-            if not steps:
-                io.tool_output("Toutes les étapes sont terminées. Le processus est complet.")
-                break
-            current_step = steps[0][4:]
+        Contenu de todolist.md:
+        {todolist}
 
-            io.tool_output(f"Étape en cours : {current_step}")
+        Contenu de cdc.md:
+        {cdc}
+        """)
 
-            # Créer le fichier prompt.md
-            prompt_file = Path(f'prompts/{current_step.replace(" ", "_")}/prompt.md')
-            prompt_file.parent.mkdir(parents=True, exist_ok=True)
-            prompt_file.touch()
-
-            # Lire le contenu du prompt
-            with open(prompt_file, 'r', encoding='utf-8') as f:
-                prompt_content = f.read()
-
-            # Exécuter l'étape
-            coder.run(with_message=f"""
-            Exécutez l'étape suivante en suivant ce prompt :
-
-            {prompt_content}
-
-            Assurez-vous de respecter le Cahier des Charges décrit dans cdc.md pour cette étape.
-            """)
-
-            # Vérifier si l'étape remplit les critères du CDC
-            with open('cdc.md', 'r', encoding='utf-8') as f:
-                cdc = f.read()
-            # Implémentez ici la logique de vérification des critères du CDC pour l'étape
-            # Pour l'instant, on suppose que les critères sont toujours remplis
-            cdc_criteria_met = True
-
-            if not cdc_criteria_met:
-                io.tool_output("Les critères du CDC ne sont pas remplis. Réexécution de l'étape ou décomposition en sous-étapes.")
-                continue
-
-            # Mettre à jour le statut de l'étape dans todolist.md
-            with open('todolist.md', 'r', encoding='utf-8') as f:
-                todolist_lines = f.readlines()
-            
-            for i, line in enumerate(todolist_lines):
-                if line.startswith(f'- [ ] {current_step}'):
-                    todolist_lines[i] = f'- [x] {current_step}\n'
-                    break
-            
-            with open('todolist.md', 'w', encoding='utf-8') as f:
-                f.writelines(todolist_lines)
-
-            # Vérifier si tous les critères du CDC global sont remplis
-            # Implémentez ici la logique de vérification des critères du CDC global
-            # Pour l'instant, on suppose que les critères globaux sont remplis si toutes les étapes sont terminées
-            if all(line.startswith('- [x]') for line in todolist_lines if line.strip()):
-                io.tool_output("Tous les critères du CDC global sont remplis. Le processus est terminé.")
-                break
+        io.tool_output("Processus terminé.")
 
     except Exception as e:
         io.tool_error(f"Une erreur s'est produite : {str(e)}")
