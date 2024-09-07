@@ -223,10 +223,33 @@ class InputOutput:
             return
         except PermissionError:
             self.tool_error(f"{filename}: permission denied")
-            return
+            return self.try_elevate_permissions(filename)
         except Exception as e:
             self.tool_error(f"{filename}: unexpected error - {str(e)}")
             return
+
+    def try_elevate_permissions(self, filename):
+        import ctypes
+        import sys
+        import os
+
+        if sys.platform.startswith('win'):
+            try:
+                ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
+                self.tool_output("Attempting to elevate permissions. Please run the script again as administrator.")
+            except Exception as e:
+                self.tool_error(f"Failed to elevate permissions: {str(e)}")
+        elif sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
+            try:
+                if os.geteuid() != 0:
+                    self.tool_output("Attempting to elevate permissions. Please enter your sudo password.")
+                    os.execvp('sudo', ['sudo'] + sys.argv)
+            except Exception as e:
+                self.tool_error(f"Failed to elevate permissions: {str(e)}")
+        else:
+            self.tool_error("Automatic permission elevation is not supported on this platform.")
+        
+        return None
 
     def write_text(self, filename, content):
         if self.dry_run:
