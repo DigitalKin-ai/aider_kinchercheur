@@ -337,18 +337,35 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     folder = args.folder
     demande = args.demande
 
-    if folder is None or demande is None:
-        print("Usage: python -m aider --folder <folder> --demande <demande>")
+    if folder is None:
+        print("Usage: python -m aider --folder <folder> [--demande <demande>]")
         return 1
 
     # Définir folder_path ici
     folder_path = os.path.abspath(folder)
 
-    # Import generation module here to avoid circular import
-    from .generation import generer_cdc
-
-    # Définir folder_path ici
-    folder_path = os.path.abspath(folder)
+    # Vérifier si la demande est déjà présente dans le dossier
+    demande_file = Path(folder_path) / 'demande.md'
+    if demande_file.exists():
+        with open(demande_file, 'r', encoding='utf-8') as f:
+            existing_demande = f.read().strip()
+        if demande is None:
+            demande = existing_demande
+        elif demande.strip() == existing_demande:
+            io.tool_output("La demande est identique à celle déjà présente. Pas besoin de régénérer le CDC.")
+        else:
+            # Import generation module here to avoid circular import
+            from .generation import generer_cdc
+            cdc, todolist, prompt = generer_cdc(folder_path, demande)
+            io.tool_output(f"Cahier des charges, liste des tâches et prompt générés pour le dossier : {folder_path}")
+    elif demande is None:
+        print("Erreur : Aucune demande fournie et aucune demande existante dans le dossier.")
+        return 1
+    else:
+        # Import generation module here to avoid circular import
+        from .generation import generer_cdc
+        cdc, todolist, prompt = generer_cdc(folder_path, demande)
+        io.tool_output(f"Cahier des charges, liste des tâches et prompt générés pour le dossier : {folder_path}")
 
     if args.verbose:
         print("Config files search order, if no --config:")
