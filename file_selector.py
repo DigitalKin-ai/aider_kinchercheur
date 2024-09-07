@@ -30,18 +30,25 @@ def select_relevant_files(folder_or_files):
     else:
         # Si c'est un dossier, on liste les fichiers
         folder = folder_or_files
-    print(f"DEBUG: select_relevant_files function called for folder: {folder}")
+    print(f"DEBUG: select_relevant_files function called for folder: {folder_or_files}")
+    
+    if isinstance(folder_or_files, list):
+        # Si c'est une liste, on la traite directement
+        all_files = folder_or_files
+    else:
+        # Si c'est un dossier, on liste les fichiers
+        folder = folder_or_files
+        all_files = [os.path.join(root, file) for root, dirs, files in os.walk(folder) for file in files]
     
     relevant_files = []
     
-    for root, dirs, files in os.walk(folder):
-        for file in files:
-            full_path = os.path.join(root, file)
-            if is_text_file(file):
-                if is_demande(file) or is_cdc(file) or is_todolist(file) or is_prompt(file):
-                    relevant_files.append(full_path)
-                elif is_analyse(os.path.relpath(full_path, folder)):
-                    relevant_files.append(full_path)
+    for full_path in all_files:
+        file = os.path.basename(full_path)
+        if is_text_file(file):
+            if is_demande(file) or is_cdc(file) or is_todolist(file) or is_prompt(file):
+                relevant_files.append(full_path)
+            elif is_analyse(os.path.relpath(full_path, os.path.dirname(full_path))):
+                relevant_files.append(full_path)
     
     print("DEBUG: Final selected files:")
     for file in relevant_files:
