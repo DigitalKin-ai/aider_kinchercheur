@@ -725,8 +725,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     thread.start()
 
     # Select relevant files
-    all_files = [f for f in os.listdir() if os.path.isfile(f)]
-    selected_files = select_relevant_files(all_files)
+    selected_files = select_relevant_files(folder)
 
     io.tool_output("Fichiers sélectionnés :")
     for file in selected_files:
@@ -737,18 +736,6 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     for file in selected_files:
         coder.add_file(file)
         added_files.append(file)
-
-    # Add all files from the 'analyses' folder to the chat
-    analyses_folder = Path('analyses')
-    if analyses_folder.exists() and analyses_folder.is_dir():
-        analyses_files = [f for f in analyses_folder.iterdir() if f.is_file()]
-        io.tool_output("Fichiers ajoutés depuis le dossier 'analyses' :")
-        for file in analyses_files:
-            io.tool_output(f"{file}")
-            coder.add_file(str(file))
-            added_files.append(str(file))
-    else:
-        io.tool_output("Le dossier 'analyses' n'existe pas ou n'est pas un répertoire.")
 
     io.tool_output("Fichiers ajoutés au chat : " + ", ".join(added_files))
     io.tool_output("Les nouveaux fichiers ont été ajoutés au chat.")
