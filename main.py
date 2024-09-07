@@ -6,6 +6,7 @@ import threading
 from pathlib import Path
 
 from aider import __version__, models, utils
+from generation import generer_cdc
 
 import git
 from dotenv import load_dotenv
@@ -313,14 +314,26 @@ def register_litellm_models(git_root, model_metadata_fname, io, verbose=False):
 
 import sys
 
-def main(argv=None, input=None, output=None, force_git_root=None, return_coder=False):
+def main(argv=None, input=None, output=None, force_git_root=None, return_coder=False, folder=None, demande=None):
     if argv is None:
         argv = sys.argv[1:]
+
+    if folder is None or demande is None:
+        if len(argv) < 2:
+            print("Usage: python main.py <folder> <demande>")
+            return 1
+        folder, demande = argv[:2]
+        argv = argv[2:]
 
     if force_git_root:
         git_root = force_git_root
     else:
         git_root = get_git_root()
+
+    # Appel à generation.py
+    from generation import generer_cdc
+    cdc, todolist = generer_cdc(folder, demande)
+    io.tool_output(f"Cahier des charges et liste des tâches générés pour le dossier : {folder}")
 
     conf_fname = Path(".aider.conf.yml")
 
@@ -755,7 +768,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     add_analyses_files(coder, io, analyses_folder, last_modified_times)
     
     # Création du fichier etat_de_lart.md s'il n'existe pas
-    etat_de_lart_file = Path('etat_de_lart.md')
+    etat_de_lart_file = Path(folder) / 'etat_de_lart.md'
     if not etat_de_lart_file.exists():
         with open(etat_de_lart_file, 'w', encoding='utf-8') as f:
             f.write("# État de l'art\n\n(Contenu à remplir)")
@@ -766,7 +779,8 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     try:
         while True:
             # Lire le contenu de todolist.md
-            with open('todolist.md', 'r', encoding='utf-8') as f:
+            todolist_file = Path(folder) / 'todolist.md'
+            with open(todolist_file, 'r', encoding='utf-8') as f:
                 todolist = f.read()
 
             # Trouver la prochaine étape à réaliser
