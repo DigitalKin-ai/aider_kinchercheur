@@ -330,7 +330,59 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     else:
         git_root = get_git_root()
 
-    # Création de l'objet io
+    conf_fname = Path(".aider.conf.yml")
+
+    default_config_files = [conf_fname.resolve()]  # CWD
+    if git_root:
+        git_conf = Path(git_root) / conf_fname  # git root
+        if git_conf not in default_config_files:
+            default_config_files.append(git_conf)
+    default_config_files.append(Path.home() / conf_fname)  # homedir
+    default_config_files = list(map(str, default_config_files))
+
+    parser = get_parser(default_config_files, git_root)
+    args, unknown = parser.parse_known_args(argv)
+
+    if args.verbose:
+        print("Config files search order, if no --config:")
+        for file in default_config_files:
+            exists = "(exists)" if Path(file).exists() else ""
+            print(f"  - {file} {exists}")
+
+    default_config_files.reverse()
+
+    parser = get_parser(default_config_files, git_root)
+    args, unknown = parser.parse_known_args(argv)
+
+    # Load the .env file specified in the arguments
+    loaded_dotenvs = load_dotenv_files(git_root, args.env_file)
+
+    # Parse again to include any arguments that might have been defined in .env
+    args = parser.parse_args(argv)
+
+    if not args.verify_ssl:
+        import httpx
+
+        litellm._load_litellm()
+        litellm._lazy_module.client_session = httpx.Client(verify=False)
+
+    if args.dark_mode:
+        args.user_input_color = "#32FF32"
+        args.tool_error_color = "#FF3333"
+        args.assistant_output_color = "#00FFFF"
+        args.code_theme = "monokai"
+
+    if args.light_mode:
+        args.user_input_color = "green"
+        args.tool_error_color = "red"
+        args.assistant_output_color = "blue"
+        args.code_theme = "default"
+
+    if return_coder and args.yes is None:
+        args.yes = True
+
+    editing_mode = EditingMode.VI if args.vim else EditingMode.EMACS
+
     io = InputOutput(
         args.pretty,
         args.yes,
@@ -344,8 +396,13 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         dry_run=args.dry_run,
         encoding=args.encoding,
         llm_history_file=args.llm_history_file,
-        editingmode=EditingMode.VI if args.vim else EditingMode.EMACS,
+        editingmode=editing_mode,
     )
+
+    # Appel à generation.py
+    from generation import generer_cdc
+    cdc, todolist = generer_cdc(folder, demande)
+    io.tool_output(f"Cahier des charges et liste des tâches générés pour le dossier : {folder}")
 
     # Appel à generation.py
     from generation import generer_cdc
