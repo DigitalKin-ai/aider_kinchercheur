@@ -406,10 +406,23 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         editingmode=editing_mode,
     )
 
-    # Appel à generation.py
-    from .generation import generer_cdc
-    cdc, todolist, prompt = generer_cdc(folder_path, demande)
-    io.tool_output(f"Cahier des charges, liste des tâches et prompt générés pour le dossier : {folder_path}")
+    # Vérification si la demande est la même que celle déjà présente
+    demande_file = Path(folder) / 'demande.md'
+    if demande_file.exists():
+        with open(demande_file, 'r', encoding='utf-8') as f:
+            existing_demande = f.read().strip()
+        if existing_demande == demande.strip():
+            io.tool_output("La demande est identique à celle déjà présente. Pas besoin de régénérer le CDC.")
+        else:
+            # Appel à generation.py
+            from .generation import generer_cdc
+            cdc, todolist, prompt = generer_cdc(folder_path, demande)
+            io.tool_output(f"Cahier des charges, liste des tâches et prompt générés pour le dossier : {folder_path}")
+    else:
+        # Appel à generation.py
+        from .generation import generer_cdc
+        cdc, todolist, prompt = generer_cdc(folder_path, demande)
+        io.tool_output(f"Cahier des charges, liste des tâches et prompt générés pour le dossier : {folder_path}")
 
     conf_fname = Path(".aider.conf.yml")
 
