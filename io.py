@@ -238,16 +238,16 @@ class InputOutput:
                 ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
                 self.tool_output("Attempting to elevate permissions. Please run the script again as administrator.")
             except Exception as e:
-                self.tool_error(f"Failed to elevate permissions: {str(e)}")
+                self.tool_error(f"Failed to elevate permissions on Windows: {str(e)}")
         elif sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
             try:
                 if os.geteuid() != 0:
                     self.tool_output("Attempting to elevate permissions. Please enter your sudo password.")
-                    os.execvp('sudo', ['sudo'] + sys.argv)
+                    os.execvp('sudo', ['sudo', sys.executable] + sys.argv)
             except Exception as e:
-                self.tool_error(f"Failed to elevate permissions: {str(e)}")
+                self.tool_error(f"Failed to elevate permissions on Unix-like system: {str(e)}")
         else:
-            self.tool_error("Automatic permission elevation is not supported on this platform.")
+            self.tool_error(f"Automatic permission elevation is not supported on this platform: {sys.platform}")
         
         return None
 
