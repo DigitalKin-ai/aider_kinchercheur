@@ -344,6 +344,23 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     # Définir folder_path ici
     folder_path = os.path.abspath(folder)
 
+    # Créer l'objet io
+    io = InputOutput(
+        args.pretty,
+        args.yes,
+        args.input_history_file,
+        args.chat_history_file,
+        input=input,
+        output=output,
+        user_input_color=args.user_input_color,
+        tool_output_color=args.tool_output_color,
+        tool_error_color=args.tool_error_color,
+        dry_run=args.dry_run,
+        encoding=args.encoding,
+        llm_history_file=args.llm_history_file,
+        editingmode=EditingMode.VI if args.vim else EditingMode.EMACS,
+    )
+
     # Vérifier si la demande est déjà présente dans le dossier
     demande_file = Path(folder_path) / 'demande.md'
     if demande_file.exists():
@@ -359,7 +376,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             cdc, todolist, prompt = generer_cdc(folder_path, demande)
             io.tool_output(f"Cahier des charges, liste des tâches et prompt générés pour le dossier : {folder_path}")
     elif demande is None:
-        print("Erreur : Aucune demande fournie et aucune demande existante dans le dossier.")
+        io.tool_error("Erreur : Aucune demande fournie et aucune demande existante dans le dossier.")
         return 1
     else:
         # Import generation module here to avoid circular import
