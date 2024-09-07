@@ -221,6 +221,12 @@ class InputOutput:
             self.tool_error(f"{filename}: {e}")
             self.tool_error("Use --encoding to set the unicode encoding.")
             return
+        except PermissionError:
+            self.tool_error(f"{filename}: permission denied")
+            return
+        except Exception as e:
+            self.tool_error(f"{filename}: unexpected error - {str(e)}")
+            return
 
     def write_text(self, filename, content):
         if self.dry_run:
