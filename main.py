@@ -811,7 +811,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         todolist_file = Path(folder) / 'todolist.md'
         cdc_file = Path(folder) / 'cdc.md'
         demande_file = Path(folder) / 'demande.md'
-        prompt_file = Path(prompt) / 'demande.md'
+        prompt_file = Path(folder) / 'prompt.md'
     
         with open(todolist_file, 'r', encoding='utf-8') as f:
             todolist = f.read()
