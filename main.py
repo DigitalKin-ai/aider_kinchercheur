@@ -404,7 +404,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     )
 
     # Appel à generation.py
-    from generation import generer_cdc
+    from .generation import generer_cdc
     cdc, todolist, prompt = generer_cdc(folder_path, demande)
     io.tool_output(f"Cahier des charges, liste des tâches et prompt générés pour le dossier : {folder_path}")
 
