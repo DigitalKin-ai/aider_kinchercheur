@@ -724,40 +724,23 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     thread.daemon = True
     thread.start()
 
-    # Création ou mise à jour du fichier demande.md avec la demande
-    demande_file = Path(folder) / 'demande.md'
-    with open(demande_file, 'w', encoding='utf-8') as f:
-        f.write(demande)
-    io.tool_output("Fichier demande.md créé ou mis à jour avec la demande.")
-    
-    coder.add_file(str(demande_file))
-    
-    # Création du fichier sortie.md s'il n'existe pas
-    sortie_file = Path(folder) / 'sortie.md'
-    if not sortie_file.exists():
-        with open(sortie_file, 'w', encoding='utf-8') as f:
-            f.write("# État de l'art\n\n(Contenu à remplir)")
-        io.tool_output("Fichier sortie.md créé.")
-    
-    coder.add_file(str(sortie_file))
-
-    # Initialize added_files
+    # Ajout des fichiers spécifiques du dossier
+    specific_files = ['todolist.md', 'cdc.md', 'prompt.md']
     added_files = []
 
-    # Select relevant files
-    selected_files = select_relevant_files(folder_path)
+    for file in specific_files:
+        file_path = Path(folder) / file
+        if file_path.exists():
+            coder.add_file(str(file_path))
+            added_files.append(str(file_path))
+            io.tool_output(f"Fichier {file} ajouté au chat.")
+        else:
+            io.tool_output(f"Fichier {file} non trouvé dans le dossier.")
 
-    io.tool_output("Fichiers sélectionnés :")
-    for file in selected_files:
-        io.tool_output(file)
-
-    # Add selected files to the chat
-    for file in selected_files:
-        coder.add_file(str(file))
-        added_files.append(str(file))
-
-    io.tool_output("Fichiers ajoutés au chat : " + ", ".join(added_files))
-    io.tool_output("Les nouveaux fichiers ont été ajoutés au chat.")
+    if added_files:
+        io.tool_output("Fichiers ajoutés au chat : " + ", ".join(added_files))
+    else:
+        io.tool_output("Aucun fichier spécifique n'a été trouvé dans le dossier.")
 
     def check_file_modified(file_path, last_modified_times):
         try:
