@@ -717,9 +717,25 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     if args.exit:
         return
 
+    coder.add_file(str(sortie_file))
     thread = threading.Thread(target=load_slow_imports)
     thread.daemon = True
     thread.start()
+
+    # Création ou mise à jour du fichier demande.md avec la demande
+    demande_file = Path(folder) / 'demande.md'
+    with open(demande_file, 'w', encoding='utf-8') as f:
+        f.write(demande)
+    io.tool_output("Fichier demande.md créé ou mis à jour avec la demande.")
+    
+    coder.add_file(str(demande_file))
+    
+    # Création du fichier sortie.md s'il n'existe pas
+    sortie_file = Path(folder) / 'sortie.md'
+    if not sortie_file.exists():
+        with open(sortie_file, 'w', encoding='utf-8') as f:
+            f.write("# État de l'art\n\n(Contenu à remplir)")
+        io.tool_output("Fichier sortie.md créé.")
 
     # Select relevant files
     selected_files = select_relevant_files(folder)
@@ -769,6 +785,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     else:
         io.tool_output(f"Dossier principal existant: {folder_path}")
 
+
     # Création du dossier 'analyses' s'il n'existe pas
     analyses_folder = Path(folder_path) / 'analyses'
     if not analyses_folder.exists():
@@ -776,7 +793,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         io.tool_output(f"Dossier 'analyses' créé: {analyses_folder}")
     else:
         io.tool_output(f"Dossier 'analyses' existant: {analyses_folder}")
-
+    
     # Ajout de tous les fichiers du dossier 'analyses' au chat
     last_modified_times = {}
     try:
@@ -784,22 +801,6 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     except Exception as e:
         io.tool_error(f"Erreur lors de l'ajout des fichiers d'analyses : {str(e)}")
 
-    # Création ou mise à jour du fichier demande.md avec la demande
-    demande_file = Path(folder) / 'demande.md'
-    with open(demande_file, 'w', encoding='utf-8') as f:
-        f.write(demande)
-    io.tool_output("Fichier demande.md créé ou mis à jour avec la demande.")
-    
-    coder.add_file(str(demande_file))
-    
-    # Création du fichier sortie.md s'il n'existe pas
-    sortie_file = Path(folder) / 'sortie.md'
-    if not sortie_file.exists():
-        with open(sortie_file, 'w', encoding='utf-8') as f:
-            f.write("# État de l'art\n\n(Contenu à remplir)")
-        io.tool_output("Fichier sortie.md créé.")
-    
-    coder.add_file(str(sortie_file))
         
     try:
         # Lire le contenu des fichiers
