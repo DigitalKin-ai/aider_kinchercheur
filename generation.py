@@ -210,6 +210,10 @@ if __name__ == "__main__":
     cdc, todolist = generer_cdc(folder, demande)
     logger.info(f"Génération terminée pour le dossier: {folder}")
     
+    # Définir parent_folder ici
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    parent_folder = os.path.join(os.path.dirname(script_dir), folder)
+    
     print(f"Cahier des charges généré et enregistré dans {parent_folder}/demande.md")
     print(f"Liste des tâches générée et enregistrée dans {parent_folder}/todolist.md")
     print("Contenu du cahier des charges :")
