@@ -808,6 +808,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         todolist_file = Path(folder) / 'todolist.md'
         cdc_file = Path(folder) / 'cdc.md'
         demande_file = Path(folder) / 'demande.md'
+        prompt_file = Path(prompt) / 'demande.md'
     
         with open(todolist_file, 'r', encoding='utf-8') as f:
             todolist = f.read()
@@ -817,17 +818,23 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     
         with open(demande_file, 'r', encoding='utf-8') as f:
             demande = f.read()
+
+        with open(prompt_file, 'r', encoding='utf-8') as f:
+            prompt = f.read()
     
         # Exécuter la boucle détaillée
         coder.run(with_message=f"""
         Contexte de la demande initiale {folder}/demande.md :
         {demande}
 
-        Cahier des charges {folder}/cdc.md :
+        Cahier des charges global (niveau 0) {folder}/cdc.md :
         {cdc}
 
-        Liste des tâches {folder}/todolist.md:
+        Liste des tâches à réaliser {folder}/todolist.md:
         {todolist}
+
+        Prompt Général {folder}/prompt.md:
+        {prompt}
 
         Pour chaque étape du processus détaillé, applique le processus suivant:
         1. Crée un fichier prompt.md dans une arborescence miroir des étapes présentées dans {folder}/todolist.md. Ce fichier doit contenir le prompt pour exécuter l'étape en question.
