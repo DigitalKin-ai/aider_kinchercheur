@@ -34,6 +34,10 @@ class GitRepo:
         commit_prompt=None,
         subtree_only=False,
     ):
+        self.ignored_patterns = []
+        if aider_ignore_file:
+            with open(aider_ignore_file, 'r') as f:
+                self.ignored_patterns = [line.strip() for line in f if line.strip() and not line.startswith('#')]
         self.io = io
         self.models = models
 
@@ -271,6 +275,20 @@ class GitRepo:
         res = [fname for fname in files if not self.ignored_file(fname)]
 
         return res
+
+    def is_ignored_file(self, file_path):
+        from fnmatch import fnmatch
+        
+        # Vérifier si le fichier est ignoré par Git
+        if self.repo.ignored(file_path):
+            return True
+        
+        # Vérifier si le fichier correspond à un motif dans .aiderignore
+        for pattern in self.ignored_patterns:
+            if fnmatch(file_path, pattern):
+                return True
+        
+        return False
 
     def normalize_path(self, path):
         orig_path = path
