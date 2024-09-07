@@ -9,8 +9,8 @@ def is_demande_or_todolist(filename):
     ]
     return any(re.search(pattern, filename.lower()) for pattern in patterns)
 
-def is_discussion(filename):
-    return re.search(r'.*discussion.*', filename.lower()) is not None
+def is_prompt(filename):
+    return re.search(r'.*prompt.*', filename.lower()) is not None
 
 def is_analyse(filename):
     return re.search(r'.*analyses.*', filename.lower()) is not None
@@ -26,7 +26,7 @@ def select_relevant_files(file_list, max_files=20):
     text_files = [file for file in file_list if is_text_file(file)]
     
     demandes_and_todolists = [file for file in text_files if is_demande_or_todolist(file)]
-    discussions = [file for file in text_files if is_discussion(file)]
+    prompts = [file for file in text_files if is_prompt(file)]
     analyses = [file for file in text_files if is_analyse(file)]
     
     print(f"DEBUG: Demandes and Todolists: {len(demandes_and_todolists)}")
@@ -34,9 +34,9 @@ def select_relevant_files(file_list, max_files=20):
     for file in demandes_and_todolists:
         print(f"  - {file}")
     
-    print(f"DEBUG: Discussions: {len(discussions)}")
-    print("DEBUG: Discussion files:")
-    for file in discussions:
+    print(f"DEBUG: prompts: {len(prompts)}")
+    print("DEBUG: prompt files:")
+    for file in prompts:
         print(f"  - {file}")
     
     print(f"DEBUG: analyses: {len(analyses)}")
@@ -46,8 +46,8 @@ def select_relevant_files(file_list, max_files=20):
     
     relevant_files = demandes_and_todolists.copy()
     
-    # Add up to 3 random discussion files
-    relevant_files.extend(random.sample(discussions, min(3, len(discussions))))
+    # Add up to 3 random prompt files
+    relevant_files.extend(random.sample(prompts, min(3, len(prompts))))
     
     # Add up to 3 random analyse files
     relevant_files.extend(random.sample(analyses, min(3, len(analyses))))
