@@ -341,6 +341,9 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         print("Usage: python -m aider --folder <folder> --demande <demande>")
         return 1
 
+    # Définir folder_path ici
+    folder_path = os.path.abspath(folder)
+
     # Import generation module here to avoid circular import
     from .generation import generer_cdc
 
@@ -738,7 +741,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         io.tool_output("Fichier sortie.md créé.")
 
     # Select relevant files
-    selected_files = select_relevant_files(folder)
+    selected_files = select_relevant_files(folder_path)
 
     io.tool_output("Fichiers sélectionnés :")
     for file in selected_files:
@@ -747,8 +750,8 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     # Add selected files to the chat
     added_files = []
     for file in selected_files:
-        coder.add_file(file)
-        added_files.append(file)
+        coder.add_file(str(file))
+        added_files.append(str(file))
 
     io.tool_output("Fichiers ajoutés au chat : " + ", ".join(added_files))
     io.tool_output("Les nouveaux fichiers ont été ajoutés au chat.")
