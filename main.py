@@ -763,7 +763,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
                 except Exception as e:
                     io.tool_error(f"Erreur lors de l'ajout/mise à jour du fichier {file}: {str(e)}")
         else:
-            io.tool_output("Le dossier 'analyses' n'existe pas ou n'est pas un répertoire.")
+            io.tool_output("Le dossier 'analyses' n'existe pas ou n'est pas un répertoire. Continuons sans.")
 
     def find_next_step(todolist):
         # Implémentez la logique pour trouver la prochaine étape non terminée
@@ -789,10 +789,13 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         # Retournez True si tous les critères sont remplis, False sinon
         pass
 
-    # Ajout de tous les fichiers du dossier 'analyses' au chat
+    # Ajout de tous les fichiers du dossier 'analyses' au chat, s'il existe
     analyses_folder = Path('analyses')
     last_modified_times = {}
-    add_analyses_files(coder, io, analyses_folder, last_modified_times)
+    try:
+        add_analyses_files(coder, io, analyses_folder, last_modified_times)
+    except Exception as e:
+        io.tool_output(f"Erreur lors de l'ajout des fichiers d'analyse : {str(e)}. Continuons sans.")
     
     # Création du fichier etat_de_lart.md s'il n'existe pas
     etat_de_lart_file = Path(folder) / 'etat_de_lart.md'
