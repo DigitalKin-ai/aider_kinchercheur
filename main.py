@@ -696,6 +696,30 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         else:
             io.tool_output("Le dossier 'analyses' n'existe pas ou n'est pas un répertoire.")
 
+    def find_next_step(todolist):
+        # Implémentez la logique pour trouver la prochaine étape non terminée
+        # Retournez le nom de l'étape ou None si toutes les étapes sont terminées
+        pass
+
+    def create_prompt_file(step):
+        # Créez le fichier prompt.md dans l'arborescence appropriée
+        # Retournez le chemin du fichier créé
+        pass
+
+    def check_cdc_criteria(step):
+        # Vérifiez si l'étape remplit les critères du CDC
+        # Retournez True si les critères sont remplis, False sinon
+        pass
+
+    def update_todolist_status(step):
+        # Mettez à jour le statut de l'étape dans todolist.md
+        pass
+
+    def check_global_cdc_criteria():
+        # Vérifiez si tous les critères du CDC global sont remplis
+        # Retournez True si tous les critères sont remplis, False sinon
+        pass
+
     # Exécution de la fonction get_studies_from_query
     io.tool_output("Exécution de la recherche d'études...")
     try:
@@ -741,36 +765,50 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         
     try:
         while True:
-            io.tool_output("Menu principal:")
-            io.tool_output("1. Travailler sur l'état de l'art")
-            io.tool_output("2. Analyser de nouvelles études")
-            io.tool_output("3. Voir le résumé des progrès")
-            io.tool_output("4. Quitter")
-            
-            choice = io.user_input("Choisissez une option (1-4): ")
-            
-            if choice == '1':
-                section = io.user_input("Sur quelle section voulez-vous travailler ? (ex: Introduction, Méthodologie, etc.) : ")
-                coder.run(with_message=f"""Travaillons sur la section '{section}' de l'état de l'art. 
-                Utilisez le fichier etat_de_lart.md pour écrire et organiser le contenu.
-                Assurez-vous d'intégrer les informations pertinentes des études analysées.
-                Suivez la structure du template.md et les directives pour la rédaction de l'état de l'art.""")
-            elif choice == '2':
-                # Code pour analyser de nouvelles études (similaire à celui au début de la boucle)
-                pass
-            elif choice == '3':
-                # Afficher un résumé des progrès
-                with open(etat_de_lart_file, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                io.tool_output("Résumé des progrès de l'état de l'art:")
-                io.tool_output(content[:500] + "..." if len(content) > 500 else content)
-            elif choice == '4':
-                break
-            else:
-                io.tool_output("Option non valide. Veuillez choisir entre 1 et 4.")
+            # Lire le contenu de todolist.md
+            with open('todolist.md', 'r', encoding='utf-8') as f:
+                todolist = f.read()
 
-            # Vérification et mise à jour des fichiers du dossier 'analyses' avant chaque exécution
-            add_analyses_files(coder, io, analyses_folder, last_modified_times)
+            # Trouver la prochaine étape à réaliser
+            current_step = find_next_step(todolist)
+
+            if not current_step:
+                io.tool_output("Toutes les étapes sont terminées. Le processus est complet.")
+                break
+
+            io.tool_output(f"Étape en cours : {current_step}")
+
+            # Créer le fichier prompt.md
+            prompt_file = create_prompt_file(current_step)
+
+            # Lire le contenu du prompt
+            with open(prompt_file, 'r', encoding='utf-8') as f:
+                prompt_content = f.read()
+
+            # Exécuter l'étape
+            coder.run(with_message=f"""
+            Exécutez l'étape suivante en suivant ce prompt :
+
+            {prompt_content}
+
+            Assurez-vous de respecter le Cahier des Charges décrit dans cdc.md pour cette étape.
+            """)
+
+            # Vérifier si l'étape remplit les critères du CDC
+            if not check_cdc_criteria(current_step):
+                io.tool_output("Les critères du CDC ne sont pas remplis. Réexécution de l'étape ou décomposition en sous-étapes.")
+                continue
+
+            # Mettre à jour le statut de l'étape dans todolist.md
+            update_todolist_status(current_step)
+
+            # Vérifier si tous les critères du CDC global sont remplis
+            if check_global_cdc_criteria():
+                io.tool_output("Tous les critères du CDC global sont remplis. Le processus est terminé.")
+                break
+
+    except Exception as e:
+        io.tool_error(f"Une erreur s'est produite : {str(e)}")
     except SwitchCoder as switch:
         kwargs = dict(io=io, from_coder=coder)
         kwargs.update(switch.kwargs)
