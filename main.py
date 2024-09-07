@@ -316,26 +316,10 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     if argv is None:
         argv = sys.argv[1:]
 
-    parser = get_parser(default_config_files, git_root)
-    args, unknown = parser.parse_known_args(argv)
-
-    folder = args.folder
-    demande = args.demande
-
-    if folder is None or demande is None:
-        print("Usage: python -m aider --folder <folder> --demande <demande>")
-        return 1
-
-    # Import generation module here to avoid circular import
-    from generation import generer_cdc
-
     if force_git_root:
         git_root = force_git_root
     else:
         git_root = get_git_root()
-
-    # Définir folder_path ici
-    folder_path = os.path.abspath(folder)
 
     conf_fname = Path(".aider.conf.yml")
 
@@ -349,6 +333,19 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
 
     parser = get_parser(default_config_files, git_root)
     args, unknown = parser.parse_known_args(argv)
+
+    folder = args.folder
+    demande = args.demande
+
+    if folder is None or demande is None:
+        print("Usage: python -m aider --folder <folder> --demande <demande>")
+        return 1
+
+    # Import generation module here to avoid circular import
+    from generation import generer_cdc
+
+    # Définir folder_path ici
+    folder_path = os.path.abspath(folder)
 
     if args.verbose:
         print("Config files search order, if no --config:")
