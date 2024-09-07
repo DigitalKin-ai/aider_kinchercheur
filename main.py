@@ -742,6 +742,14 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     else:
         io.tool_output("Aucun fichier spécifique n'a été trouvé dans le dossier.")
 
+    # Sélection des fichiers pertinents
+    relevant_files = select_relevant_files(folder)
+    for file in relevant_files:
+        if file not in added_files:
+            coder.add_file(file)
+            added_files.append(file)
+            io.tool_output(f"Fichier pertinent ajouté au chat : {file}")
+
     def check_file_modified(file_path, last_modified_times):
         try:
             current_mtime = os.path.getmtime(file_path)

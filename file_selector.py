@@ -28,9 +28,10 @@ def select_relevant_files(folder_or_files):
     
     if isinstance(folder_or_files, list):
         all_files = folder_or_files
+        base_folder = os.path.commonpath(all_files)
     else:
-        folder = folder_or_files
-        all_files = [os.path.join(root, file) for root, dirs, files in os.walk(folder) for file in files]
+        base_folder = folder_or_files
+        all_files = [os.path.join(root, file) for root, dirs, files in os.walk(base_folder) for file in files]
     
     relevant_files = []
     
@@ -39,7 +40,7 @@ def select_relevant_files(folder_or_files):
         if is_text_file(file):
             if is_demande(file) or is_cdc(file) or is_todolist(file) or is_prompt(file):
                 relevant_files.append(full_path)
-            elif is_analyse(os.path.relpath(full_path, os.path.dirname(folder_or_files))):
+            elif is_analyse(os.path.relpath(full_path, base_folder)):
                 relevant_files.append(full_path)
     
     print("DEBUG: Final selected files:")
