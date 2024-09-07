@@ -720,7 +720,6 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     if args.exit:
         return
 
-    coder.add_file(str(sortie_file))
     thread = threading.Thread(target=load_slow_imports)
     thread.daemon = True
     thread.start()
@@ -739,6 +738,8 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         with open(sortie_file, 'w', encoding='utf-8') as f:
             f.write("# État de l'art\n\n(Contenu à remplir)")
         io.tool_output("Fichier sortie.md créé.")
+    
+    coder.add_file(str(sortie_file))
 
     # Select relevant files
     selected_files = select_relevant_files(folder_path)
