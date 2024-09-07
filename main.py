@@ -6,8 +6,6 @@ import threading
 from pathlib import Path
 
 from aider import __version__, models, utils
-from generation import generer_cdc
-
 import git
 from dotenv import load_dotenv
 from prompt_toolkit.enums import EditingMode
@@ -314,16 +312,22 @@ def register_litellm_models(git_root, model_metadata_fname, io, verbose=False):
 
 import sys
 
-def main(argv=None, input=None, output=None, force_git_root=None, return_coder=False, folder=None, demande=None):
+def main(argv=None, input=None, output=None, force_git_root=None, return_coder=False):
     if argv is None:
         argv = sys.argv[1:]
 
+    parser = get_parser(default_config_files, git_root)
+    args, unknown = parser.parse_known_args(argv)
+
+    folder = args.folder
+    demande = args.demande
+
     if folder is None or demande is None:
-        if len(argv) < 2:
-            print("Usage: python main.py <folder> <demande>")
-            return 1
-        folder, demande = argv[:2]
-        argv = argv[2:]
+        print("Usage: python -m aider --folder <folder> --demande <demande>")
+        return 1
+
+    # Import generation module here to avoid circular import
+    from generation import generer_cdc
 
     if force_git_root:
         git_root = force_git_root
