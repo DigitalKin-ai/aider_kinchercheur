@@ -1704,12 +1704,14 @@ class Coder:
                 return
 
             if not self.dry_run:
-                Path(full_path).parent.mkdir(parents=True, exist_ok=True)
-                Path(full_path).touch()
+                try:
+                    parent_dir = Path(full_path).parent
+                    parent_dir.mkdir(parents=True, exist_ok=True)
+                    Path(full_path).touch()
+                except OSError as e:
+                    self.io.tool_error(f"Error creating file or directory: {e}")
+                    return False
 
-                # Seems unlikely that we needed to create the file, but it was
-                # actually already part of the repo.
-                # But let's only add if we need to, just to be safe.
                 if need_to_add:
                     self.repo.repo.git.add(full_path)
 
