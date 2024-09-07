@@ -820,15 +820,22 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         # Lire le contenu des fichiers
         todolist_file = Path(folder) / 'todolist.md'
         cdc_file = Path(folder) / 'cdc.md'
-        
+        demande_file = Path(folder) / 'demande.md'
+    
         with open(todolist_file, 'r', encoding='utf-8') as f:
             todolist = f.read()
-        
+    
         with open(cdc_file, 'r', encoding='utf-8') as f:
             cdc = f.read()
-        
+    
+        with open(demande_file, 'r', encoding='utf-8') as f:
+            demande = f.read()
+    
         # Exécuter la boucle simplifiée
         coder.run(with_message=f"""
+        Contexte de la demande initiale :
+        {demande}
+
         Pour chaque étape du processus détaillé, applique le processus suivant:
         - Crée un fichier prompt.md, dans une arborescence étant le miroir des étapes de todolist.md. Ce fichier doit contenir le prompt qui permettra l'execution de l'étape.
         - Si l'étape est trop complexe pour être réalisée en un prompt, refais le même principe dans un sous-dossier avec des sous-étapes.
