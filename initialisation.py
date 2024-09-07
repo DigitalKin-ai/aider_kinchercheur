@@ -48,7 +48,7 @@ Demande à partir de laquelle générer le CDC:
 {demande}
 """
 
-    model_name = "gpt-4"  # Vous pouvez ajuster le modèle selon vos besoins
+    model_name = "gpt-4o"  # Vous pouvez ajuster le modèle selon vos besoins
     messages = [{"role": "user", "content": prompt}]
     
     response = simple_send_with_retries(model_name, messages)
