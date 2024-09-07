@@ -1,7 +1,7 @@
 import os
 import logging
 from dotenv import load_dotenv
-from sendchat import simple_send_with_retries
+from .sendchat import simple_send_with_retries
 
 # Charger les variables d'environnement depuis le fichier .env
 load_dotenv()

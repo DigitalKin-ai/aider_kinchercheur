@@ -97,3 +97,34 @@ def simple_send_with_retries(model_name, messages):
         return response.choices[0].message.content
     except (AttributeError, litellm.exceptions.BadRequestError):
         return
+import os
+import time
+from typing import List, Dict, Any
+
+import litellm
+from litellm import completion
+
+def retry_exceptions():
+    return (
+        litellm.exceptions.OpenAIError,
+        litellm.exceptions.AzureError,
+        litellm.exceptions.AnthropicError,
+    )
+
+def simple_send_with_retries(model_name: str, messages: List[Dict[str, Any]]) -> str:
+    max_retries = 5
+    retry_delay = 1
+
+    for attempt in range(max_retries):
+        try:
+            response = completion(model=model_name, messages=messages)
+            return response.choices[0].message.content
+        except retry_exceptions() as e:
+            if attempt < max_retries - 1:
+                print(f"Error: {e}. Retrying in {retry_delay} seconds...")
+                time.sleep(retry_delay)
+                retry_delay *= 2
+            else:
+                raise
+
+    raise Exception("Max retries reached. Unable to get a response.")
