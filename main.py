@@ -785,7 +785,15 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         io.tool_error(f"Erreur lors de l'ajout des fichiers d'analyses : {str(e)}")
 
     # Création du fichier demande.md avec la demande
-    #TODO
+    demande_file = Path(folder) / 'demande.md'
+    if not demande_file.exists():
+        with open(demande_file, 'w', encoding='utf-8') as f:
+            f.write(demande)
+        io.tool_output("Fichier demande.md créé avec la demande initiale.")
+    else:
+        io.tool_output("Le fichier demande.md existe déjà.")
+    
+    coder.add_file(str(demande_file))
     
     # Création du fichier sortie.md s'il n'existe pas
     sortie_file = Path(folder) / 'sortie.md'
