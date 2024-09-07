@@ -93,16 +93,16 @@ Demande à partir de laquelle générer le CDC:
     response = simple_send_with_retries(model_name, messages)
     logger.info("Réponse reçue du modèle")
     
-    # Obtenir le chemin absolu du répertoire contenant le script
-    script_dir = os.path.dirname(os.path.abspath(__file__))
+    # Obtenir le chemin absolu du répertoire du projet (parent du répertoire 'aider')
+    project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     
-    # Créer le dossier dans le répertoire parent du répertoire 'aider'
-    parent_folder = os.path.join(os.path.dirname(script_dir), folder)
-    os.makedirs(parent_folder, exist_ok=True)
-    logger.info(f"Dossier créé/vérifié: {parent_folder}")
+    # Créer le dossier dans le répertoire du projet
+    folder_path = os.path.join(project_dir, folder)
+    os.makedirs(folder_path, exist_ok=True)
+    logger.info(f"Dossier créé/vérifié: {folder_path}")
     
     # Enregistrer la réponse dans le fichier demande.md
-    demande_file = os.path.join(parent_folder, "demande.md")
+    demande_file = os.path.join(folder_path, "demande.md")
     with open(demande_file, "w", encoding="utf-8") as f:
         f.write(response)
     logger.info(f"Cahier des charges enregistré dans: {demande_file}")
@@ -181,7 +181,7 @@ Cahier des charges généré :
     todolist_response = simple_send_with_retries(model_name, todolist_messages)
     logger.info("Réponse reçue pour la liste des tâches")
     
-    todolist_file = os.path.join(parent_folder, "todolist.md")
+    todolist_file = os.path.join(folder_path, "todolist.md")
     with open(todolist_file, "w", encoding="utf-8") as f:
         f.write(todolist_response)
     logger.info(f"Liste des tâches enregistrée dans: {todolist_file}")
@@ -210,12 +210,8 @@ if __name__ == "__main__":
     cdc, todolist = generer_cdc(folder, demande)
     logger.info(f"Génération terminée pour le dossier: {folder}")
     
-    # Définir parent_folder ici
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    parent_folder = os.path.join(os.path.dirname(script_dir), folder)
-    
-    print(f"Cahier des charges généré et enregistré dans {os.path.join(parent_folder, 'demande.md')}")
-    print(f"Liste des tâches générée et enregistrée dans {os.path.join(parent_folder, 'todolist.md')}")
+    print(f"Cahier des charges généré et enregistré dans {os.path.join(folder_path, 'demande.md')}")
+    print(f"Liste des tâches générée et enregistrée dans {os.path.join(folder_path, 'todolist.md')}")
     print("Contenu du cahier des charges :")
     print(cdc)
     print("\nContenu de la liste des tâches :")
