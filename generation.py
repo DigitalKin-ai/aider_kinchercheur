@@ -174,6 +174,10 @@ Demande à décomposer :
 
 Cahier des charges généré :
 {response}
+
+Chemins des fichiers :
+- Cahier des charges : {os.path.join(folder_path, 'cdc.md')}
+- Liste des tâches : {os.path.join(folder_path, 'todolist.md')}
 """
 
     logger.info("Envoi de la demande pour la génération de la liste des tâches")
