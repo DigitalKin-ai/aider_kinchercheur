@@ -440,6 +440,38 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         editingmode=editing_mode,
     )
 
+    # Créer l'objet coder
+    coder = Coder.create(
+        main_model=models.Model(args.model),
+        edit_format=args.edit_format,
+        io=io,
+        repo=None,  # Nous n'utilisons pas de repo Git ici
+        fnames=[],  # Nous ajouterons les fichiers plus tard
+        read_only_fnames=[],
+        show_diffs=args.show_diffs,
+        auto_commits=False,  # Pas de commits automatiques
+        dirty_commits=False,
+        dry_run=args.dry_run,
+        map_tokens=args.map_tokens,
+        verbose=args.verbose,
+        assistant_output_color=args.assistant_output_color,
+        code_theme=args.code_theme,
+        stream=args.stream,
+        use_git=False,
+        restore_chat_history=args.restore_chat_history,
+        auto_lint=args.auto_lint,
+        auto_test=args.auto_test,
+        lint_cmds=None,
+        test_cmd=args.test_cmd,
+        commands=Commands(io, None),
+        summarizer=ChatSummary(
+            [models.Model(args.model).weak_model, models.Model(args.model)],
+            args.max_chat_history_tokens or models.Model(args.model).max_chat_history_tokens,
+        ),
+        map_refresh=args.map_refresh,
+        cache_prompts=args.cache_prompts,
+    )
+
     # Ajout des fichiers spécifiques du dossier
     specific_files = ['todolist.md', 'cdc.md', 'prompt.md']
     added_files = []
@@ -581,6 +613,8 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             coder.show_announcements()
     except Exception as e:
         io.tool_error(f"Une erreur s'est produite : {str(e)}")
+
+    return coder if return_coder else 0
 
 
 def load_slow_imports():
