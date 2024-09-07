@@ -553,7 +553,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
 
     # Vérification des nouveaux fichiers
     try:
-        new_files = coder.check_for_new_files()
+        new_files = check_for_new_files()
         if new_files:
             io.tool_output("Nouveaux fichiers détectés et ajoutés au chat.")
     except Exception as e:
