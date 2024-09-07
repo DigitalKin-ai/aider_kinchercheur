@@ -1614,12 +1614,15 @@ class Coder:
             all_files = set(self.repo.get_tracked_files())
             new_files = all_files - set(self.abs_fnames)
             if new_files:
-                self.io.tool_output(f"Nouveaux fichiers détectés : {', '.join(new_files)}")
-                self.io.tool_output("Sélection des fichiers les plus pertinents...")
-                selected_files = select_relevant_files(list(new_files))
-                selected_files = selected_files[:20]  # Limite à 20 fichiers
-                self.io.tool_output(f"Fichiers sélectionnés : {', '.join(selected_files)}")
-                return self.add_files_to_chat(selected_files)
+                # Filtrer les fichiers ignorés
+                new_files = [f for f in new_files if not self.repo.is_ignored_file(f)]
+                if new_files:
+                    self.io.tool_output(f"Nouveaux fichiers détectés : {', '.join(new_files)}")
+                    self.io.tool_output("Sélection des fichiers les plus pertinents...")
+                    selected_files = select_relevant_files(list(new_files))
+                    selected_files = selected_files[:20]  # Limite à 20 fichiers
+                    self.io.tool_output(f"Fichiers sélectionnés : {', '.join(selected_files)}")
+                    return self.add_files_to_chat(selected_files)
         return False
 
     def add_files_to_chat(self, files):
