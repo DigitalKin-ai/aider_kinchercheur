@@ -31,6 +31,8 @@ def get_parser(default_config_files, git_root):
     group.add_argument(
         "files", metavar="FILE", nargs="*", help="files to edit with an LLM (optional)"
     )
+    group.add_argument('--folder', type=str, help='Folder path for the project')
+    group.add_argument('--demande', type=str, help='Demand for the project')
     group.add_argument(
         "--openai-api-key",
         metavar="OPENAI_API_KEY",
