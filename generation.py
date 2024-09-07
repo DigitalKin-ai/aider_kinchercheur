@@ -207,6 +207,10 @@ if __name__ == "__main__":
     logger.info(f"Démarrage du script avec le dossier: {folder}")
     logger.info(f"Demande: {demande}")
     
+    # Définir folder_path ici
+    project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    folder_path = os.path.join(project_dir, folder)
+    
     cdc, todolist = generer_cdc(folder, demande)
     logger.info(f"Génération terminée pour le dossier: {folder}")
     
