@@ -284,7 +284,7 @@ class InputOutput:
         prefix = "####"
         hist = ["""IMPORTANT INSTRUCTIONS: 
     - Don't use main.py or other scripts to write the SOTA, write it via text files mainly.
-    - Write the SOTA progressively, using template.md as the reference. Only do modifications one by one, leaving the () [] \{\} if they are still needed.
+    - Write the SOTA progressively, using template.md as the reference. Only do modifications one by one, leaving the () [] {} if they are still needed.
     - Make sure you have downloaded and read at least 10 studies.
     - Make sure you only reference studies that you have downloaded and read."""]
 
@@ -296,7 +296,7 @@ class InputOutput:
         
         return """IMPORTANT INSTRUCTIONS: 
     - Don't use main.py or other scripts to write the SOTA, write it via text files mainly.
-    - Write the SOTA progressively, using template.md as the reference. Only do modifications one by one, leaving the () [] \{\} if they are still needed.
+    - Write the SOTA progressively, using template.md as the reference. Only do modifications one by one, leaving the () [] {} if they are still needed.
     - Make sure you have downloaded and read at least 10 studies.
     - Make sure you only reference studies that you have downloaded and read."""
 
