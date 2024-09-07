@@ -10,6 +10,8 @@ import git
 from dotenv import load_dotenv
 from prompt_toolkit.enums import EditingMode
 
+DEFAULT_MODEL_NAME = "gpt-4o"  # ou le modèle par défaut que vous souhaitez utiliser
+
 # Add the parent directory to sys.path
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
@@ -441,8 +443,11 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     )
 
     # Créer l'objet coder
+    # Définir le modèle par défaut si aucun n'est spécifié
+    model_name = args.model or DEFAULT_MODEL_NAME
+    
     coder = Coder.create(
-        main_model=models.Model(args.model),
+        main_model=models.Model(model_name),
         edit_format=args.edit_format,
         io=io,
         repo=None,  # Nous n'utilisons pas de repo Git ici
@@ -465,8 +470,8 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         test_cmd=args.test_cmd,
         commands=Commands(io, None),
         summarizer=ChatSummary(
-            [models.Model(args.model).weak_model, models.Model(args.model)],
-            args.max_chat_history_tokens or models.Model(args.model).max_chat_history_tokens,
+            [models.Model(model_name).weak_model, models.Model(model_name)],
+            args.max_chat_history_tokens or models.Model(model_name).max_chat_history_tokens,
         ),
         map_refresh=args.map_refresh,
         cache_prompts=args.cache_prompts,
