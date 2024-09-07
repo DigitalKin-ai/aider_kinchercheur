@@ -24,19 +24,11 @@ def is_text_file(filename):
     return any(filename.lower().endswith(ext) for ext in text_extensions)
 
 def select_relevant_files(folder_or_files):
-    if isinstance(folder_or_files, list):
-        # Si c'est une liste, on la traite directement
-        all_files = folder_or_files
-    else:
-        # Si c'est un dossier, on liste les fichiers
-        folder = folder_or_files
-    print(f"DEBUG: select_relevant_files function called for folder: {folder_or_files}")
+    print(f"DEBUG: select_relevant_files function called for: {folder_or_files}")
     
     if isinstance(folder_or_files, list):
-        # Si c'est une liste, on la traite directement
         all_files = folder_or_files
     else:
-        # Si c'est un dossier, on liste les fichiers
         folder = folder_or_files
         all_files = [os.path.join(root, file) for root, dirs, files in os.walk(folder) for file in files]
     
@@ -47,7 +39,7 @@ def select_relevant_files(folder_or_files):
         if is_text_file(file):
             if is_demande(file) or is_cdc(file) or is_todolist(file) or is_prompt(file):
                 relevant_files.append(full_path)
-            elif is_analyse(os.path.relpath(full_path, os.path.dirname(full_path))):
+            elif is_analyse(os.path.relpath(full_path, os.path.dirname(folder_or_files))):
                 relevant_files.append(full_path)
     
     print("DEBUG: Final selected files:")
@@ -58,14 +50,18 @@ def select_relevant_files(folder_or_files):
 
 if __name__ == "__main__":
     import sys
-    if len(sys.argv) != 2:
-        print("Usage: python file_selector.py <folder>")
+    if len(sys.argv) < 2:
+        print("Usage: python file_selector.py <folder_or_file1> [file2] [file3] ...")
         sys.exit(1)
     
-    folder = sys.argv[1]
-    print(f"DEBUG: file_selector.py executed directly for folder: {folder}")
+    args = sys.argv[1:]
+    print(f"DEBUG: file_selector.py executed directly with arguments: {args}")
     
-    selected_files = select_relevant_files(folder)
+    if len(args) == 1 and os.path.isdir(args[0]):
+        selected_files = select_relevant_files(args[0])
+    else:
+        selected_files = select_relevant_files(args)
+    
     print("\nSelected files:")
     for file in selected_files:
         print(file)
