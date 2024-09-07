@@ -1611,29 +1611,29 @@ class Coder:
         current_time = time.time()
         if current_time - self.last_file_check >= self.file_check_interval:
             self.last_file_check = current_time
-            all_files = set(self.repo.get_tracked_files())
-            new_files = all_files - set(self.abs_fnames)
+            all_files = set(self.get_all_relative_files())
+            new_files = all_files - set(self.get_inchat_relative_files())
             if new_files:
                 # Filtrer les fichiers ignorés
-                new_files = [f for f in new_files if not self.repo.is_ignored_file(f)]
+                new_files = [f for f in new_files if not self.is_ignored_file(f)]
                 if new_files:
                     self.io.tool_output(f"Nouveaux fichiers détectés : {', '.join(new_files)}")
                     self.io.tool_output("Sélection des fichiers les plus pertinents...")
-                    selected_files = select_relevant_files(list(new_files))
+                    selected_files = select_relevant_files([os.path.join(self.root, f) for f in new_files])
                     selected_files = selected_files[:20]  # Limite à 20 fichiers
                     self.io.tool_output(f"Fichiers sélectionnés : {', '.join(selected_files)}")
                     return self.add_files_to_chat(selected_files)
         return False
 
-    def add_files_to_chat(files):
+    def add_files_to_chat(self, files):
         added_files = []
         for file in files:
-            if io.confirm_ask(f"Voulez-vous ajouter {file} au chat ?"):
-                coder.add_rel_fname(file)
+            if self.io.confirm_ask(f"Voulez-vous ajouter {file} au chat ?"):
+                self.add_rel_fname(file)
                 added_files.append(file)
         
         if added_files:
-            io.tool_output(f"Fichiers ajoutés au chat : {', '.join(added_files)}")
+            self.io.tool_output(f"Fichiers ajoutés au chat : {', '.join(added_files)}")
             return True
         return False
 

@@ -553,7 +553,8 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
 
     # Vérification des nouveaux fichiers
     try:
-        new_files = check_for_new_files()
+        # Vérification des nouveaux fichiers
+        new_files = coder.check_for_new_files()
         if new_files:
             io.tool_output("Nouveaux fichiers détectés et ajoutés au chat.")
     except Exception as e:
@@ -561,22 +562,21 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         
     try:
         # Lire le contenu des fichiers
-        demande_file = Path(folder) / 'demande.md'
-        cdc_file = Path(folder) / 'cdc.md'
-        todolist_file = Path(folder) / 'todolist.md'
-        prompt_file = Path(folder) / 'prompt.md'
-    
-        with open(demande_file, 'r', encoding='utf-8') as f:
-            demande = f.read()
-    
-        with open(cdc_file, 'r', encoding='utf-8') as f:
-            cdc = f.read()
+        files_to_read = {
+            'demande': 'demande.md',
+            'cdc': 'cdc.md',
+            'todolist': 'todolist.md',
+            'prompt': 'prompt.md'
+        }
+        file_contents = {}
 
-        with open(todolist_file, 'r', encoding='utf-8') as f:
-            todolist = f.read()
-    
-        with open(prompt_file, 'r', encoding='utf-8') as f:
-            prompt = f.read()
+        for key, filename in files_to_read.items():
+            file_path = Path(folder) / filename
+            if file_path.exists():
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    file_contents[key] = f.read()
+            else:
+                io.tool_error(f"Le fichier {filename} n'existe pas dans le dossier {folder}.")
     
         # Exécuter la boucle détaillée
         coder.run(with_message=f"""
