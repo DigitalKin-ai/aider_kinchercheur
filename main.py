@@ -739,50 +739,50 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     
     coder.add_file(str(etat_de_lart_file))
         
-    while True:
-        io.tool_output("Menu principal:")
-        io.tool_output("1. Travailler sur l'état de l'art")
-        io.tool_output("2. Analyser de nouvelles études")
-        io.tool_output("3. Voir le résumé des progrès")
-        io.tool_output("4. Quitter")
-        
-        choice = io.user_input("Choisissez une option (1-4): ")
-        
-        if choice == '1':
-            section = io.user_input("Sur quelle section voulez-vous travailler ? (ex: Introduction, Méthodologie, etc.) : ")
-            coder.run(with_message=f"""Travaillons sur la section '{section}' de l'état de l'art. 
-            Utilisez le fichier etat_de_lart.md pour écrire et organiser le contenu.
-            Assurez-vous d'intégrer les informations pertinentes des études analysées.
-            Suivez la structure du template.md et les directives pour la rédaction de l'état de l'art.""")
-        elif choice == '2':
-            # Code pour analyser de nouvelles études (similaire à celui au début de la boucle)
-            pass
-        elif choice == '3':
-            # Afficher un résumé des progrès
-            with open(etat_de_lart_file, 'r', encoding='utf-8') as f:
-                content = f.read()
-            io.tool_output("Résumé des progrès de l'état de l'art:")
-            io.tool_output(content[:500] + "..." if len(content) > 500 else content)
-        elif choice == '4':
-            break
-        else:
-            io.tool_output("Option non valide. Veuillez choisir entre 1 et 4.")
+    try:
+        while True:
+            io.tool_output("Menu principal:")
+            io.tool_output("1. Travailler sur l'état de l'art")
+            io.tool_output("2. Analyser de nouvelles études")
+            io.tool_output("3. Voir le résumé des progrès")
+            io.tool_output("4. Quitter")
+            
+            choice = io.user_input("Choisissez une option (1-4): ")
+            
+            if choice == '1':
+                section = io.user_input("Sur quelle section voulez-vous travailler ? (ex: Introduction, Méthodologie, etc.) : ")
+                coder.run(with_message=f"""Travaillons sur la section '{section}' de l'état de l'art. 
+                Utilisez le fichier etat_de_lart.md pour écrire et organiser le contenu.
+                Assurez-vous d'intégrer les informations pertinentes des études analysées.
+                Suivez la structure du template.md et les directives pour la rédaction de l'état de l'art.""")
+            elif choice == '2':
+                # Code pour analyser de nouvelles études (similaire à celui au début de la boucle)
+                pass
+            elif choice == '3':
+                # Afficher un résumé des progrès
+                with open(etat_de_lart_file, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                io.tool_output("Résumé des progrès de l'état de l'art:")
+                io.tool_output(content[:500] + "..." if len(content) > 500 else content)
+            elif choice == '4':
+                break
+            else:
+                io.tool_output("Option non valide. Veuillez choisir entre 1 et 4.")
 
-        # Vérification et mise à jour des fichiers du dossier 'analyses' avant chaque exécution
-        add_analyses_files(coder, io, analyses_folder, last_modified_times)
-        except SwitchCoder as switch:
-            kwargs = dict(io=io, from_coder=coder)
-            kwargs.update(switch.kwargs)
-            if "show_announcements" in kwargs:
-                del kwargs["show_announcements"]
+            # Vérification et mise à jour des fichiers du dossier 'analyses' avant chaque exécution
+            add_analyses_files(coder, io, analyses_folder, last_modified_times)
+    except SwitchCoder as switch:
+        kwargs = dict(io=io, from_coder=coder)
+        kwargs.update(switch.kwargs)
+        if "show_announcements" in kwargs:
+            del kwargs["show_announcements"]
 
-            coder = Coder.create(**kwargs)
+        coder = Coder.create(**kwargs)
 
-            if switch.kwargs.get("show_announcements") is not False:
-                coder.show_announcements()
-        except Exception as e:
-            io.tool_error(f"Une erreur s'est produite : {str(e)}")
-            break
+        if switch.kwargs.get("show_announcements") is not False:
+            coder.show_announcements()
+    except Exception as e:
+        io.tool_error(f"Une erreur s'est produite : {str(e)}")
 
 
 def load_slow_imports():
