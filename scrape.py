@@ -2,6 +2,7 @@
 
 import re
 import sys
+import asyncio
 
 import pypandoc
 
@@ -14,17 +15,17 @@ aider_user_agent = f"aider/{__version__} +{urls.website}"
 # platforms.
 
 
-def install_playwright(io):
+async def install_playwright(io):
     try:
-        from playwright.sync_api import sync_playwright
+        from playwright.async_api import async_playwright
 
         has_pip = True
     except ImportError:
         has_pip = False
 
     try:
-        with sync_playwright() as p:
-            p.chromium.launch()
+        async with async_playwright() as p:
+            await p.chromium.launch()
             has_chromium = True
     except Exception:
         has_chromium = False
@@ -53,12 +54,12 @@ See {urls.enable_playwright} for more info.
         return
 
     if not has_pip:
-        success, output = utils.run_install(pip_cmd)
+        success, output = await utils.run_install(pip_cmd)
         if not success:
             io.tool_error(output)
             return
 
-    success, output = utils.run_install(chromium_cmd)
+    success, output = await utils.run_install(chromium_cmd)
     if not success:
         io.tool_error(output)
         return
@@ -85,7 +86,7 @@ class Scraper:
         self.playwright_available = playwright_available
         self.verify_ssl = verify_ssl
 
-    def scrape(self, url):
+    async def scrape(self, url):
         """
         Scrape a url and turn it into readable markdown if it's HTML.
         If it's plain text or non-HTML, return it as-is.
@@ -94,9 +95,9 @@ class Scraper:
         """
 
         if self.playwright_available:
-            content, mime_type = self.scrape_with_playwright(url)
+            content, mime_type = await self.scrape_with_playwright(url)
         else:
-            content, mime_type = self.scrape_with_httpx(url)
+            content, mime_type = await self.scrape_with_httpx(url)
 
         if not content:
             self.print_error(f"Failed to retrieve content from {url}")
@@ -106,8 +107,8 @@ class Scraper:
         if (mime_type and mime_type.startswith("text/html")) or (
             mime_type is None and self.looks_like_html(content)
         ):
-            self.try_pandoc()
-            content = self.html_to_markdown(content)
+            await self.try_pandoc()
+            content = await self.html_to_markdown(content)
 
         return content
 
@@ -130,32 +131,32 @@ class Scraper:
         return False
 
     # Internals...
-    def scrape_with_playwright(self, url):
+    async def scrape_with_playwright(self, url):
         import playwright
-        from playwright.sync_api import sync_playwright
+        from playwright.async_api import async_playwright
 
-        with sync_playwright() as p:
+        async with async_playwright() as p:
             try:
-                browser = p.chromium.launch()
+                browser = await p.chromium.launch()
             except Exception as e:
                 self.playwright_available = False
                 self.print_error(str(e))
                 return None, None
 
             try:
-                context = browser.new_context(ignore_https_errors=not self.verify_ssl)
-                page = context.new_page()
+                context = await browser.new_context(ignore_https_errors=not self.verify_ssl)
+                page = await context.new_page()
 
-                user_agent = page.evaluate("navigator.userAgent")
+                user_agent = await page.evaluate("navigator.userAgent")
                 user_agent = user_agent.replace("Headless", "")
                 user_agent = user_agent.replace("headless", "")
                 user_agent += " " + aider_user_agent
 
-                page.set_extra_http_headers({"User-Agent": user_agent})
+                await page.set_extra_http_headers({"User-Agent": user_agent})
 
                 response = None
                 try:
-                    response = page.goto(url, wait_until="networkidle", timeout=5000)
+                    response = await page.goto(url, wait_until="networkidle", timeout=5000)
                 except playwright._impl._errors.TimeoutError:
                     self.print_error(f"Timeout while loading {url}")
                 except playwright._impl._errors.Error as e:
@@ -163,26 +164,26 @@ class Scraper:
                     return None, None
 
                 try:
-                    content = page.content()
+                    content = await page.content()
                     mime_type = (
-                        response.header_value("content-type").split(";")[0] if response else None
+                        await response.header_value("content-type").split(";")[0] if response else None
                     )
                 except playwright._impl._errors.Error as e:
                     self.print_error(f"Error retrieving page content: {str(e)}")
                     content = None
                     mime_type = None
             finally:
-                browser.close()
+                await browser.close()
 
         return content, mime_type
 
-    def scrape_with_httpx(self, url):
+    async def scrape_with_httpx(self, url):
         import httpx
 
         headers = {"User-Agent": f"Mozilla./5.0 ({aider_user_agent})"}
         try:
-            with httpx.Client(headers=headers, verify=self.verify_ssl) as client:
-                response = client.get(url)
+            async with httpx.AsyncClient(headers=headers, verify=self.verify_ssl) as client:
+                response = await client.get(url)
                 response.raise_for_status()
                 return response.text, response.headers.get("content-type", "").split(";")[0]
         except httpx.HTTPError as http_err:
@@ -191,7 +192,7 @@ class Scraper:
             self.print_error(f"An error occurred: {err}")
         return None, None
 
-    def try_pandoc(self):
+    async def try_pandoc(self):
         if self.pandoc_available:
             return
 
@@ -203,24 +204,24 @@ class Scraper:
             pass
 
         try:
-            pypandoc.download_pandoc(delete_installer=True)
+            await asyncio.to_thread(pypandoc.download_pandoc, delete_installer=True)
         except Exception as err:
             self.print_error(f"Unable to install pandoc: {err}")
             return
 
         self.pandoc_available = True
 
-    def html_to_markdown(self, page_source):
+    async def html_to_markdown(self, page_source):
         from bs4 import BeautifulSoup
 
         soup = BeautifulSoup(page_source, "html.parser")
-        soup = slimdown_html(soup)
+        soup = await asyncio.to_thread(slimdown_html, soup)
         page_source = str(soup)
 
         if not self.pandoc_available:
             return page_source
 
-        md = pypandoc.convert_text(page_source, "markdown", format="html")
+        md = await asyncio.to_thread(pypandoc.convert_text, page_source, "markdown", format="html")
 
         md = re.sub(r"</div>", "      ", md)
         md = re.sub(r"<div>", "     ", md)
@@ -251,7 +252,7 @@ def slimdown_html(soup):
     return soup
 
 
-def main():
+async def main():
     # Liste des URLs à scraper
     urls = [
         "https://example.com/research1",
@@ -262,7 +263,7 @@ def main():
     scraper = Scraper()
     for url in urls:
         print(f"Scraping {url}...")
-        content = scraper.scrape(url)
+        content = await scraper.scrape(url)
         if content:
             # Sauvegarde du contenu dans un fichier dans le dossier 'analyses'
             filename = f"analyses/{url.split('/')[-1]}.txt"
@@ -273,4 +274,4 @@ def main():
             print(f"Échec du scraping pour {url}")
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
