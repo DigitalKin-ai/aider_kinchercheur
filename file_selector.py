@@ -6,14 +6,20 @@ import os
 def is_in_correct_folder(filename, folder):
     return os.path.dirname(filename) == folder
 
-def is_message(filename, folder):
-    return re.search(r'message\.md', filename.lower()) is not None and is_in_correct_folder(filename, folder)
+def is_request(filename, folder):
+    return re.search(r'request\.md', filename.lower()) is not None and is_in_correct_folder(filename, folder)
+
+def is_role(filename, role):
+    return re.search(r'role\.md', role.lower()) is not None and is_in_correct_folder(filename, role) # Only one per agent
+
+def is_journal(filename, role):
+    return re.search(r'journal\.md', role.lower()) is not None and is_in_correct_folder(filename, role) # Only one per agent
 
 def is_specifications(filename, folder):
     return re.search(r'specifications\.md', filename.lower()) is not None and is_in_correct_folder(filename, folder)
 
-def is_todolist(filename, folder):
-    return re.search(r'todolist\.md', filename.lower()) is not None and is_in_correct_folder(filename, folder)
+def is_todolist(filename, role):
+    return re.search(r'todolist\.md', filename.lower()) is not None and is_in_correct_folder(filename, role) # Only one per agent
 
 def is_prompt(filename, folder):
     return re.search(r'prompt\.md', filename.lower()) is not None and is_in_correct_folder(filename, folder)
@@ -31,7 +37,7 @@ def is_text_file(filename):
     text_extensions = ['.md', '.txt', '.py', '.js', '.html', '.css', '.json', '.yml', '.yaml', '.ini', '.cfg']
     return any(filename.lower().endswith(ext) for ext in text_extensions)
 
-def select_relevant_files(folder_or_files):
+def select_relevant_files(folder_or_files, role):
     print(f"DEBUG: select_relevant_files function called for: {folder_or_files}")
     
     if isinstance(folder_or_files, list):
@@ -45,9 +51,11 @@ def select_relevant_files(folder_or_files):
         file = os.path.basename(full_path)
         folder = os.path.dirname(full_path)
         if is_text_file(file):
-            if (is_message(full_path, folder) or 
+            if (is_request(full_path, folder) or
+                is_role(full_path, role) or 
+                is_journal(full_path, role) or 
                 is_specifications(full_path, folder) or 
-                is_todolist(full_path, folder) or 
+                is_todolist(full_path, role) or 
                 is_prompt(full_path, folder) or
                 is_toolbox(full_path, folder) or
                 is_output(full_path, folder) or
@@ -63,7 +71,7 @@ def select_relevant_files(folder_or_files):
 if __name__ == "__main__":
     import sys
     if len(sys.argv) < 2:
-        print("Usage: python file_selector.py <folder_or_file1> [file2] [file3] ...")
+        print("Usage: python file_selector.py <folder>")
         sys.exit(1)
     
     args = sys.argv[1:]
