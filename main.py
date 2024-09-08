@@ -337,11 +337,11 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     args, unknown = parser.parse_known_args(argv)
 
     folder = args.folder
-    demande = args.demande
-    append_message = args.append_demande
+    request = args.request
+    append_message = args.append_request
 
     if folder is None:
-        print("Usage: python -m aider --folder <folder> [--demande <demande>] [--message <message>]")
+        print("Usage: python -m aider --folder <folder> [--request <request>] [--message <message>]")
         return 1
 
     # Define folder_path here
@@ -365,45 +365,45 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     )
 
     # Check if the request is already present in the folder
-    demande_file = Path(folder_path) / 'demande.md'
-    if demande_file.exists():
-        with open(demande_file, 'r', encoding='utf-8') as f:
-            existing_demande = f.read().strip()
-        if demande is None:
-            demande = existing_demande
-        elif demande.strip() == existing_demande:
-            io.tool_output("The request is identical to the one already present. No need to regenerate the CDC.")
+    request_file = Path(folder_path) / 'request.md'
+    if request_file.exists():
+        with open(request_file, 'r', encoding='utf-8') as f:
+            existing_request = f.read().strip()
+        if request is None:
+            request = existing_request
+        elif request.strip() == existing_request:
+            io.tool_output("The request is identical to the one already present. No need to regenerate the specifications.")
         else:
-            # Save the new demande
-            with open(demande_file, 'w', encoding='utf-8') as f:
-                f.write(demande)
-            io.tool_output(f"New request saved to {demande_file}")
+            # Save the new request
+            with open(request_file, 'w', encoding='utf-8') as f:
+                f.write(request)
+            io.tool_output(f"New request saved to {request_file}")
             # Import generation module here to avoid circular import
-            from .generation import generer_cdc
-            cdc, todolist, prompt = generer_cdc(folder_path, demande)
+            from .generation import generate_specifications
+            specifications, todolist, prompt = generate_specifications(folder_path, request)
             io.tool_output(f"Specifications, task list, and prompt generated for the folder: {folder_path}")
-    elif demande is None:
-        # Create a demande.md file with default text
-        demande = "Set a coherent mission from the informations available"
-        with open(demande_file, 'w', encoding='utf-8') as f:
-            f.write(demande)
-        io.tool_output(f"Created a request file with default text: {demande_file}")
+    elif request is None:
+        # Create a request.md file with default text
+        request = "Set a coherent mission from the information available"
+        with open(request_file, 'w', encoding='utf-8') as f:
+            f.write(request)
+        io.tool_output(f"Created a request file with default text: {request_file}")
     
-    # Save the new demande (empty or not)
-    with open(demande_file, 'w', encoding='utf-8') as f:
-        f.write(demande)
-    io.tool_output(f"Request saved to {demande_file}")
+    # Save the new request (empty or not)
+    with open(request_file, 'w', encoding='utf-8') as f:
+        f.write(request)
+    io.tool_output(f"Request saved to {request_file}")
     
     # Import generation module here to avoid circular import
-    from .generation import generer_cdc
-    cdc, todolist, prompt = generer_cdc(folder_path, demande)
+    from .generation import generate_specifications
+    specifications, todolist, prompt = generate_specifications(folder_path, request)
     io.tool_output(f"Specifications, task list, and prompt generated for the folder: {folder_path}")
 
     # Add the message to the end of the request file if it's present
     if append_message:
-        with open(demande_file, 'a', encoding='utf-8') as f:
+        with open(request_file, 'a', encoding='utf-8') as f:
             f.write(f"\n\n{append_message}")
-        io.tool_output(f"Message added to the end of the request file: {demande_file}")
+        io.tool_output(f"Message added to the end of the request file: {request_file}")
 
     if args.verbose:
         print("Config files search order, if no --config:")

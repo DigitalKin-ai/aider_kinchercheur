@@ -10,16 +10,16 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-def generer_cdc(folder_path, request):
+def generate_specifications(folder_path, request):
     logger.info(f"Starting the generation of specifications for the folder: {folder_path}")
     logger.info(f"Received request: {request}")
     
-    # S'assurer que le dossier existe
+    # Ensure that the folder exists
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
-        logger.info(f"Dossier créé: {folder_path}")
+        logger.info(f"Folder created: {folder_path}")
     else:
-        logger.info(f"Dossier existant: {folder_path}")
+        logger.info(f"Existing folder: {folder_path}")
 
     prompt = f"""# Prompt for the Specifications Generator (KinSpecifier)
 

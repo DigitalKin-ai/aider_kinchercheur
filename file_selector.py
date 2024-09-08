@@ -6,11 +6,11 @@ import os
 def is_in_correct_folder(filename, folder):
     return os.path.dirname(filename) == folder
 
-def is_demande(filename, folder):
-    return re.search(r'demande\.md', filename.lower()) is not None and is_in_correct_folder(filename, folder)
+def is_request(filename, folder):
+    return re.search(r'request\.md', filename.lower()) is not None and is_in_correct_folder(filename, folder)
 
-def is_cdc(filename, folder):
-    return re.search(r'cdc\.md', filename.lower()) is not None and is_in_correct_folder(filename, folder)
+def is_specifications(filename, folder):
+    return re.search(r'specifications\.md', filename.lower()) is not None and is_in_correct_folder(filename, folder)
 
 def is_todolist(filename, folder):
     return re.search(r'todolist\.md', filename.lower()) is not None and is_in_correct_folder(filename, folder)
@@ -18,10 +18,10 @@ def is_todolist(filename, folder):
 def is_prompt(filename, folder):
     return re.search(r'prompt\.md', filename.lower()) is not None and is_in_correct_folder(filename, folder)
 
-def is_sortie(filename, folder):
-    return re.search(r'sortie\.md', filename.lower()) is not None and is_in_correct_folder(filename, folder)
+def is_output(filename, folder):
+    return re.search(r'output\.md', filename.lower()) is not None and is_in_correct_folder(filename, folder)
 
-def is_analyse(filename, folder):
+def is_analysis(filename, folder):
     return filename.lower().startswith('analyses/') and is_in_correct_folder(filename, os.path.join(folder, 'analyses'))
 
 def is_text_file(filename):
@@ -42,13 +42,13 @@ def select_relevant_files(folder_or_files):
         file = os.path.basename(full_path)
         folder = os.path.dirname(full_path)
         if is_text_file(file):
-            if (is_demande(full_path, folder) or 
-                is_cdc(full_path, folder) or 
+            if (is_request(full_path, folder) or 
+                is_specifications(full_path, folder) or 
                 is_todolist(full_path, folder) or 
                 is_prompt(full_path, folder) or
-                is_sortie(full_path, folder)):
+                is_output(full_path, folder)):
                 relevant_files.append(full_path)
-            elif is_analyse(full_path, folder):
+            elif is_analysis(full_path, folder):
                 relevant_files.append(full_path)
     
     print("DEBUG: Final selected files:")
