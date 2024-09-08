@@ -69,9 +69,9 @@ def get_state():
 
 
 @st.cache_resource
-def get_coder():
+async def get_coder():
     from aider.main import main as cli_main
-    coder = cli_main(return_coder=True)
+    coder = await cli_main(return_coder=True)
     if not isinstance(coder, Coder):
         raise ValueError(coder)
     if not coder.repo:
@@ -437,8 +437,8 @@ class GUI:
 
         return st.button(args, **kwargs)
 
-    def __init__(self):
-        self.coder = get_coder()
+    async def __init__(self):
+        self.coder = await get_coder()
         self.state = get_state()
 
         # Force the coder to cooperate, regardless of cmd line args
@@ -456,7 +456,7 @@ class GUI:
             self.prompt = user_inp
 
         if self.prompt_pending():
-            self.process_chat()
+            await self.process_chat()
 
         if not self.prompt:
             return
@@ -480,7 +480,7 @@ class GUI:
                 st.text(self.prompt)
 
         # Initialize Playwright browser
-        asyncio.run(self.initialize_playwright())
+        await self.initialize_playwright()
 
         # re-render the UI for the prompt_pending state
         st.rerun()
@@ -633,7 +633,7 @@ class GUI:
             self.prompt = reply
 
 
-def gui_main():
+async def gui_main():
     st.set_page_config(
         layout="wide",
         page_title="aider",
@@ -649,11 +649,11 @@ def gui_main():
     # for key, value in config_options.items():
     #    print(f"{key}: {value.value}")
 
-    GUI()
+    await GUI()
 
 
-def launch_gui(argv):
-    return gui_main()
+async def launch_gui(argv):
+    return await gui_main()
 
 if __name__ == "__main__":
     status = gui_main()
