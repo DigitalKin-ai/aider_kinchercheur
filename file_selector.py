@@ -47,10 +47,13 @@ def select_relevant_files(folder_or_files, role):
     if isinstance(folder_or_files, list):
         all_files = folder_or_files
     elif isinstance(folder_or_files, str):
+        folder_or_files = os.path.abspath(folder_or_files)
         all_files = [os.path.join(root, file) for root, dirs, files in os.walk(folder_or_files) for file in files]
     else:
         print(f"ERROR: Unexpected type for folder_or_files: {type(folder_or_files)}")
         return []
+    
+    print(f"DEBUG: all_files: {all_files}")
     
     relevant_files = []
     

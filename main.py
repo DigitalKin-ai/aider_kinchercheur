@@ -589,7 +589,9 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
 
     # Select relevant files
     if folder:
-        relevant_files = select_relevant_files(folder, role="default")
+        folder_path = os.path.abspath(folder)
+        io.tool_output(f"Using folder path: {folder_path}")
+        relevant_files = select_relevant_files(folder_path, role="default")
         for file in relevant_files:
             if file not in added_files:
                 coder.add_rel_fname(file)
