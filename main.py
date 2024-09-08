@@ -327,11 +327,6 @@ def register_litellm_models(git_root, model_metadata_fname, io, verbose=False):
         io.tool_error(f"Error loading model metadata models: {e}")
         return 1
 
-
-import sys
-
-import sys
-
 def main(argv=None, input=None, output=None, force_git_root=None, return_coder=False):
     logger.info("Starting main function")
     if argv is None:
