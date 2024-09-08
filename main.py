@@ -365,8 +365,6 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         except ImportError:
             logger.error("Failed to import launch_gui. Make sure the gui.py file exists and is correctly implemented.")
             return 1
-    if argv is None:
-        argv = sys.argv[1:]
 
     if force_git_root:
         git_root = force_git_root
