@@ -300,7 +300,7 @@ if __name__ == "__main__":
     # Définir folder_path ici
     folder_path = os.path.abspath(folder)
     
-    specifications, todolist, prompt = generer_cdc(folder_path, request)
+    specifications, todolist, prompt = generate_specifications(folder_path, request)
     logger.info(f"Generation completed for folder: {folder_path}")
     
     print(f"Specifications generated and saved in {os.path.join(folder_path, 'specifications.md')}")
