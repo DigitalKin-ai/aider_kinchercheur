@@ -96,7 +96,7 @@ Message from which to generate the specifications:
     model_name = "claude-3-5-sonnet-20240620"  # Vous pouvez ajuster le modèle selon vos besoins
     messages = [{"role": "user", "content": prompt}]
     
-    logger.info(f"Envoi de la demande au modèle: {model_name}")
+    logger.info(f"Envoi de la request au modèle: {model_name}")
     response = simple_send_with_retries(model_name, messages)
     logger.info("Réponse reçue du modèle")
     
@@ -179,7 +179,7 @@ File paths:
 - Task list: {os.path.join(folder_path, 'todolist.md')}
 """
 
-    logger.info("Envoi de la demande pour la génération de la liste des tâches")
+    logger.info("Envoi de la request pour la génération de la liste des tâches")
     todolist_messages = [{"role": "user", "content": todolist_prompt}]
     todolist_response = simple_send_with_retries(model_name, todolist_messages)
     logger.info("Réponse reçue pour la liste des tâches")
@@ -264,7 +264,7 @@ Todolist to implement:
 Please generate an optimized prompt based on this information.
 """
 
-    logger.info("Envoi de la demande pour la génération du prompt")
+    logger.info("Envoi de la request pour la génération du prompt")
     prompt_messages = [{"role": "user", "content": prompt_prompt}]
     prompt_response = simple_send_with_retries(model_name, prompt_messages)
     logger.info("Réponse reçue pour le prompt optimisé")
@@ -289,7 +289,7 @@ if __name__ == "__main__":
     import sys
     if len(sys.argv) != 3:
         logger.error("Arguments insuffisants")
-        print("Usage: python generation.py <dossier> <demande>")
+        print("Usage: python generation.py <dossier> <request>")
         sys.exit(1)
     
     folder = sys.argv[1]
@@ -423,11 +423,11 @@ Request from which to generate the specifications:
         f.write(response)
     logger.info(f"Specifications saved in: {specifications_file}")
 
-    # Save the specifications in the cdc.md file as well
-    cdc_file = os.path.join(folder_path, "cdc.md")
-    with open(cdc_file, "w", encoding="utf-8") as f:
+    # Save the specifications in the specifications.md file as well
+    specifications_file = os.path.join(folder_path, "specifications.md")
+    with open(specifications_file, "w", encoding="utf-8") as f:
         f.write(response)
-    logger.info(f"CDC saved in: {cdc_file}")
+    logger.info(f"specifications saved in: {specifications_file}")
     
     # Generate the todolist
     todolist_prompt = f"""# Prompt for KinDecomposer
@@ -512,7 +512,7 @@ File paths:
         f.write(todolist_response)
     logger.info(f"Task list saved in: {todolist_file}")
     
-    logger.info("Generation of specifications, CDC, and task list completed")
+    logger.info("Generation of specifications, specifications, and task list completed")
 
     # Generate the optimized prompt
     prompt_prompt = f"""# Prompt for KinPromptGenerator
@@ -606,7 +606,7 @@ Please generate an optimized prompt based on this information.
         raise
 
 # Usage example:
-# specifications, todolist, prompt = generer_cdc("my_folder", "Create a task management application for a small business")
+# specifications, todolist, prompt = generer_specifications("my_folder", "Create a task management application for a small business")
 # print(specifications)
 # print(todolist)
 # print(prompt)
