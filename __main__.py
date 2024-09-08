@@ -1,14 +1,15 @@
 import asyncio
 import tracemalloc
 from aider.main import main
-from aider.gui import launch_gui
+from aider.gui import gui_main
 
 async def async_main():
     try:
         tracemalloc.start()
-        return await launch_gui(None)
+        return await gui_main()
     except Exception as e:
         print(f"An error occurred: {e}")
+        print(f"Error details: {traceback.format_exc()}")
         return 1
 
 if __name__ == "__main__":

@@ -704,17 +704,11 @@ async def gui_main():
         },
     )
 
-    # config_options = st.config._config_options
-    # for key, value in config_options.items():
-    #    print(f"{key}: {value.value}")
-
     gui = GUI()
     await gui.initialize()
-
-
-async def launch_gui(argv):
-    return await gui_main()
+    return 0
 
 if __name__ == "__main__":
-    status = gui_main()
+    import asyncio
+    status = asyncio.run(gui_main())
     sys.exit(status)
