@@ -21,13 +21,18 @@ def generation(folder_path, request, role="default"):
 
     model_name = "claude-3-5-sonnet-20240620"  # You can adjust the model according to your needs
 
-    role_file_path = f"{role}/role.md"
+    role_file_path = os.path.join(role, "role.md")
     try:
         with open(role_file_path, 'r', encoding='utf-8') as role_file:
             roleText = role_file.read()
     except FileNotFoundError:
         logger.warning(f"Role file not found: {role_file_path}")
-        roleText = ""
+        os.makedirs(os.path.dirname(role_file_path), exist_ok=True)
+        default_role_text = "Act as an expert developer and writer."
+        with open(role_file_path, 'w', encoding='utf-8') as role_file:
+            role_file.write(default_role_text)
+        roleText = default_role_text
+        logger.info(f"Created role file with default content: {role_file_path}")
 
     # Generate specifications
     specifications = generate_content(model_name, roleText, "specifications", request, folder_path)
