@@ -426,51 +426,51 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             except Exception as e:
                 logger.error(f"Error reading or writing message file: {e}")
                 io.tool_error(f"Error processing message file: {e}")
-        elif message is None:
-            # Create a message.md file with default text
-            message = "Set a coherent mission from the information available"
+        elif request is None:
+            # Create a request.md file with default text
+            request = "Set a coherent mission from the information available"
             try:
-                with open(message_file, 'w', encoding='utf-8') as f:
-                    f.write(message)
-                io.tool_output(f"Created a message file with default text: {message_file}")
-                logger.info(f"Created default message file: {message_file}")
+                with open(request_file, 'w', encoding='utf-8') as f:
+                    f.write(request)
+                io.tool_output(f"Created a request file with default text: {request_file}")
+                logger.info(f"Created default request file: {request_file}")
             except Exception as e:
-                logger.error(f"Error creating default message file: {e}")
-                io.tool_error(f"Error creating default message file: {e}")
+                logger.error(f"Error creating default request file: {e}")
+                io.tool_error(f"Error creating default request file: {e}")
         
-        # Save the new message (empty or not)
+        # Save the new request (empty or not)
         try:
-            with open(message_file, 'w', encoding='utf-8') as f:
-                f.write(message)
-            io.tool_output(f"Message saved to {message_file}")
-            logger.info(f"Message saved to {message_file}")
+            with open(request_file, 'w', encoding='utf-8') as f:
+                f.write(request)
+            io.tool_output(f"Request saved to {request_file}")
+            logger.info(f"Request saved to {request_file}")
         except Exception as e:
-            logger.error(f"Error saving message to file: {e}")
-            io.tool_error(f"Error saving message to file: {e}")
+            logger.error(f"Error saving request to file: {e}")
+            io.tool_error(f"Error saving request to file: {e}")
         
         # Import generation module here to avoid circular import
         if request:
             try:
                 from .generation import generate_specifications
-                specifications, todolist, prompt = generate_specifications(folder_path, message)
+                specifications, todolist, prompt = generate_specifications(folder_path, request)
                 io.tool_output(f"Specifications, task list, and prompt generated for the folder: {folder_path}")
                 logger.info("Specifications, task list, and prompt generated")
             except Exception as e:
                 logger.error(f"Error generating specifications: {e}")
                 io.tool_error(f"Error generating specifications: {e}")
         else:
-            logger.info("No --request argument provided, skipping specification generation")
+            logger.info("No request provided, skipping specification generation")
 
-        # Add the append_request to the end of the message file if it's present
+        # Add the append_request to the end of the request file if it's present
         if append_request:
             try:
-                with open(message_file, 'a', encoding='utf-8') as f:
+                with open(request_file, 'a', encoding='utf-8') as f:
                     f.write(f"\n\n{append_request}")
-                io.tool_output(f"Append request added to the end of the message file: {message_file}")
-                logger.info(f"Append request added to {message_file}")
+                io.tool_output(f"Append request added to the end of the request file: {request_file}")
+                logger.info(f"Append request added to {request_file}")
             except Exception as e:
-                logger.error(f"Error appending request to message file: {e}")
-                io.tool_error(f"Error appending request to message file: {e}")
+                logger.error(f"Error appending request to request file: {e}")
+                io.tool_error(f"Error appending request to request file: {e}")
     except Exception as e:
         logger.error(f"Unexpected error in file operations: {e}")
         io.tool_error(f"An unexpected error occurred: {e}")
