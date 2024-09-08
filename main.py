@@ -607,14 +607,14 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             return False
 
     def add_analyses_files(coder, io, analyses_folder, last_modified_times):
-        if analyses_folder.exists() and analyses_folder.is_dir():
+        if analyses_folder and analyses_folder.exists() and analyses_folder.is_dir():
             analyses_files = [f for f in analyses_folder.iterdir() if f.is_file()]
             io.tool_output("Adding/Updating files from the 'analyses' folder:")
             for file in analyses_files:
                 try:
                     if check_file_modified(str(file), last_modified_times):
                         io.tool_output(f"Adding/Updating {file}")
-                        coder.add_file(str(file))
+                        coder.add_rel_fname(str(file))
                 except Exception as e:
                     io.tool_error(f"Error while adding/updating file {file}: {str(e)}")
         else:
