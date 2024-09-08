@@ -2,6 +2,7 @@
 
 import argparse
 import os
+import os
 import sys
 
 import configargparse
@@ -31,7 +32,7 @@ def get_parser(default_config_files, git_root):
     group.add_argument(
         "files", metavar="FILE", nargs="*", help="files to edit with an LLM (optional)"
     )
-    group.add_argument('--folder', type=str, help='Folder path for the project')
+    group.add_argument('--folder', type=str, default=os.getcwd(), help='Folder path for the project (default: current working directory)')
     group.add_argument('--demande', type=str, help='Demand for the project')
     group.add_argument('--message', type=str, help='Message to add at the end of the demand file')
     group.add_argument(
