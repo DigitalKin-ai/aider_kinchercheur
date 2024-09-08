@@ -583,26 +583,29 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         
             # Exécuter la boucle détaillée
             coder.run(with_message=f"""
-            Contexte de la demande initiale {folder}/demande.md :
+            Contexte de la demande initiale ({folder}/demande.md) :
             {file_contents['demande']}
 
-            Cahier des charges global (niveau 0) {folder}/cdc.md :
+            Cahier des Charges global ({folder}/cdc.md) :
             {file_contents['cdc']}
 
-            Liste des tâches à réaliser {folder}/todolist.md:
+            Liste des tâches à réaliser ({folder}/todolist.md) :
             {file_contents['todolist']}
 
-            Prompt Général {folder}/prompt.md:
+            Prompt Général ({folder}/sortie.md) :
             {file_contents['prompt']}
 
-            Pour chaque étape du processus détaillé, applique le processus suivant:
-            1. Crée un fichier prompt.md dans une arborescence miroir des étapes présentées dans {folder}/todolist.md. Ce fichier doit contenir le prompt pour exécuter l'étape en question.
+            Contenu actuel de la sortie de la mission ({folder}/sortie.md) :
+            {file_contents['sortie']}
+
+            Pour chaque étape du de la todolist encore non-complétée, applique le processus suivant:
+            1. Pour les prompts non-crées, crée un fichier prompt.md dans une arborescence miroir des étapes présentées dans {folder}/todolist.md. Ce fichier doit contenir le prompt pour exécuter l'étape en question.
             2. Si l'étape est trop complexe pour un seul prompt, crée un sous-dossier avec des sous-étapes
-            3. Exécute l'étape en suivant le prompt créé. Assure-toi de vraiment réaliser le travail nécessaire à la completion de l'étape.
-            4. Vérifie que le travail effectué remplit les critères du CDC pour l'étape (dans {folder}
+            3. Exécute l'étape en suivant le prompt de l'étape. Assure-toi de vraiment réaliser le travail nécessaire à la completion de l'étape
+            4. Vérifie que le travail effectué remplit bien les critères du CDC pour l'étape
             5. Si les critères ne sont pas remplis, recommence l'étape ou décompose-la en sous-étapes
             6. Une fois les critères remplis, mets à jour le statut de l'étape dans {folder}/todolist.md
-            7. Répète ce processus jusqu'à ce que tous les critères du CDC global (niveau 0) soient remplis
+            7. Répète ce processus jusqu'à ce que tous les critères du CDC global soient remplis (rendu dans le fichier {folder}/`sortie.md`)
             """)
 
             # Vérifier si la mission est terminée
@@ -614,8 +617,10 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             {file_contents['sortie']}
 
             En vous basant sur le CDC et la sortie actuelle, la mission est-elle terminée selon les critères du CDC ?
-            Répondez uniquement par OUI ou NON.
+            Répondez uniquement par Mission terminée ? : OUI ou NON, suivi d'une explication détaillée.
             """)
+
+            #TODO: ajouter la réponse oui non au chat
 
             if "OUI" in completion_check.upper():
                 io.tool_output("Mission terminée selon les critères du CDC.")
