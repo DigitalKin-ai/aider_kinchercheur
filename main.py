@@ -329,9 +329,13 @@ import sys
 def main(argv=None, input=None, output=None, force_git_root=None, return_coder=False):
     # Check if --gui argument is present
     if '--gui' in (argv or []):
-        # Import the launch_gui function here to avoid circular import
-        from .gui import launch_gui
-        return launch_gui(argv)
+        try:
+            # Import the launch_gui function here to avoid circular import
+            from .gui import launch_gui
+            return launch_gui(argv)
+        except ImportError:
+            logger.error("Failed to import launch_gui. Make sure the gui.py file exists and is correctly implemented.")
+            return 1
     logger.info("Starting main function")
     if argv is None:
         argv = sys.argv[1:]
