@@ -346,13 +346,11 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     default_config_files = list(map(str, default_config_files))
 
     parser = get_parser(default_config_files, git_root)
-    parser.add_argument('--request', help='Specify a request')
-    parser.add_argument('--append-request', help='Append a request to the message file')
-    parser.add_argument('--message', help='Specify a message')
     args, unknown = parser.parse_known_args(argv)
 
     folder = args.folder
-    message = args.message or args.request  # Use request as message if provided
+    message = args.message
+    request = args.request
     append_request = args.append_request
 
     if folder is None:
