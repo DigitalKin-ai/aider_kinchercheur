@@ -650,9 +650,6 @@ def gui_main():
 def launch_gui(argv):
     return gui_main()
 
-def launch_gui(argv):
-    return gui_main()
-
 if __name__ == "__main__":
     status = gui_main()
     sys.exit(status)
