@@ -334,19 +334,25 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     default_config_files = list(map(str, default_config_files))
 
     parser = get_parser(default_config_files, git_root)
+    parser.add_argument('--request', help='Specify a request')
     parser.add_argument('--append-request', help='Append a request to the message file')
     args, unknown = parser.parse_known_args(argv)
 
     folder = args.folder
     message = args.message
+    request = args.request
     append_request = args.append_request
 
     if folder is None:
-        print("Usage: python -m aider --folder <folder> [--message <message>] [--append-message <append_message>]")
+        print("Usage: python -m aider --folder <folder> [--message <message>] [--request <request>] [--append-request <append_request>]")
         return 1
 
     # Define folder_path here
     folder_path = os.path.abspath(folder)
+
+    # If request is provided, use it as the message
+    if request:
+        message = request
 
     # Create the io object
     io = InputOutput(
