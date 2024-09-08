@@ -476,8 +476,15 @@ class GUI:
             with self.messages.expander(line):
                 st.text(self.prompt)
 
+        # Initialize Playwright browser
+        asyncio.run(self.initialize_playwright())
+
         # re-render the UI for the prompt_pending state
         st.rerun()
+
+    async def initialize_playwright(self):
+        self.playwright = await async_playwright().start()
+        self.browser = await self.playwright.chromium.launch()
 
     def prompt_pending(self):
         return self.state.prompt is not None
@@ -486,7 +493,7 @@ class GUI:
         cost = random.random() * 0.003 + 0.001
         st.caption(f"${cost:0.4f}")
 
-    def process_chat(self):
+    async def process_chat(self):
         prompt = self.state.prompt
         self.state.prompt = None
 
@@ -531,19 +538,23 @@ class GUI:
         discord_token = os.getenv('DISCORD_BOT_TOKEN')
         discord_channel_id = 1279332180077842495
         discord_message = "Hello everyone! We're excited to introduce the members of our band: [List band members here]"
-        asyncio.run(self.send_discord_message(discord_token, discord_channel_id, discord_message))
+        await self.send_discord_message(discord_token, discord_channel_id, discord_message)
 
         # Send Telegram message
         telegram_token = os.getenv('TELEGRAM_BOT_TOKEN')
         telegram_chat_id = -1001699255893
         telegram_message = "Greetings from our band! We have some exciting news to share: [Your message here]"
-        asyncio.run(self.send_telegram_message(telegram_token, telegram_chat_id, telegram_message))
+        await self.send_telegram_message(telegram_token, telegram_chat_id, telegram_message)
 
         # Get and save Telegram messages
-        telegram_messages = asyncio.run(self.get_telegram_messages(telegram_token, telegram_chat_id))
+        telegram_messages = await self.get_telegram_messages(telegram_token, telegram_chat_id)
         with open(f"{self.coder.repo.root}/telegram_messages.txt", "w") as f:
             for message in telegram_messages:
                 f.write(f"{message}\n")
+
+        # Close Playwright browser
+        await self.browser.close()
+        await self.playwright.stop()
 
         # re-render the UI for the non-prompt_pending state
         st.rerun()
@@ -556,7 +567,7 @@ class GUI:
         if echo:
             self.messages.info(message)
 
-    async def do_web(self):
+    def do_web(self):
         st.markdown("Add the text content of a web page to the chat")
 
         if not self.web_content_empty:
@@ -578,14 +589,17 @@ class GUI:
 
         url = self.web_content
 
-        content = await self.scrape_webpage(url) or ""
-        if content.strip():
-            content = f"{url}\n\n" + content
-            self.prompt = content
-            self.prompt_as = "text"
-        else:
-            self.info(f"No web content found for `{url}`.")
-            self.web_content = None
+        async def fetch_content():
+            content = await self.scrape_webpage(url) or ""
+            if content.strip():
+                content = f"{url}\n\n" + content
+                self.prompt = content
+                self.prompt_as = "text"
+            else:
+                self.info(f"No web content found for `{url}`.")
+                self.web_content = None
+
+        asyncio.run(fetch_content())
 
     def do_undo(self, commit_hash):
         self.last_undo_empty.empty()
