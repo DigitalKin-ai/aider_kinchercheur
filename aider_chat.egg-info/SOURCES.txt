@@ -1,0 +1,15 @@
+LICENSE.txt
+README.md
+pyproject.toml
+requirements.txt
+setup.py
+aider_chat.egg-info/PKG-INFO
+aider_chat.egg-info/SOURCES.txt
+aider_chat.egg-info/dependency_links.txt
+aider_chat.egg-info/entry_points.txt
+aider_chat.egg-info/requires.txt
+aider_chat.egg-info/top_level.txt
+requirements/requirements-browser.txt
+requirements/requirements-dev.txt
+requirements/requirements-help.txt
+requirements/requirements-playwright.txt
