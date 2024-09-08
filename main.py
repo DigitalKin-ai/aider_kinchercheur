@@ -324,7 +324,7 @@ async def get_telegram_messages(token, chat_id):
     return messages
 
 import sys
-from aider.gui import launch_gui
+from aider.gui import gui_main
 
 async def main(argv=None, input=None, output=None, force_git_root=None, return_coder=False):
     logger.info("Starting main function")
