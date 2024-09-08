@@ -3,7 +3,7 @@ import tracemalloc
 from aider.main import main
 from aider.gui import launch_gui
 
-async def main():
+async def async_main():
     try:
         tracemalloc.start()
         return await launch_gui(None)
@@ -12,4 +12,4 @@ async def main():
         return 1
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.run(async_main())
