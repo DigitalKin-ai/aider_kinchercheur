@@ -18,6 +18,7 @@ from aider import __version__, models, utils
 from aider.coders import Coder
 from aider.io import InputOutput
 from aider.scrape import Scraper
+from aider.gui import launch_gui
 
 
 class CaptureIO(InputOutput):
