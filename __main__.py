@@ -4,15 +4,35 @@ import asyncio
 import tracemalloc
 import traceback
 import sys
+import subprocess
 from aider.main import main
 from aider.gui import gui_main
 from aider.io import InputOutput
+
+async def install_playwright():
+    try:
+        print("Installing Playwright...")
+        process = await asyncio.create_subprocess_exec(
+            sys.executable, '-m', 'playwright', 'install', '--with-deps', 'chromium',
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        stdout, stderr = await process.communicate()
+        if process.returncode == 0:
+            print("Playwright installed successfully.")
+        else:
+            print(f"Error installing Playwright: {stderr.decode()}")
+    except Exception as e:
+        print(f"An error occurred while installing Playwright: {e}")
 
 async def async_main():
     try:
         tracemalloc.start()
         
         print("Debug: Command line arguments:", sys.argv)  # Debug print
+        
+        # Install Playwright
+        await install_playwright()
         
         # Check if --gui argument is present
         if '--gui' in sys.argv:

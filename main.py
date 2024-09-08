@@ -353,6 +353,7 @@ async def get_telegram_messages(token, chat_id):
 import sys
 from aider.gui import gui_main
 import streamlit
+from playwright.async_api import async_playwright
 
 async def main(argv=None, input=None, output=None, force_git_root=None, return_coder=False):
     logger.info("Starting main function")
@@ -363,6 +364,11 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
             return await gui_main(argv)
         else:
             return 1
+
+    # Initialize Playwright
+    async with async_playwright() as p:
+        browser = await p.chromium.launch()
+        page = await browser.new_page()
 
     if force_git_root:
         git_root = force_git_root
