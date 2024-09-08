@@ -14,6 +14,7 @@ from prompt_toolkit.enums import EditingMode
 import discord
 import asyncio
 import telegram
+from aider.gui import launch_gui
 
 DEFAULT_MODEL_NAME = "gpt-4o-mini"  # or the default model you want to use
 
@@ -189,40 +190,7 @@ def check_streamlit_install(io):
     )
 
 
-def launch_gui(args):
-    import streamlit.web.cli as stcli
-    import sys
-    from aider import gui
-
-    print()
-    print("CONTROL-C to exit...")
-
-    target = gui.__file__
-
-    sys.argv = ["streamlit", "run", target]
-    sys.argv += [
-        "--browser.gatherUsageStats=false",
-        "--runner.magicEnabled=false",
-        "--server.runOnSave=false",
-    ]
-
-    if "-dev" not in __version__:
-        sys.argv += [
-            "--global.developmentMode=false",
-            "--server.fileWatcherType=none",
-            "--client.toolbarMode=viewer",
-        ]
-
-    sys.argv += ["--"] + args
-
-    sys.exit(stcli.main())
-
-    # from click.testing import CliRunner
-    # runner = CliRunner()
-    # from streamlit.web import bootstrap
-    # bootstrap.load_config_options(flag_options={})
-    # cli.main_run(target, args)
-    # sys.argv = ['streamlit', 'run', '--'] + args
+# La fonction launch_gui a été déplacée dans le fichier gui.py
 
 
 def parse_lint_cmds(lint_cmds, io):
