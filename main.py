@@ -721,9 +721,9 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             completion_response = "YES" if "YES" in completion_check.upper() else "NO"
             coder.cur_messages.append({"role": "assistant", "content": f"Mission completed?: {completion_response}"})
 
-            # Append the completion check to the output file
-            output_file_path = Path(folder) / 'output.md'
-            with open(output_file_path, 'a', encoding='utf-8') as f:
+            # Append the completion check to the request file
+            request_file_path = Path(folder) / 'request.md'
+            with open(request_file_path, 'a', encoding='utf-8') as f:
                 f.write(f"\n\n--- Mission Completion Check ---\n{completion_check}")
 
             if completion_response == "YES":
