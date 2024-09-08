@@ -388,9 +388,9 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         io.tool_output(f"Cahier des charges, liste des tâches et prompt générés pour le dossier : {folder_path}")
 
     # Ajouter le message à la fin du fichier de demande s'il est présent
-    if append_demande:
+    if append_message:
         with open(demande_file, 'a', encoding='utf-8') as f:
-            f.write(f"\n\n{append_demande}")
+            f.write(f"\n\n{append_message}")
         io.tool_output(f"Message ajouté à la fin du fichier de demande : {demande_file}")
 
     if args.verbose:
