@@ -7,7 +7,8 @@ from pathlib import Path
 import logging
 import traceback
 
-from aider import __version__, utils
+from aider import __version__
+from aider import utils
 from . import models
 import git
 from dotenv import load_dotenv
