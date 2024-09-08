@@ -1,3 +1,4 @@
+
 import configparser
 import os
 import re
@@ -17,6 +18,8 @@ import discord
 import asyncio
 import telegram
 from playwright.async_api import async_playwright
+import streamlit as st
+from aider.args import get_parser
 
 # Remove the import of launch_gui from here
 
@@ -30,6 +33,29 @@ logger = logging.getLogger(__name__)
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
+
+def gui_main(argv):
+    st.set_page_config(page_title="Aider GUI", page_icon="🤖", layout="wide")
+    st.title("Aider GUI")
+    st.write(f"Aider version: {__version__}")
+
+    parser = get_parser()
+    args = parser.parse_args(argv)
+
+    # Add your GUI components here
+    st.write("Welcome to the Aider GUI!")
+    
+    # You can add more Streamlit components to interact with your Aider functionality
+    folder = st.text_input("Folder path", value=args.folder if args.folder else "")
+    role = st.text_input("Role", value=args.role if args.role else "")
+    message = st.text_area("Message", value=args.message if args.message else "")
+
+    if st.button("Run Aider"):
+        # Here you would call your main Aider functionality
+        st.write("Running Aider...")
+        # You might want to call your async_main function here and display its results
+
+    # Add more GUI elements as needed
 
 def import_modules():
     try:
@@ -186,12 +212,13 @@ def scrub_sensitive_info(args, text):
 
 
 def check_streamlit_install(io):
-    return utils.check_pip_install_extra(
-        io,
-        "streamlit",
-        "You need to install the aider browser feature",
-        ["aider-chat[browser]"],
-    )
+    try:
+        import streamlit
+        return True
+    except ImportError:
+        io.tool_error("Streamlit is not installed. Please install it to use the GUI feature.")
+        io.tool_output("You can install it by running: pip install streamlit")
+        return False
 
 
 # La fonction launch_gui a été déplacée dans le fichier gui.py
@@ -325,13 +352,17 @@ async def get_telegram_messages(token, chat_id):
 
 import sys
 from aider.gui import gui_main
+import streamlit
 
 async def main(argv=None, input=None, output=None, force_git_root=None, return_coder=False):
     logger.info("Starting main function")
 
     # Check if --gui argument is present
     if argv is not None and '--gui' in argv:
-        return await launch_gui(argv)
+        if check_streamlit_install(InputOutput(pretty=True, yes=True)):
+            return await gui_main(argv)
+        else:
+            return 1
 
     if force_git_root:
         git_root = force_git_root
@@ -350,11 +381,6 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
 
     parser = get_parser(default_config_files, git_root)
     args, unknown = parser.parse_known_args(argv)
-
-    # Check if --gui argument is present
-    if args.gui:
-        logger.info("GUI mode requested")
-        return launch_gui(argv)
 
     role = getattr(args, 'role', None)
     folder = args.folder
@@ -675,111 +701,23 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
             7. Current Mission Output ({folder}/output.md):
             {file_contents['output']}
 
-            Process for completing tasks:
+            Process for completing tasks. YOU MUST EXECUTE ALL ACTIONS IN ONE RESPONSE:
 
             0. Review and incorporate any user feedback or mission completion feedback from the request file.
 
-            1. For each uncompleted task in the todolist:
-               a. Create a prompt.md file in a mirrored directory structure of {folder}/todolist.md if it doesn't exist.
-               b. If the task is complex, break it down into sub-tasks in a new sub-folder.
-               c. Update the toolbox.py if necessary, explicitly writing commands between backticks. Ensure main.py calls these commands.
-               d. Verify command execution by checking for visible results.
-               e. Execute the task using the prompt, ensuring all necessary work is completed.
-               f. Verify the work is explicitly visible in the output, not just marked as complete.
-               g. Confirm the outcome matches the task specifications and the work process is visible.
-               h. If the outcome is not achieved or work is not fully visible, revise the task or break it down further.
-               i. Update the task status in {folder}/todolist.md upon successful completion.
-
-            2. Repeat this process until all global specifications are met and reflected in {folder}/output.md.
-
-            3. After each task, provide a brief summary of actions taken and progress made.
-
-            4. Send a new message on Discord to introduce the band members:
-               - Use the Discord token: os.getenv('DISCORD_BOT_TOKEN')
-               - Use the channel ID: 1279332180077842495
-               - Craft an appropriate introduction message for the band members
-
-            5. Send a message in the Telegram group:
-               - Use the Telegram bot token (you need to set this in the .env file)
-               - Use the chat ID: -1001699255893
-               - Craft an appropriate message for the Telegram group
-
-            6. Retrieve and save messages from the Telegram group
+            For the first uncompleted task of the todolist:
+            1. If needed, create a prompt.md file in a mirrored directory structure of {folder}/todolist.md if it doesn't exist.
+            2. If the task is complex, break it down into sub-tasks in a new sub-folder.
+            3. Update the toolbox.py if necessary, explicitly writing commands between backticks. Ensure main.py calls these commands.
+            4. Verify command execution by checking for visible results.
+            5. **Execute the task** using the prompt, ensuring all necessary work is completed.
+            6. Verify the work is explicitly visible in the output, not just marked as complete.
+            7. Confirm the outcome matches the task specifications and the work process is visible.
+            8. If the outcome is not achieved or work is not fully visible, revise the task or break it down further.
+            9. Update the task status in {folder}/todolist.md upon successful completion.
 
             Remember: Avoid hallucinations. Only report on actions you've actually taken and results you can verify.
             """)
-
-            # Send Discord message
-            discord_token = os.getenv('DISCORD_BOT_TOKEN')
-            discord_channel_id = 1279332180077842495
-            discord_message = "Hello everyone! We're excited to introduce the members of our band: [List band members here]"
-            asyncio.run(send_discord_message(discord_token, discord_channel_id, discord_message))
-
-            # Send Telegram message
-            telegram_token = os.getenv('TELEGRAM_BOT_TOKEN')
-            telegram_chat_id = -1001699255893
-            telegram_message = "Greetings from our band! We have some exciting news to share: [Your message here]"
-            asyncio.run(send_telegram_message(telegram_token, telegram_chat_id, telegram_message))
-
-            # Get and save Telegram messages
-            telegram_messages = asyncio.run(get_telegram_messages(telegram_token, telegram_chat_id))
-            with open(f"{folder}/telegram_messages.txt", "w") as f:
-                for message in telegram_messages:
-                    f.write(f"{message}\n")
-            logger.info("Task execution process completed")
-
-            logger.info("Performing mission completion check")
-            completion_check = coder.run(with_message=f"""
-            Conduct a thorough mission completion check:
-
-            1. Review the specifications:
-            {file_contents['specifications']}
-
-            2. Analyze the current output:
-            {file_contents['output']}
-
-            3. Evaluation criteria:
-               a. Does the output fully meet all specifications?
-               b. Is there clear evidence of all required work being completed?
-               c. Are there any discrepancies or missing elements?
-
-            4. Provide a detailed, critical analysis of the mission status:
-               - Highlight specific areas where criteria are met
-               - Identify any shortcomings or areas needing improvement
-               - Be suspicious and look for any potential oversights
-
-            5. Conclusion:
-               - State whether the mission is completed (YES) or not (NO)
-               - If NO, briefly outline what remains to be done
-
-            6. Todolist update:
-               - Suggest specific updates to the todolist based on your analysis
-
-            Format your response as follows:
-            Analysis: [Your detailed analysis]
-            Conclusion: [YES/NO]
-            Remaining Tasks: [List of tasks if NO, or "None" if YES]
-            Todolist Updates: [Specific update suggestions]
-            """)
-
-            # Extract the YES/NO response and log it
-            completion_response = "YES" if "Conclusion: YES" in completion_check else "NO"
-            logger.info(f"Mission completion status: {completion_response}")
-
-            # Add the response to the chat
-            coder.cur_messages.append({"role": "assistant", "content": f"Mission completed?: {completion_response}"})
-
-            # Append the completion check to the request file
-            request_file_path = Path(folder) / 'request.md'
-            with open(request_file_path, 'a', encoding='utf-8') as f:
-                f.write(f"\n\n--- Mission Completion Check ---\n{completion_check}")
-
-            if completion_response == "YES":
-                io.tool_output("Mission completed according to the specifications criteria.")
-                logger.info("Mission completed successfully")
-            else:
-                io.tool_output("The mission is not yet completed. Continuing the process.")
-                logger.info("Mission incomplete, continuing execution")
 
             # Choose and run a terminal command
             command_choice = coder.run(with_message=f"""
@@ -870,7 +808,29 @@ def load_slow_imports():
     except Exception:
         pass
 
+async def async_operations(coder, io, folder):
+    # Send Discord message
+    discord_token = os.getenv('DISCORD_BOT_TOKEN')
+    discord_channel_id = 1279332180077842495
+    discord_message = "Hello everyone! We're excited to introduce the members of our band: [List band members here]"
+    await send_discord_message(discord_token, discord_channel_id, discord_message)
+
+    # Send Telegram message
+    telegram_token = os.getenv('TELEGRAM_BOT_TOKEN')
+    telegram_chat_id = -1001699255893
+    telegram_message = "Greetings from our band! We have some exciting news to share: [Your message here]"
+    await send_telegram_message(telegram_token, telegram_chat_id, telegram_message)
+
+    # Get and save Telegram messages
+    telegram_messages = await get_telegram_messages(telegram_token, telegram_chat_id)
+    with open(f"{folder}/telegram_messages.txt", "w") as f:
+        for message in telegram_messages:
+            f.write(f"{message}\n")
+    
+    logger.info("Async operations completed")
+
 
 if __name__ == "__main__":
-    status = main()
+    import asyncio
+    status = asyncio.run(main())
     sys.exit(status)
