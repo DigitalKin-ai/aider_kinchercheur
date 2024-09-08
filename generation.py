@@ -11,7 +11,7 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-def generate_specifications(folder_path, request):
+def generation(folder_path, request, role="default"):
     logger.info(f"Starting the generation of specifications for the folder: {folder_path}")
     logger.info(f"Received request: {request}")
 
@@ -21,22 +21,24 @@ def generate_specifications(folder_path, request):
 
     model_name = "claude-3-5-sonnet-20240620"  # You can adjust the model according to your needs
 
+    roleText = ""; # TODO: lire le contenu du fichier <nomdurole>/role.md
+
     # Generate specifications
-    specifications = generate_content(model_name, "specifications", request, folder_path)
+    specifications = generate_content(model_name, roleText, "specifications", request, folder_path)
 
     # Generate todolist
-    todolist = generate_content(model_name, "todolist", request, folder_path, specifications)
+    todolist = generate_content(model_name, roleText, "todolist", request, folder_path, specifications)
 
     # Generate optimized prompt
-    prompt = generate_content(model_name, "prompt", request, folder_path, specifications, todolist)
+    prompt = generate_content(model_name, roleText, "prompt", request, folder_path, specifications, todolist)
 
     # Generate toolbox
-    toolbox = generate_content(model_name, "toolbox", request, folder_path, specifications, todolist, prompt)
+    toolbox = generate_content(model_name, roleText, "toolbox", request, folder_path, specifications, todolist, prompt)
 
     logger.info("Generation of specifications, task list, optimized prompt, and Toolbox completed")
     return specifications, todolist, prompt, toolbox
 
-def generate_content(model_name, content_type, request, folder_path, specifications=None, todolist=None, prompt=None):
+def generate_content(model_name, role, content_type, request, folder_path, specifications=None, todolist=None, prompt=None):
     prompt = get_prompt(content_type, request, specifications, todolist, prompt, folder_path)
     
     logger.info(f"Sending the request for {content_type} generation")
@@ -54,12 +56,13 @@ def generate_content(model_name, content_type, request, folder_path, specificati
 
 def get_prompt(content_type, request, specifications, todolist, prompt, folder_path):
     if content_type == "specifications":
-        return f"""# Prompt for the Specifications Generator (KinSpecifier)
+        return f"""
 
-# Prompt for the Specifications Generator (KinSpecifier)
+# Role
+{role}
 
-## Identity and Role
-You are KinSpecifier, an AI assistant specialized in generating detailed and structured specifications. Your expertise lies in transforming usage intentions into clear and complete functional specifications.
+## SubRole
+Specialized in generating detailed and structured specifications. Your expertise lies in transforming usage intentions into clear and complete functional specifications.
 
 ## Main Objective
 Generate a complete, detailed, and structured specification document in a single interaction, based on the information provided by the user.
@@ -131,8 +134,11 @@ Request from which to generate the specifications:
     elif content_type == "todolist":
         return f"""# Prompt for KinDecomposer
 
-## Identity and Role
-You are KinDecomposer, an AI Assistant specialized in breaking down complex problems into elementary steps achievable through prompt procedures. You collaborate within a team of Kins to accomplish missions autonomously.
+# Role
+{role}
+
+## Subrole
+Specialized in breaking down complex problems into elementary steps achievable through prompt procedures. You collaborate within a team of Kins to accomplish missions autonomously.
 
 ## Main Objective
 Decompose a process into steps based on functional specifications, establishing the necessary steps to transform inputs into outputs, then generate a prompt to accomplish this process.
@@ -200,8 +206,11 @@ Generated specifications:
     elif content_type == "prompt":
         return f"""# Prompt for KinPromptGenerator
 
-## Identity and Role
-You are KinPromptGenerator, an AI assistant specialized in creating optimized prompts. Your role is to generate a detailed and structured prompt that will allow another AI assistant to accomplish a specific task according to the defined specifications and process.
+# Role
+{role}
+
+## Subrole
+Specialized in creating optimized prompts. Your role is to generate a detailed and structured prompt that will allow another AI assistant to accomplish a specific task according to the defined specifications and process.
 
 ## Main Objective
 Create a complete and effective prompt that will guide an AI assistant in executing the necessary steps to achieve the objectives specified in the specifications, following the process detailed in the todolist.
@@ -272,8 +281,11 @@ Please generate an optimized prompt based on this information.
     elif content_type == "toolbox":
         return f"""# Prompt for KinToolboxGenerator
 
-## Identity and Role
-You are KinToolboxGenerator, an AI assistant specialized in generating Python scripts that serve as a toolbox for LLM models. Your expertise lies in translating high-level requirements into a functional, modular Python toolbox that can be dynamically called by LLM models.
+# Role
+{role}
+
+## Subrole
+Specialized in generating Python scripts that serve as a toolbox for LLM models. Your expertise lies in translating high-level requirements into a functional, modular Python toolbox that can be dynamically called by LLM models.
 
 ## Main Objective
 Generate a complete, functional Python script named "toolbox.py" that implements a set of utility functions based on the specifications and task list. These functions should be designed to be easily called by LLM models via command line arguments.
@@ -354,6 +366,7 @@ if __name__ == "__main__":
     
     folder = sys.argv[1]
     request = sys.argv[2]
+    role = sys.argv[3]
     
     logger.info(f"Starting the toolbox with folder: {folder}")
     logger.info(f"Request: {request}")
@@ -361,7 +374,7 @@ if __name__ == "__main__":
     folder_path = os.path.abspath(folder)
     
     try:
-        specifications, todolist, prompt, toolbox = generate_specifications(folder_path, request)
+        specifications, todolist, prompt, toolbox = generation(folder_path, request, role)
         logger.info(f"Generation completed for folder: {folder_path}")
         
         for content_type in ["specifications", "todolist", "prompt", "toolbox"]:
