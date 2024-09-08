@@ -449,14 +449,17 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             io.tool_error(f"Error saving message to file: {e}")
         
         # Import generation module here to avoid circular import
-        try:
-            from .generation import generate_specifications
-            specifications, todolist, prompt = generate_specifications(folder_path, message)
-            io.tool_output(f"Specifications, task list, and prompt generated for the folder: {folder_path}")
-            logger.info("Specifications, task list, and prompt generated")
-        except Exception as e:
-            logger.error(f"Error generating specifications: {e}")
-            io.tool_error(f"Error generating specifications: {e}")
+        if request:
+            try:
+                from .generation import generate_specifications
+                specifications, todolist, prompt = generate_specifications(folder_path, message)
+                io.tool_output(f"Specifications, task list, and prompt generated for the folder: {folder_path}")
+                logger.info("Specifications, task list, and prompt generated")
+            except Exception as e:
+                logger.error(f"Error generating specifications: {e}")
+                io.tool_error(f"Error generating specifications: {e}")
+        else:
+            logger.info("No --request argument provided, skipping specification generation")
 
         # Add the append_request to the end of the message file if it's present
         if append_request:
