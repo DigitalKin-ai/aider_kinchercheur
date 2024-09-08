@@ -100,7 +100,13 @@ class GUI:
     recent_msgs_empty = None
     web_content_empty = None
 
-    async def __init__(self):
+    def __init__(self):
+        self.coder = None
+        self.state = None
+        self.playwright = None
+        self.browser = None
+
+    async def initialize(self):
         self.coder = await get_coder()
         self.state = get_state()
 
@@ -702,7 +708,8 @@ async def gui_main():
     # for key, value in config_options.items():
     #    print(f"{key}: {value.value}")
 
-    await GUI()
+    gui = GUI()
+    await gui.initialize()
 
 
 async def launch_gui(argv):
