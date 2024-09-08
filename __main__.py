@@ -103,11 +103,17 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
         role_file_path = os.path.join(folder_path, 'role.md')
         if not os.path.exists(role_file_path):
             default_role_text = "Act as an expert developer and writer."
-            os.makedirs(os.path.dirname(role_file_path), exist_ok=True)
-            with open(role_file_path, 'w', encoding='utf-8') as role_file:
-                role_file.write(default_role_text)
-            logger.info(f"Created role file with default content: {role_file_path}")
-            io.tool_output(f"Created role file: {role_file_path}")
+            try:
+                os.makedirs(os.path.dirname(role_file_path), exist_ok=True)
+                with open(role_file_path, 'w', encoding='utf-8') as role_file:
+                    role_file.write(default_role_text)
+                logger.info(f"Created role file with default content: {role_file_path}")
+                io.tool_output(f"Created role file: {role_file_path}")
+            except Exception as e:
+                logger.error(f"Error creating role file: {e}")
+                io.tool_error(f"Error creating role file: {e}")
+                raise
+
         # Check if the request is already present in the folder
         request_file = Path(folder_path) / 'request.md'
         if request_file.exists():
@@ -128,8 +134,9 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
                     io.tool_output(f"New request saved to {request_file}")
                     logger.info(f"New request saved to {request_file}")
             except Exception as e:
-                logger.error(f"Error reading or writing request file: {e}")
+                logger.error(f"Error processing request file: {e}")
                 io.tool_error(f"Error processing request file: {e}")
+                raise
         elif request is not None:
             # Create a request.md file with the provided request
             try:
@@ -140,6 +147,7 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
             except Exception as e:
                 logger.error(f"Error creating request file: {e}")
                 io.tool_error(f"Error creating request file: {e}")
+                raise
         
         # Generate new only if a new request is provided via command line
         if new_request_provided:
@@ -152,6 +160,7 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
             except Exception as e:
                 logger.error(f"Error generating specifications: {e}")
                 io.tool_error(f"Error generating specifications: {e}")
+                raise
         else:
             logger.info("No new request provided via command line, skipping specification generation")
 
@@ -165,9 +174,11 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
             except Exception as e:
                 logger.error(f"Error appending request to request file: {e}")
                 io.tool_error(f"Error appending request to request file: {e}")
+                raise
     except Exception as e:
         logger.error(f"Unexpected error in file operations: {e}")
         io.tool_error(f"An unexpected error occurred: {e}")
+        return 1  # Exit the function with an error code
 
     if args.verbose:
         print("Config files search order, if no --config:")
@@ -270,194 +281,213 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
         
     try:
         while True:
-            
-            # Check for new files
             try:
                 # Check for new files
                 new_files = coder.check_for_new_files()
                 if new_files:
                     io.tool_output("New files detected and added to the chat.")
-            except Exception as e:
-                io.tool_error(f"Error while checking for new files: {str(e)}")
+                    logger.info(f"New files detected: {new_files}")
 
-            # Add specific files from the folder
-            specific_files = ['todolist.md', 'specifications.md', 'prompt.md', 'toolbox.py']
-            added_files = []
+                # Add specific files from the folder
+                specific_files = ['todolist.md', 'specifications.md', 'prompt.md', 'toolbox.py']
+                added_files = []
 
-            for file in specific_files:
-                file_path = Path(folder) / file
-                if file_path.exists():
-                    coder.add_rel_fname(str(file_path))
-                    added_files.append(str(file_path))
-                    io.tool_output(f"File {file} added to the chat.")
-                else:
-                    io.tool_output(f"File {file} not found in the folder.")
-
-            if added_files:
-                io.tool_output("Files added to the chat: " + ", ".join(added_files))
-            else:
-                io.tool_output("No specific files were found in the folder.")
-
-            # Select relevant files
-            if folder:
-                folder_path = os.path.abspath(folder)
-                io.tool_output(f"Using folder path: {folder_path}")
-                relevant_files = select_relevant_files(folder_path, role="default")
-                for file in relevant_files:
-                    if file and file not in added_files:
-                        try:
-                            coder.add_rel_fname(str(file))
-                            added_files.append(file)
-                            io.tool_output(f"Relevant file added to the chat: {file}")
-                        except Exception as e:
-                            io.tool_error(f"Error adding file {file}: {str(e)}")
-            else:
-                io.tool_error("Folder is not specified. Cannot select relevant files.")
-
-            # Read the content of the files
-            files_to_read = {
-                'request': 'request.md',
-                'role': 'role.md',
-                'specifications': 'specifications.md',
-                'todolist': 'todolist.md',
-                'prompt': 'prompt.md',
-                'toolbox': 'toolbox.py',
-                'output': 'output.md'
-            }
-            file_contents = {}
-
-            for key, filename in files_to_read.items():
-                if filename in ['todolist.md', 'role.md']:
-                    file_path = Path(role) / filename
-                else:
-                    file_path = Path(folder) / filename
-                try:
+                for file in specific_files:
+                    file_path = Path(folder) / file
                     if file_path.exists():
-                        with open(file_path, 'r', encoding='utf-8') as f:
-                            file_contents[key] = f.read()
+                        try:
+                            coder.add_rel_fname(str(file_path))
+                            added_files.append(str(file_path))
+                            io.tool_output(f"File {file} added to the chat.")
+                            logger.info(f"Added file to chat: {file}")
+                        except Exception as e:
+                            logger.error(f"Error adding file {file} to chat: {e}")
+                            io.tool_error(f"Error adding file {file} to chat: {e}")
                     else:
-                        if filename == 'output.md':
-                            # Create output.md if it doesn't exist
-                            with open(file_path, 'w', encoding='utf-8') as f:
-                                f.write("")  # Create an empty file
-                            file_contents[key] = ""
-                            io.tool_output(f"Created empty {filename} in the folder {folder}.")
-                        elif filename == 'role.md':
-                            file_contents[key] = "Act as an expert developer and writer."
-                            io.tool_output(f"Default content set for {filename} as it doesn't exist in the folder {folder}.")
+                        io.tool_output(f"File {file} not found in the folder.")
+                        logger.warning(f"File not found: {file}")
+
+                if added_files:
+                    io.tool_output("Files added to the chat: " + ", ".join(added_files))
+                else:
+                    io.tool_output("No specific files were found in the folder.")
+
+                # Select relevant files
+                if folder:
+                    folder_path = os.path.abspath(folder)
+                    io.tool_output(f"Using folder path: {folder_path}")
+                    relevant_files = select_relevant_files(folder_path, role="default")
+                    for file in relevant_files:
+                        if file and file not in added_files:
+                            try:
+                                coder.add_rel_fname(str(file))
+                                added_files.append(file)
+                                io.tool_output(f"Relevant file added to the chat: {file}")
+                                logger.info(f"Added relevant file to chat: {file}")
+                            except Exception as e:
+                                logger.error(f"Error adding relevant file {file}: {e}")
+                                io.tool_error(f"Error adding file {file}: {e}")
+                else:
+                    logger.error("Folder is not specified. Cannot select relevant files.")
+                    io.tool_error("Folder is not specified. Cannot select relevant files.")
+
+                # Read the content of the files
+                files_to_read = {
+                    'request': 'request.md',
+                    'role': 'role.md',
+                    'specifications': 'specifications.md',
+                    'todolist': 'todolist.md',
+                    'prompt': 'prompt.md',
+                    'toolbox': 'toolbox.py',
+                    'output': 'output.md'
+                }
+                file_contents = {}
+
+                for key, filename in files_to_read.items():
+                    if filename in ['todolist.md', 'role.md']:
+                        file_path = Path(role) / filename
+                    else:
+                        file_path = Path(folder) / filename
+                    try:
+                        if file_path.exists():
+                            with open(file_path, 'r', encoding='utf-8') as f:
+                                file_contents[key] = f.read()
+                            logger.info(f"Read file content: {filename}")
                         else:
-                            io.tool_error(f"The file {filename} doesn't exist in the folder {folder}.")
-                            file_contents[key] = f"Content of {filename} not available"
-                            logger.error(f"File not found: {file_path}")
-                except Exception as e:
-                    io.tool_error(f"Error reading file {filename}: {str(e)}")
-                    file_contents[key] = f"Error reading content of {filename}"
-                    logger.error(f"Error reading file {file_path}: {str(e)}")
-        
-            # Execute the detailed loop
-            logger.info("Starting task execution process")
-            coder.run(with_message=f"""
-            You are an expert developer and writer tasked with completing a project. Your role and context are defined in the following files:
+                            if filename == 'output.md':
+                                with open(file_path, 'w', encoding='utf-8') as f:
+                                    f.write("")  # Create an empty file
+                                file_contents[key] = ""
+                                io.tool_output(f"Created empty {filename} in the folder {folder}.")
+                                logger.info(f"Created empty file: {filename}")
+                            elif filename == 'role.md':
+                                file_contents[key] = "Act as an expert developer and writer."
+                                io.tool_output(f"Default content set for {filename} as it doesn't exist in the folder {folder}.")
+                                logger.info(f"Set default content for: {filename}")
+                            else:
+                                io.tool_error(f"The file {filename} doesn't exist in the folder {folder}.")
+                                file_contents[key] = f"Content of {filename} not available"
+                                logger.warning(f"File not found: {file_path}")
+                    except Exception as e:
+                        logger.error(f"Error reading file {filename}: {e}")
+                        io.tool_error(f"Error reading file {filename}: {e}")
+                        file_contents[key] = f"Error reading content of {filename}"
 
-            1. Role ({role}/role.md):
-            {file_contents['role']}          
+                # Execute the detailed loop
+                logger.info("Starting task execution process")
+                coder.run(with_message=f"""
+                You are an expert developer and writer tasked with completing a project. Your role and context are defined in the following files:
 
-            2. Initial Request ({folder}/request.md):
-            {file_contents['request']}
+                1. Role ({role}/role.md):
+                {file_contents['role']}          
 
-            3. Global Specifications ({folder}/specifications.md):
-            {file_contents['specifications']}
+                2. Initial Request ({folder}/request.md):
+                {file_contents['request']}
 
-            4. Tasks to Complete ({folder}/todolist.md):
-            {file_contents['todolist']}
+                3. Global Specifications ({folder}/specifications.md):
+                {file_contents['specifications']}
 
-            5. General Prompt ({folder}/prompt.md):
-            {file_contents['prompt']}
+                4. Tasks to Complete ({folder}/todolist.md):
+                {file_contents['todolist']}
 
-            6. Available Toolbox ({folder}/toolbox.py):
-            {file_contents['toolbox']}
+                5. General Prompt ({folder}/prompt.md):
+                {file_contents['prompt']}
 
-            7. Current Mission Output ({folder}/output.md):
-            {file_contents['output']}
+                6. Available Toolbox ({folder}/toolbox.py):
+                {file_contents['toolbox']}
 
-            Process for completing tasks. YOU MUST EXECUTE ALL ACTIONS IN ONE RESPONSE:
+                7. Current Mission Output ({folder}/output.md):
+                {file_contents['output']}
 
-            0. Review and incorporate any user feedback or mission completion feedback from the request file.
+                Process for completing tasks. YOU MUST EXECUTE ALL ACTIONS IN ONE RESPONSE:
 
-            For the first uncompleted task of the todolist:
-            1. If needed, create a prompt.md file in a mirrored directory structure of {folder}/todolist.md if it doesn't exist.
-            2. If the task is complex, break it down into sub-tasks in a new sub-folder.
-            3. Update the toolbox.py if necessary, explicitly writing commands between backticks. Ensure main.py calls these commands.
-            4. Verify command execution by checking for visible results.
-            5. **Execute the task** using the prompt, ensuring all necessary work is completed.
-            6. Verify the work is explicitly visible in the output, not just marked as complete.
-            7. Confirm the outcome matches the task specifications and the work process is visible.
-            8. If the outcome is not achieved or work is not fully visible, revise the task or break it down further.
-            9. Update the task status in {folder}/todolist.md upon successful completion.
+                0. Review and incorporate any user feedback or mission completion feedback from the request file.
 
-            Remember: Avoid hallucinations. Only report on actions you've actually taken and results you can verify.
-            """)
+                For the first uncompleted task of the todolist:
+                1. If needed, create a prompt.md file in a mirrored directory structure of {folder}/todolist.md if it doesn't exist.
+                2. If the task is complex, break it down into sub-tasks in a new sub-folder.
+                3. Update the toolbox.py if necessary, explicitly writing commands between backticks. Ensure main.py calls these commands.
+                4. Verify command execution by checking for visible results.
+                5. **Execute the task** using the prompt, ensuring all necessary work is completed.
+                6. Verify the work is explicitly visible in the output, not just marked as complete.
+                7. Confirm the outcome matches the task specifications and the work process is visible.
+                8. If the outcome is not achieved or work is not fully visible, revise the task or break it down further.
+                9. Update the task status in {folder}/todolist.md upon successful completion.
 
-            # Choose and run a terminal command
-            command_choice = coder.run(with_message=f"""
-            Based on the current state of the project, choose a terminal command to run.
-            Consider the following context:
+                Remember: Avoid hallucinations. Only report on actions you've actually taken and results you can verify.
+                """)
 
-            Role: {file_contents['role']}
-            Request: {file_contents['request']}
-            Specifications: {file_contents['specifications']}
-            Todolist: {file_contents['todolist']}
-            Prompt: {file_contents['prompt']}
-            Toolbox: {file_contents['toolbox']}
-            Current output: {file_contents['output']}
+                # Choose and run a terminal command
+                command_choice = coder.run(with_message=f"""
+                Based on the current state of the project, choose a terminal command to run.
+                Consider the following context:
 
-            Repository structure:
-            {coder.get_repo_map()}
+                Role: {file_contents['role']}
+                Request: {file_contents['request']}
+                Specifications: {file_contents['specifications']}
+                Todolist: {file_contents['todolist']}
+                Prompt: {file_contents['prompt']}
+                Toolbox: {file_contents['toolbox']}
+                Current output: {file_contents['output']}
 
-            Choose a terminal command that would be most helpful for progressing the project.
-            The command should be an appropriate shell command for the current operating system.
-            Provide a brief explanation of why you chose this command.
+                Repository structure:
+                {coder.get_repo_map()}
 
-            Your response should be in the format:
-            Command: <your_chosen_command>
-            Explanation: <your_explanation>
-            """)
+                Choose a terminal command that would be most helpful for progressing the project.
+                The command should be an appropriate shell command for the current operating system.
+                Provide a brief explanation of why you chose this command.
 
-            # Extract the command from the response
-            command_lines = command_choice.split('\n')
-            chosen_command = None
-            for line in command_lines:
-                if line.startswith("Command:"):
-                    chosen_command = line.split("Command:")[1].strip()
-                    break
+                Your response should be in the format:
+                Command: <your_chosen_command>
+                Explanation: <your_explanation>
+                """)
 
-            if chosen_command:
-                io.tool_output(f"Executing command: {chosen_command}")
-                try:
-                    import subprocess
-                    import shlex
-                    
-                    # Split the command into arguments, respecting quoted strings
-                    command_args = shlex.split(chosen_command)
-                    
-                    # Execute the command
-                    result = subprocess.run(command_args, check=True, capture_output=True, text=True, cwd=folder_path)
-                    io.tool_output(f"Command output:\n{result.stdout}")
-                    if result.stderr:
-                        io.tool_error(f"Command error output:\n{result.stderr}")
-                except subprocess.CalledProcessError as e:
-                    io.tool_error(f"Command execution failed: {e}")
-                    io.tool_error(f"Error output:\n{e.stderr}")
-                except Exception as e:
-                    io.tool_error(f"An error occurred while executing the command: {str(e)}")
-            else:
-                io.tool_error("No valid command was chosen.")
+                # Extract the command from the response
+                command_lines = command_choice.split('\n')
+                chosen_command = None
+                for line in command_lines:
+                    if line.startswith("Command:"):
+                        chosen_command = line.split("Command:")[1].strip()
+                        break
+
+                if chosen_command:
+                    io.tool_output(f"Executing command: {chosen_command}")
+                    logger.info(f"Executing command: {chosen_command}")
+                    try:
+                        import subprocess
+                        import shlex
+                        
+                        # Split the command into arguments, respecting quoted strings
+                        command_args = shlex.split(chosen_command)
+                        
+                        # Execute the command
+                        result = subprocess.run(command_args, check=True, capture_output=True, text=True, cwd=folder_path)
+                        io.tool_output(f"Command output:\n{result.stdout}")
+                        logger.info(f"Command executed successfully: {chosen_command}")
+                        if result.stderr:
+                            io.tool_error(f"Command error output:\n{result.stderr}")
+                            logger.warning(f"Command produced error output: {result.stderr}")
+                    except subprocess.CalledProcessError as e:
+                        io.tool_error(f"Command execution failed: {e}")
+                        io.tool_error(f"Error output:\n{e.stderr}")
+                        logger.error(f"Command execution failed: {e}")
+                    except Exception as e:
+                        io.tool_error(f"An error occurred while executing the command: {e}")
+                        logger.error(f"Error executing command: {e}")
+                else:
+                    io.tool_error("No valid command was chosen.")
+                    logger.warning("No valid command was chosen.")
+
+            except Exception as e:
+                logger.error(f"An error occurred in the main loop: {e}")
+                io.tool_error(f"An error occurred: {e}")
+                # Optionally, you can add a retry mechanism or break the loop here
 
         io.tool_output("Process completed.")
+        logger.info("Process completed.")
 
-    except Exception as e:
-        io.tool_error(f"An error occurred: {str(e)}")
     except SwitchCoder as switch:
+        logger.info("Switching coder")
         kwargs = dict(io=io, from_coder=coder)
         kwargs.update(switch.kwargs)
         if "show_announcements" in kwargs:
@@ -467,8 +497,12 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
 
         if switch.kwargs.get("show_announcements") is not False:
             coder.show_announcements()
+    except KeyboardInterrupt:
+        logger.info("Process interrupted by user")
+        io.tool_output("Process interrupted by user.")
     except Exception as e:
-        io.tool_error(f"An error occurred: {str(e)}")
+        logger.error(f"An unexpected error occurred: {e}")
+        io.tool_error(f"An unexpected error occurred: {e}")
 
     return coder if return_coder else 0
 
