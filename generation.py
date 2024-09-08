@@ -59,6 +59,7 @@ def generate_content(model_name, role, content_type, request, folder_path, speci
     
     file_name = f"{content_type}.{'py' if content_type == 'toolbox' else 'md'}"
     file_path = os.path.join(folder_path, file_name)
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(response)
     logger.info(f"{content_type.capitalize()} saved in: {file_path}")

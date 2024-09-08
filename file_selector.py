@@ -68,6 +68,12 @@ def select_relevant_files(folder_or_files, role):
     
     return relevant_files
 
+def ensure_directory_exists(file_path):
+    directory = os.path.dirname(file_path)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+        print(f"Created directory: {directory}")
+
 if __name__ == "__main__":
     import sys
     if len(sys.argv) < 2:
