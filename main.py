@@ -721,6 +721,53 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             else:
                 io.tool_output("The mission is not yet completed. Continuing the process.")
 
+            # Choose and run a terminal command
+            command_choice = coder.run(with_message=f"""
+            Based on the current state of the project, choose a terminal command to run.
+            Consider the following context:
+
+            Role: {file_contents['role']}
+            Request: {file_contents['request']}
+            Specifications: {file_contents['specifications']}
+            Todolist: {file_contents['todolist']}
+            Prompt: {file_contents['prompt']}
+            Toolbox: {file_contents['toolbox']}
+            Current output: {file_contents['output']}
+
+            Repository structure:
+            {coder.get_repo_map()}
+
+            Choose a terminal command that would be most helpful for progressing the project.
+            The command should be in the format 'python <script>.py [arguments]' or any other appropriate shell command.
+            Provide a brief explanation of why you chose this command.
+
+            Your response should be in the format:
+            Command: <your_chosen_command>
+            Explanation: <your_explanation>
+            """)
+
+            # Extract the command from the response
+            command_lines = command_choice.split('\n')
+            chosen_command = None
+            for line in command_lines:
+                if line.startswith("Command:"):
+                    chosen_command = line.split("Command:")[1].strip()
+                    break
+
+            if chosen_command:
+                io.tool_output(f"Executing command: {chosen_command}")
+                try:
+                    import subprocess
+                    result = subprocess.run(chosen_command, shell=True, check=True, capture_output=True, text=True)
+                    io.tool_output(f"Command output:\n{result.stdout}")
+                    if result.stderr:
+                        io.tool_error(f"Command error output:\n{result.stderr}")
+                except subprocess.CalledProcessError as e:
+                    io.tool_error(f"Command execution failed: {e}")
+                    io.tool_error(f"Error output:\n{e.stderr}")
+            else:
+                io.tool_error("No valid command was chosen.")
+
         io.tool_output("Process completed.")
 
     except Exception as e:
