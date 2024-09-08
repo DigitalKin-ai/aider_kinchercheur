@@ -418,38 +418,22 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
                         f.write(request)
                     io.tool_output(f"New request saved to {request_file}")
                     logger.info(f"New request saved to {request_file}")
-                    # Import generation module here to avoid circular import
-                    from .generation import generate_specifications
-                    specifications, todolist, prompt = generate_specifications(folder_path, request)
-                    io.tool_output(f"Specifications, task list, and prompt generated for the folder: {folder_path}")
-                    logger.info("Specifications, task list, and prompt generated")
             except Exception as e:
-                logger.error(f"Error reading or writing message file: {e}")
-                io.tool_error(f"Error processing message file: {e}")
-        elif request is None:
-            # Create a request.md file with default text
-            request = "Set a coherent mission from the information available"
+                logger.error(f"Error reading or writing request file: {e}")
+                io.tool_error(f"Error processing request file: {e}")
+        elif request is not None:
+            # Create a request.md file with the provided request
             try:
                 with open(request_file, 'w', encoding='utf-8') as f:
                     f.write(request)
-                io.tool_output(f"Created a request file with default text: {request_file}")
-                logger.info(f"Created default request file: {request_file}")
+                io.tool_output(f"Created a request file: {request_file}")
+                logger.info(f"Created request file: {request_file}")
             except Exception as e:
-                logger.error(f"Error creating default request file: {e}")
-                io.tool_error(f"Error creating default request file: {e}")
+                logger.error(f"Error creating request file: {e}")
+                io.tool_error(f"Error creating request file: {e}")
         
-        # Save the new request (empty or not)
-        try:
-            with open(request_file, 'w', encoding='utf-8') as f:
-                f.write(request)
-            io.tool_output(f"Request saved to {request_file}")
-            logger.info(f"Request saved to {request_file}")
-        except Exception as e:
-            logger.error(f"Error saving request to file: {e}")
-            io.tool_error(f"Error saving request to file: {e}")
-        
-        # Import generation module here to avoid circular import
-        if request:
+        # Generate specifications only if a new request is provided
+        if request is not None:
             try:
                 from .generation import generate_specifications
                 specifications, todolist, prompt = generate_specifications(folder_path, request)
@@ -459,7 +443,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
                 logger.error(f"Error generating specifications: {e}")
                 io.tool_error(f"Error generating specifications: {e}")
         else:
-            logger.info("No request provided, skipping specification generation")
+            logger.info("No new request provided, skipping specification generation")
 
         # Add the append_request to the end of the request file if it's present
         if append_request:
