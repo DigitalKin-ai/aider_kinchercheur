@@ -327,8 +327,12 @@ def register_litellm_models(git_root, model_metadata_fname, io, verbose=False):
 import sys
 
 def main(argv=None, input=None, output=None, force_git_root=None, return_coder=False):
+    logger.info("Starting main function")
+    if argv is None:
+        argv = sys.argv[1:]
+
     # Check if --gui argument is present
-    if '--gui' in (argv or []):
+    if '--gui' in argv:
         try:
             # Import the launch_gui function here to avoid circular import
             from .gui import launch_gui
@@ -336,7 +340,6 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         except ImportError:
             logger.error("Failed to import launch_gui. Make sure the gui.py file exists and is correctly implemented.")
             return 1
-    logger.info("Starting main function")
     if argv is None:
         argv = sys.argv[1:]
 
