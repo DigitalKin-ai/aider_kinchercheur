@@ -128,15 +128,6 @@ class GUI:
             await browser.close()
             return content
 
-    async def scrape_webpage(self, url):
-        async with async_playwright() as p:
-            browser = await p.chromium.launch()
-            page = await browser.new_page()
-            await page.goto(url)
-            content = await page.content()
-            await browser.close()
-            return content
-
     def announce(self):
         lines = self.coder.get_announcements()
         lines = "  \n".join(lines)
