@@ -279,7 +279,7 @@ Please generate an optimized prompt based on this information.
     # Log du prompt de la boucle
     loop_prompt = f"""
     Contexte de la demande initiale {folder_path}/demande.md :
-    {demande}
+    {request}
 
     Cahier des charges global (niveau 0) {folder_path}/cdc.md :
     {response}
