@@ -105,6 +105,11 @@ Message from which to generate the specifications:
     with open(specifications_file, "w", encoding="utf-8") as f:
         f.write(response)
     logger.info(f"Specifications saved in: {specifications_file}")
+
+    # Verify that the specifications were actually generated
+    if "# Spécifications" not in response and "# Specifications" not in response:
+        logger.error("The generated specifications seem to be empty or invalid.")
+        raise ValueError("Failed to generate valid specifications. Please check the model's response.")
     
     # Générer la todolist
     todolist_prompt = f"""# Prompt for KinDecomposer
@@ -401,6 +406,8 @@ For each section and subsection:
 
 Request from which to generate the specifications:
 {request}
+
+Please generate the specifications based on this request. Make sure to include all necessary sections and details as outlined in the methodology above.
 """
 
     model_name = "claude-3-5-sonnet-20240620"  # You can adjust the model according to your needs
@@ -942,17 +949,22 @@ if __name__ == "__main__":
     # Define folder_path here
     folder_path = os.path.abspath(folder)
     
-    specifications, todolist, prompt = generate_specifications(folder_path, request)
-    logger.info(f"Generation completed for folder: {folder_path}")
-    
-    print(f"Specifications generated and saved in {os.path.join(folder_path, 'specifications.md')}")
-    print(f"Task list generated and saved in {os.path.join(folder_path, 'todolist.md')}")
-    print(f"Optimized prompt generated and saved in {os.path.join(folder_path, 'prompt.md')}")
-    print("Specifications content:")
-    print(specifications)
-    print("\nTask list content:")
-    print(todolist)
-    print("\nOptimized prompt content:")
-    print(prompt)
-    
-    logger.info("Script completed successfully")
+    try:
+        specifications, todolist, prompt = generate_specifications(folder_path, request)
+        logger.info(f"Generation completed for folder: {folder_path}")
+        
+        print(f"Specifications generated and saved in {os.path.join(folder_path, 'specifications.md')}")
+        print(f"Task list generated and saved in {os.path.join(folder_path, 'todolist.md')}")
+        print(f"Optimized prompt generated and saved in {os.path.join(folder_path, 'prompt.md')}")
+        print("Specifications content:")
+        print(specifications)
+        print("\nTask list content:")
+        print(todolist)
+        print("\nOptimized prompt content:")
+        print(prompt)
+        
+        logger.info("Script completed successfully")
+    except Exception as e:
+        logger.error(f"An error occurred during the generation process: {str(e)}")
+        print(f"Error: {str(e)}")
+        sys.exit(1)
