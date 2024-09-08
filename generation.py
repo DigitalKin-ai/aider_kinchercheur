@@ -21,7 +21,7 @@ def generation(folder_path, request, role="default"):
 
     model_name = "claude-3-5-sonnet-20240620"  # You can adjust the model according to your needs
 
-    role_file_path = os.path.join(folder_path, f"{role}/role.md")
+    role_file_path = f"{role}/role.md"
     try:
         with open(role_file_path, 'r', encoding='utf-8') as role_file:
             roleText = role_file.read()
