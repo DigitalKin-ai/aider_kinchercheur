@@ -21,7 +21,7 @@ def generation(folder_path, request, role="default"):
 
     model_name = "claude-3-5-sonnet-20240620"  # You can adjust the model according to your needs
 
-    role_file_path = os.path.join(role, "role.md")
+    role_file_path = os.path.join(folder_path, role, "role.md")
     try:
         with open(role_file_path, 'r', encoding='utf-8') as role_file:
             roleText = role_file.read()
@@ -370,17 +370,18 @@ Please generate a complete Python script based on this information. Do not inclu
 
 if __name__ == "__main__":
     import sys
-    if len(sys.argv) != 3:
+    if len(sys.argv) < 3:
         logger.error("Insufficient arguments")
-        print("Usage: python generation.py <folder> <request>")
+        print("Usage: python generation.py <folder> <request> [role]")
         sys.exit(1)
     
     folder = sys.argv[1]
     request = sys.argv[2]
-    role = sys.argv[3]
+    role = sys.argv[3] if len(sys.argv) > 3 else "default"
     
     logger.info(f"Starting the toolbox with folder: {folder}")
     logger.info(f"Request: {request}")
+    logger.info(f"Role: {role}")
     
     folder_path = os.path.abspath(folder)
     
