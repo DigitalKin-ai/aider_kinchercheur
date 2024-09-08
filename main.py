@@ -360,10 +360,11 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
     if argv is not None and '--gui' in argv:
         try:
             # Import the launch_gui function here to avoid circular import
-            from .gui import launch_gui
+            from aider.gui import launch_gui
             return launch_gui(argv)
-        except ImportError:
-            logger.error("Failed to import launch_gui. Make sure the gui.py file exists and is correctly implemented.")
+        except ImportError as e:
+            logger.error(f"Failed to import launch_gui: {e}")
+            logger.error("Make sure the gui.py file exists and is correctly implemented.")
             return 1
 
     if force_git_root:
