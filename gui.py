@@ -3,8 +3,11 @@
 import os
 import random
 import sys
+import asyncio
 
 import streamlit as st
+import discord
+import telegram
 
 from aider import urls
 from aider.coders import Coder
@@ -94,6 +97,27 @@ class GUI:
     last_undo_empty = None
     recent_msgs_empty = None
     web_content_empty = None
+
+    async def send_discord_message(self, token, channel_id, message):
+        client = discord.Client(intents=discord.Intents.default())
+        
+        @client.event
+        async def on_ready():
+            channel = client.get_channel(channel_id)
+            await channel.send(message)
+            await client.close()
+
+        await client.start(token)
+
+    async def send_telegram_message(self, token, chat_id, message):
+        bot = telegram.Bot(token=token)
+        await bot.send_message(chat_id=chat_id, text=message)
+
+    async def get_telegram_messages(self, token, chat_id):
+        bot = telegram.Bot(token=token)
+        updates = await bot.get_updates()
+        messages = [update.message.text for update in updates if update.message.chat.id == chat_id]
+        return messages
 
     def announce(self):
         lines = self.coder.get_announcements()
@@ -493,6 +517,24 @@ class GUI:
 
             self.state.messages.append(edit)
             self.show_edit_info(edit)
+
+        # Send Discord message
+        discord_token = os.getenv('DISCORD_BOT_TOKEN')
+        discord_channel_id = 1279332180077842495
+        discord_message = "Hello everyone! We're excited to introduce the members of our band: [List band members here]"
+        asyncio.run(self.send_discord_message(discord_token, discord_channel_id, discord_message))
+
+        # Send Telegram message
+        telegram_token = os.getenv('TELEGRAM_BOT_TOKEN')
+        telegram_chat_id = -1001699255893
+        telegram_message = "Greetings from our band! We have some exciting news to share: [Your message here]"
+        asyncio.run(self.send_telegram_message(telegram_token, telegram_chat_id, telegram_message))
+
+        # Get and save Telegram messages
+        telegram_messages = asyncio.run(self.get_telegram_messages(telegram_token, telegram_chat_id))
+        with open(f"{self.coder.repo.root}/telegram_messages.txt", "w") as f:
+            for message in telegram_messages:
+                f.write(f"{message}\n")
 
         # re-render the UI for the non-prompt_pending state
         st.rerun()
