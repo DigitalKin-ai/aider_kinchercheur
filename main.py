@@ -334,6 +334,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     default_config_files = list(map(str, default_config_files))
 
     parser = get_parser(default_config_files, git_root)
+    parser.add_argument('--append-request', help='Append a request to the message file')
     args, unknown = parser.parse_known_args(argv)
 
     folder = args.folder
@@ -399,7 +400,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     specifications, todolist, prompt = generate_specifications(folder_path, message)
     io.tool_output(f"Specifications, task list, and prompt generated for the folder: {folder_path}")
 
-    # Add the append_message to the end of the message file if it's present
+    # Add the append_request to the end of the message file if it's present
     if append_request:
         with open(message_file, 'a', encoding='utf-8') as f:
             f.write(f"\n\n{append_request}")
