@@ -12,7 +12,7 @@ import git
 from dotenv import load_dotenv
 from prompt_toolkit.enums import EditingMode
 
-DEFAULT_MODEL_NAME = "gpt-4o-mini"  # or the default model you want to use
+DEFAULT_MODEL_NAME = "gpt-4o"  # or the default model you want to use
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -692,8 +692,8 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             4. Command Hallucination verification step: Verify that you can actually see the results of the command. If you don't see the results, the command hasn't been called.
             5. Execute the step using the prompt for the step. Make sure to actually do the work necessary to complete the step.
             6. Text Hallucination verification step: Verify that you can actually see in the text the work being done (LLMs' natural tendency is to just cross the item off the todolist, without actually doing the work). 
-            7. Verify that the work done meets the specifications criteria for the step.
-            8. If the criteria are not met, redo the step or break it down into sub-steps.
+            7. Verify that the outcome (result) defined in the specifications of the step is achieved, and that you can see the work leading to it.
+            8. If the outcome is not achieved, or the visibility of the work not 100% explicit, redo the step or break it down into sub-steps.
             9. Once the criteria are met, update the status of the step in {folder}/todolist.md.
             10. Repeat this process until all criteria of the global specifications are met (rendered in the file {folder}/`output.md`).
             """)
@@ -706,8 +706,9 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             Current output:
             {file_contents['output']}
 
-            Based on the specifications and the current output, is the mission completed according to the specifications criteria?
-            Answer only with Mission completed?: YES or NO, followed by a detailed explanation, and a request to update the todolist.
+            Based on the outcome defined in the specifications and the current output, is the mission completed according to the specifications criteria?
+            Give a detailed explanation being critic and suspicious (you need evidence of the work being done to validate, then answer with YES or NO.
+            Then request to update the todolist.
             """)
 
             # Add the YES/NO response to the chat
@@ -721,7 +722,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
 
             if completion_response == "YES":
                 io.tool_output("Mission completed according to the specifications criteria.")
-                break
+                #break
             else:
                 io.tool_output("The mission is not yet completed. Continuing the process.")
 

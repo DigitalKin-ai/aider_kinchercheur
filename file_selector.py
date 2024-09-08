@@ -18,6 +18,9 @@ def is_todolist(filename, folder):
 def is_prompt(filename, folder):
     return re.search(r'prompt\.md', filename.lower()) is not None and is_in_correct_folder(filename, folder)
 
+def is_toolbox(filename, folder):
+    return re.search(r'toolbox\.md', filename.lower()) is not None and is_in_correct_folder(filename, folder)
+
 def is_output(filename, folder):
     return re.search(r'output\.md', filename.lower()) is not None and is_in_correct_folder(filename, folder)
 
@@ -46,6 +49,7 @@ def select_relevant_files(folder_or_files):
                 is_specifications(full_path, folder) or 
                 is_todolist(full_path, folder) or 
                 is_prompt(full_path, folder) or
+                is_toolbox(full_path, folder) or
                 is_output(full_path, folder) or
                 is_analysis(full_path, folder)):
                 relevant_files.append(full_path)
