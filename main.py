@@ -374,6 +374,10 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         elif demande.strip() == existing_demande:
             io.tool_output("The request is identical to the one already present. No need to regenerate the CDC.")
         else:
+            # Save the new demande
+            with open(demande_file, 'w', encoding='utf-8') as f:
+                f.write(demande)
+            io.tool_output(f"New request saved to {demande_file}")
             # Import generation module here to avoid circular import
             from .generation import generer_cdc
             cdc, todolist, prompt = generer_cdc(folder_path, demande)
@@ -382,6 +386,10 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         io.tool_error("Error: No request provided and no existing request in the folder.")
         return 1
     else:
+        # Save the new demande
+        with open(demande_file, 'w', encoding='utf-8') as f:
+            f.write(demande)
+        io.tool_output(f"New request saved to {demande_file}")
         # Import generation module here to avoid circular import
         from .generation import generer_cdc
         cdc, todolist, prompt = generer_cdc(folder_path, demande)
