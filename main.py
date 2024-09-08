@@ -367,6 +367,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     message = args.message
     request = getattr(args, 'request', None)
     append_request = getattr(args, 'append_request', None)
+    new_request_provided = request is not None
 
     if folder is None:
         logger.error("Folder not specified")
@@ -432,8 +433,8 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
                 logger.error(f"Error creating request file: {e}")
                 io.tool_error(f"Error creating request file: {e}")
         
-        # Generate specifications only if a new request is provided
-        if request is not None:
+        # Generate specifications only if a new request is provided via command line
+        if new_request_provided:
             try:
                 from .generation import generate_specifications
                 logger.info("Generating specifications, todolist, prompt and toolbox...")
@@ -444,7 +445,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
                 logger.error(f"Error generating specifications: {e}")
                 io.tool_error(f"Error generating specifications: {e}")
         else:
-            logger.info("No new request provided, skipping specification generation")
+            logger.info("No new request provided via command line, skipping specification generation")
 
         # Add the append_request to the end of the request file if it's present
         if append_request:
