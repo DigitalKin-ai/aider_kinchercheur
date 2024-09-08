@@ -339,6 +339,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     folder = args.folder
     demande = args.demande
     message = args.message
+    message = args.message
 
     if folder is None:
         print("Usage: python -m aider --folder <folder> [--demande <demande>] [--message <message>]")
@@ -386,6 +387,12 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         from .generation import generer_cdc
         cdc, todolist, prompt = generer_cdc(folder_path, demande)
         io.tool_output(f"Cahier des charges, liste des tâches et prompt générés pour le dossier : {folder_path}")
+
+    # Ajouter le message à la fin du fichier de demande s'il est présent
+    if message:
+        with open(demande_file, 'a', encoding='utf-8') as f:
+            f.write(f"\n\n{message}")
+        io.tool_output(f"Message ajouté à la fin du fichier de demande : {demande_file}")
 
     # Ajouter le message à la fin du fichier de demande s'il est présent
     if message:
