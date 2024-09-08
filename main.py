@@ -363,6 +363,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         logger.info("GUI mode requested")
         return launch_gui(argv)
 
+    role = getattr(args, 'role', None)
     folder = args.folder
     message = args.message
     request = getattr(args, 'request', None)
@@ -371,7 +372,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
 
     if folder is None:
         logger.error("Folder not specified")
-        print("Usage: python -m aider --folder <folder> [--message <message>] [--request <request>] [--append-request <append_request>]")
+        print("Usage: python -m aider --folder <folder> [--role <role>] [--request <request>] [--append-request <append_request>]")
         return 1
 
     # Define folder_path here
@@ -433,12 +434,12 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
                 logger.error(f"Error creating request file: {e}")
                 io.tool_error(f"Error creating request file: {e}")
         
-        # Generate specifications only if a new request is provided via command line
+        # Generate new only if a new request is provided via command line
         if new_request_provided:
             try:
-                from .generation import generate_specifications
+                from .generation import generation
                 logger.info("Generating specifications, todolist, prompt and toolbox...")
-                specifications, todolist, prompt, toolbox = generate_specifications(folder_path, request)
+                specifications, todolist, prompt, toolbox = generation(folder_path, role="default")
                 io.tool_output(f"Specifications, todolist, prompt and toolbox generated for the folder: {folder_path}")
                 logger.info("Specifications, todolist, prompt and toolbox generated")
             except Exception as e:
@@ -578,7 +579,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         io.tool_output("No specific files were found in the folder.")
 
     # Select relevant files
-    relevant_files = select_relevant_files(folder)
+    relevant_files = select_relevant_files(folder, role="default")
     for file in relevant_files:
         if file not in added_files:
             coder.add_rel_fname(file)
@@ -639,6 +640,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             # Read the content of the files
             files_to_read = {
                 'request': 'request.md',
+                'role': 'role.md',
                 'specifications': 'specifications.md',
                 'todolist': 'todolist.md',
                 'prompt': 'prompt.md',
@@ -648,7 +650,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             file_contents = {}
 
             for key, filename in files_to_read.items():
-                file_path = Path(folder) / filename
+                file_path = Path(folder) / filename #todo : special case : the path of todolist and role is <rolename>/filename, not folder/filename
                 if file_path.exists():
                     with open(file_path, 'r', encoding='utf-8') as f:
                         file_contents[key] = f.read()
@@ -665,6 +667,9 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         
             # Execute the detailed loop
             coder.run(with_message=f"""
+            Your role ({role}/role.md):
+            {file_contents['role']}          
+
             Context of the initial request ({folder}/request.md):
             {file_contents['request']}
 
