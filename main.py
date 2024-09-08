@@ -497,6 +497,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
 
     if not args.verify_ssl:
         import httpx
+        from .llm import litellm
 
         litellm._load_litellm()
         litellm._lazy_module.client_session = httpx.Client(verify=False)
