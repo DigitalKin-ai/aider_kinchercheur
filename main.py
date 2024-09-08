@@ -568,53 +568,53 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         io.tool_output(f"Main folder created: {folder_path}")
     else:
         io.tool_output(f"Main folder already exists: {folder_path}")
-
-    # Add specific files from the folder
-    specific_files = ['todolist.md', 'specifications.md', 'prompt.md', 'toolbox.py']
-    added_files = []
-
-    for file in specific_files:
-        file_path = Path(folder) / file
-        if file_path.exists():
-            coder.add_rel_fname(str(file_path))
-            added_files.append(str(file_path))
-            io.tool_output(f"File {file} added to the chat.")
-        else:
-            io.tool_output(f"File {file} not found in the folder.")
-
-    if added_files:
-        io.tool_output("Files added to the chat: " + ", ".join(added_files))
-    else:
-        io.tool_output("No specific files were found in the folder.")
-
-    # Select relevant files
-    if folder:
-        folder_path = os.path.abspath(folder)
-        io.tool_output(f"Using folder path: {folder_path}")
-        relevant_files = select_relevant_files(folder_path, role="default")
-        for file in relevant_files:
-            if file and file not in added_files:
-                try:
-                    coder.add_rel_fname(str(file))
-                    added_files.append(file)
-                    io.tool_output(f"Relevant file added to the chat: {file}")
-                except Exception as e:
-                    io.tool_error(f"Error adding file {file}: {str(e)}")
-    else:
-        io.tool_error("Folder is not specified. Cannot select relevant files.")
-
-
-    # Check for new files
-    try:
-        # Check for new files
-        new_files = coder.check_for_new_files()
-        if new_files:
-            io.tool_output("New files detected and added to the chat.")
-    except Exception as e:
-        io.tool_error(f"Error while checking for new files: {str(e)}")
         
     try:
         while True:
+            
+            # Check for new files
+            try:
+                # Check for new files
+                new_files = coder.check_for_new_files()
+                if new_files:
+                    io.tool_output("New files detected and added to the chat.")
+            except Exception as e:
+                io.tool_error(f"Error while checking for new files: {str(e)}")
+
+            # Add specific files from the folder
+            specific_files = ['todolist.md', 'specifications.md', 'prompt.md', 'toolbox.py']
+            added_files = []
+
+            for file in specific_files:
+                file_path = Path(folder) / file
+                if file_path.exists():
+                    coder.add_rel_fname(str(file_path))
+                    added_files.append(str(file_path))
+                    io.tool_output(f"File {file} added to the chat.")
+                else:
+                    io.tool_output(f"File {file} not found in the folder.")
+
+            if added_files:
+                io.tool_output("Files added to the chat: " + ", ".join(added_files))
+            else:
+                io.tool_output("No specific files were found in the folder.")
+
+            # Select relevant files
+            if folder:
+                folder_path = os.path.abspath(folder)
+                io.tool_output(f"Using folder path: {folder_path}")
+                relevant_files = select_relevant_files(folder_path, role="default")
+                for file in relevant_files:
+                    if file and file not in added_files:
+                        try:
+                            coder.add_rel_fname(str(file))
+                            added_files.append(file)
+                            io.tool_output(f"Relevant file added to the chat: {file}")
+                        except Exception as e:
+                            io.tool_error(f"Error adding file {file}: {str(e)}")
+            else:
+                io.tool_error("Folder is not specified. Cannot select relevant files.")
+
             # Read the content of the files
             files_to_read = {
                 'request': 'request.md',
@@ -683,7 +683,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             For the next item of the todolist of the todolist that is not yet completed, apply the following process:
             1. If the prompt is not created, create a prompt.md file in a mirror directory structure of the steps presented in {folder}/todolist.md. This file should contain the prompt to execute the step in question.
             2. If the step is too complex for a single prompt, create a sub-folder with sub-steps.
-            3. If a toolbox is required to complete the step, make the necessary changes to the toolbox. Write EXPLICITELY between backquotes the command that you want to call, with arguments.
+            3. If a toolbox is required to complete the step, make the necessary changes to the toolbox. Write EXPLICITELY between backquotes the command that you want to call, with arguments. Ensure that it is called from main.py
             4. Command Hallucination verification step: Verify that you can actually see the results of the command. If you don't see the results, the command hasn't been called.
             5. Execute the step using the prompt for the step. Make sure to actually do the work necessary to complete the step.
             6. Text Hallucination verification step: Verify that you can actually see in the text the work being done (LLMs' natural tendency is to just cross the item off the todolist, without actually doing the work). 
