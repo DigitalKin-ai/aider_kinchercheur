@@ -34,6 +34,7 @@ try:
     from .repo import GitRepo
     from .versioncheck import check_version
     from .dump import dump  # noqa: F401
+    from .gui import launch_gui  # Import the launch_gui function
 except ImportError as e:
     logger.error(f"Error importing modules: {e}")
     logger.error(traceback.format_exc())
@@ -347,6 +348,11 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
 
     parser = get_parser(default_config_files, git_root)
     args, unknown = parser.parse_known_args(argv)
+
+    # Check if --gui argument is present
+    if args.gui:
+        logger.info("GUI mode requested")
+        return launch_gui(argv)
 
     folder = args.folder
     message = args.message
