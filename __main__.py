@@ -1,5 +1,6 @@
 import asyncio
 import tracemalloc
+import traceback
 from aider.main import main
 from aider.gui import gui_main
 
