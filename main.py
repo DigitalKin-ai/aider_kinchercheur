@@ -10,7 +10,7 @@ import traceback
 
 from aider import __version__
 from aider import utils
-from . import models
+from aider import models
 import git
 from dotenv import load_dotenv
 from prompt_toolkit.enums import EditingMode
@@ -59,16 +59,16 @@ def gui_main(argv):
 
 def import_modules():
     try:
-        from .file_selector import select_relevant_files
-        from aider.args import get_parser
-        from aider.coders import Coder
-        from aider.commands import Commands, SwitchCoder
-        from aider.history import ChatSummary
-        from aider.io import InputOutput
-        from .llm import litellm  # noqa: F401; properly init litellm on launch
-        from .repo import GitRepo
-        from .versioncheck import check_version
-        from .dump import dump  # noqa: F401
+        from file_selector import select_relevant_files
+        from args import get_parser
+        from coders import Coder
+        from commands import Commands, SwitchCoder
+        from history import ChatSummary
+        from io import InputOutput
+        from llm import litellm  # noqa: F401; properly init litellm on launch
+        from repo import GitRepo
+        from versioncheck import check_version
+        from dump import dump  # noqa: F401
         # Import the launch_gui function conditionally to avoid circular import
         return (select_relevant_files, get_parser, Coder, Commands, SwitchCoder, 
                 ChatSummary, InputOutput, GitRepo, check_version)

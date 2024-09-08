@@ -760,25 +760,37 @@ class Coder:
         if self.repo:
             self.commit_before_message.append(self.repo.get_head())
 
-    def run(self, with_message=None, preproc=True):
-        if self.check_for_new_files():
-            self.io.tool_output("Les nouveaux fichiers ont été ajoutés au chat.")
+    async def run(self, with_message=None, preproc=True):
+        while True:
+            try:
+                user_message = await self.get_input()
+                if user_message is None:
+                    break
+                if self.check_for_new_files():
+                    self.io.tool_output("Les nouveaux fichiers ont été ajoutés au chat.")
 
-        try:
-            if with_message:
-                self.io.user_input(with_message)
-                self.run_one(with_message, preproc)
-                return self.partial_response_content
-
-            while True:
                 try:
-                    user_message = self.get_input()
-                    self.run_one(user_message, preproc)
-                    self.show_undo_hint()
-                except KeyboardInterrupt:
-                    self.keyboard_interrupt()
-        except EOFError:
-            return
+                    if with_message:
+                        self.io.user_input(with_message)
+                        self.run_one(with_message, preproc)
+                        return self.partial_response_content
+
+                    while True:
+                        try:
+                            user_message = self.get_input()
+                            self.run_one(user_message, preproc)
+                            self.show_undo_hint()
+                        except KeyboardInterrupt:
+                            self.keyboard_interrupt()
+                except EOFError:
+                    return
+            except KeyboardInterrupt:
+                self.io.tool_error("Interrupt received, exiting...")
+                break
+            except Exception as e:
+                self.io.tool_error(f"An error occurred: {e}")
+                self.io.tool_error(traceback.format_exc())
+        
 
     def get_input(self):
         inchat_files = self.get_inchat_relative_files()
@@ -789,8 +801,10 @@ class Coder:
             all_files,
             self.get_addable_relative_files(),
             self.commands,
-            self.abs_read_only_fnames,
+            se
+            lf.abs_read_only_fnames,
         )
+    
 
     def preproc_user_input(self, inp):
         if not inp:
