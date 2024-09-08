@@ -326,67 +326,66 @@ def register_litellm_models(git_root, model_metadata_fname, io, verbose=False):
 import sys
 
 def main(argv=None, input=None, output=None, force_git_root=None, return_coder=False):
-    try:
-        logger.info("Starting main function")
-        if argv is None:
-            argv = sys.argv[1:]
+    logger.info("Starting main function")
+    if argv is None:
+        argv = sys.argv[1:]
 
-        if force_git_root:
-            git_root = force_git_root
-        else:
-            git_root = get_git_root()
+    if force_git_root:
+        git_root = force_git_root
+    else:
+        git_root = get_git_root()
 
-        conf_fname = Path(".aider.conf.yml")
+    conf_fname = Path(".aider.conf.yml")
 
-        default_config_files = [conf_fname.resolve()]  # CWD
-        if git_root:
-            git_conf = Path(git_root) / conf_fname  # git root
-            if git_conf not in default_config_files:
-                default_config_files.append(git_conf)
-        default_config_files.append(Path.home() / conf_fname)  # homedir
-        default_config_files = list(map(str, default_config_files))
+    default_config_files = [conf_fname.resolve()]  # CWD
+    if git_root:
+        git_conf = Path(git_root) / conf_fname  # git root
+        if git_conf not in default_config_files:
+            default_config_files.append(git_conf)
+    default_config_files.append(Path.home() / conf_fname)  # homedir
+    default_config_files = list(map(str, default_config_files))
 
-        parser = get_parser(default_config_files, git_root)
-        parser.add_argument('--request', help='Specify a request')
-        parser.add_argument('--append-request', help='Append a request to the message file')
-        args, unknown = parser.parse_known_args(argv)
+    parser = get_parser(default_config_files, git_root)
+    parser.add_argument('--request', help='Specify a request')
+    parser.add_argument('--append-request', help='Append a request to the message file')
+    args, unknown = parser.parse_known_args(argv)
 
-        folder = args.folder
-        message = args.message
-        request = args.request
-        append_request = args.append_request
+    folder = args.folder
+    message = args.message
+    request = args.request
+    append_request = args.append_request
 
-        if folder is None:
-            logger.error("Folder not specified")
-            print("Usage: python -m aider --folder <folder> [--message <message>] [--request <request>] [--append-request <append_request>]")
-            return 1
+    if folder is None:
+        logger.error("Folder not specified")
+        print("Usage: python -m aider --folder <folder> [--message <message>] [--request <request>] [--append-request <append_request>]")
+        return 1
 
-        # Define folder_path here
-        folder_path = os.path.abspath(folder)
-        logger.info(f"Working with folder: {folder_path}")
+    # Define folder_path here
+    folder_path = os.path.abspath(folder)
+    logger.info(f"Working with folder: {folder_path}")
 
-        # If request is provided, use it as the message
-        if request:
-            message = request
-            logger.info(f"Using request as message: {message}")
+    # If request is provided, use it as the message
+    if request:
+        message = request
+        logger.info(f"Using request as message: {message}")
 
-        # Create the io object
-        io = InputOutput(
-            args.pretty,
-            args.yes,
-            args.input_history_file,
-            args.chat_history_file,
-            input=input,
-            output=output,
-            user_input_color=args.user_input_color,
-            tool_output_color=args.tool_output_color,
-            tool_error_color=args.tool_error_color,
-            dry_run=args.dry_run,
-            encoding=args.encoding,
-            llm_history_file=args.llm_history_file,
-            editingmode=EditingMode.VI if args.vim else EditingMode.EMACS,
-        )
-        logger.info("InputOutput object created")
+    # Create the io object
+    io = InputOutput(
+        args.pretty,
+        args.yes,
+        args.input_history_file,
+        args.chat_history_file,
+        input=input,
+        output=output,
+        user_input_color=args.user_input_color,
+        tool_output_color=args.tool_output_color,
+        tool_error_color=args.tool_error_color,
+        dry_run=args.dry_run,
+        encoding=args.encoding,
+        llm_history_file=args.llm_history_file,
+        editingmode=EditingMode.VI if args.vim else EditingMode.EMACS,
+    )
+    logger.info("InputOutput object created")
 
     try:
         # Check if the message is already present in the folder
