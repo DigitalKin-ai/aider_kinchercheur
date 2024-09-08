@@ -50,7 +50,7 @@ def generation(folder_path, request, role="default"):
     return specifications, todolist, prompt, toolbox
 
 def generate_content(model_name, role, content_type, request, folder_path, specifications=None, todolist=None, prompt=None):
-    prompt = get_prompt(content_type, request, specifications, todolist, prompt, folder_path)
+    prompt = get_prompt(content_type, request, specifications, todolist, prompt, folder_path, role)
     
     logger.info(f"Sending the request for {content_type} generation")
     messages = [{"role": "user", "content": prompt}]
@@ -65,7 +65,7 @@ def generate_content(model_name, role, content_type, request, folder_path, speci
     
     return response
 
-def get_prompt(content_type, request, specifications, todolist, prompt, folder_path):
+def get_prompt(content_type, request, specifications, todolist, prompt, folder_path, role):
     if content_type == "specifications":
         return f"""
 
