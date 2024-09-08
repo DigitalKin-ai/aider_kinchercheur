@@ -40,10 +40,17 @@ def is_text_file(filename):
 def select_relevant_files(folder_or_files, role):
     print(f"DEBUG: select_relevant_files function called for: {folder_or_files}")
     
+    if folder_or_files is None:
+        print("ERROR: folder_or_files is None")
+        return []
+    
     if isinstance(folder_or_files, list):
         all_files = folder_or_files
-    else:
+    elif isinstance(folder_or_files, str):
         all_files = [os.path.join(root, file) for root, dirs, files in os.walk(folder_or_files) for file in files]
+    else:
+        print(f"ERROR: Unexpected type for folder_or_files: {type(folder_or_files)}")
+        return []
     
     relevant_files = []
     
