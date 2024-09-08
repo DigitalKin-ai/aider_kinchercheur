@@ -401,6 +401,15 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     logger.info("InputOutput object created")
 
     try:
+        # Check if the role file exists, if not create it
+        role_file_path = os.path.join(folder_path, 'role.md')
+        if not os.path.exists(role_file_path):
+            default_role_text = "Act as an expert developer and writer."
+            os.makedirs(os.path.dirname(role_file_path), exist_ok=True)
+            with open(role_file_path, 'w', encoding='utf-8') as role_file:
+                role_file.write(default_role_text)
+            logger.info(f"Created role file with default content: {role_file_path}")
+            io.tool_output(f"Created role file: {role_file_path}")
         # Check if the request is already present in the folder
         request_file = Path(folder_path) / 'request.md'
         if request_file.exists():
