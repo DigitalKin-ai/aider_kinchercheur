@@ -531,6 +531,12 @@ def get_parser(default_config_files, git_root):
         help='Message to add at the end of the demand file'
     )
     group.add_argument(
+        "--role",
+        type=str,
+        default="default",
+        help='Specify the role for the AI assistant (default: default)'
+    )
+    group.add_argument(
         "--single-message",
         "--msg",
         "-m",
