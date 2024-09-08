@@ -13,6 +13,13 @@ logger = logging.getLogger(__name__)
 def generer_cdc(folder_path, request):
     logger.info(f"Starting the generation of specifications for the folder: {folder_path}")
     logger.info(f"Received request: {request}")
+    
+    # S'assurer que le dossier existe
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+        logger.info(f"Dossier créé: {folder_path}")
+    else:
+        logger.info(f"Dossier existant: {folder_path}")
 
     prompt = f"""# Prompt for the Specifications Generator (KinSpecifier)
 
@@ -85,20 +92,12 @@ For each section and subsection:
 Request from which to generate the specifications:
 {request}
 """
-
     model_name = "claude-3-5-sonnet-20240620"  # Vous pouvez ajuster le modèle selon vos besoins
     messages = [{"role": "user", "content": prompt}]
     
     logger.info(f"Envoi de la demande au modèle: {model_name}")
     response = simple_send_with_retries(model_name, messages)
     logger.info("Réponse reçue du modèle")
-    
-    # S'assurer que le dossier existe
-    if not os.path.exists(folder_path):
-        os.makedirs(folder_path)
-        logger.info(f"Dossier créé: {folder_path}")
-    else:
-        logger.info(f"Dossier existant: {folder_path}")
     
     # Save the response in the specifications.md file
     specifications_file = os.path.join(folder_path, "specifications.md")
@@ -275,32 +274,7 @@ Please generate an optimized prompt based on this information.
     logger.info(f"Prompt optimisé enregistré dans: {prompt_file}")
     
     logger.info("Génération du cahier des charges, de la liste des tâches et du prompt optimisé terminée")
-    
-    # Log du prompt de la boucle
-    loop_prompt = f"""
-    Contexte de la demande initiale {folder_path}/demande.md :
-    {request}
 
-    Cahier des charges global (niveau 0) {folder_path}/cdc.md :
-    {response}
-
-    Liste des tâches à réaliser {folder_path}/todolist.md:
-    {todolist_response}
-
-    Prompt Général {folder_path}/prompt.md:
-    {prompt_response}
-
-    Pour chaque étape du processus détaillé, applique le processus suivant:
-    1. Crée un fichier prompt.md dans une arborescence miroir des étapes présentées dans {folder_path}/todolist.md. Ce fichier doit contenir le prompt pour exécuter l'étape en question.
-    2. Si l'étape est trop complexe pour un seul prompt, crée un sous-dossier avec des sous-étapes
-    3. Exécute l'étape en suivant le prompt créé. Assure-toi de vraiment réaliser le travail nécessaire à la completion de l'étape.
-    4. Vérifie que le travail effectué remplit les critères du CDC pour l'étape (dans {folder_path}
-    5. Si les critères ne sont pas remplis, recommence l'étape ou décompose-la en sous-étapes
-    6. Une fois les critères remplis, mets à jour le statut de l'étape dans {folder_path}/todolist.md
-    7. Répète ce processus jusqu'à ce que tous les critères du CDC global (niveau 0) soient remplis
-    """
-    logger.info("Prompt de la boucle généré:")
-    logger.info(loop_prompt)
 
     return response, todolist_response, prompt_response
 
