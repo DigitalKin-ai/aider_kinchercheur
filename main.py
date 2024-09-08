@@ -348,11 +348,11 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     parser = get_parser(default_config_files, git_root)
     parser.add_argument('--request', help='Specify a request')
     parser.add_argument('--append-request', help='Append a request to the message file')
+    parser.add_argument('--message', help='Specify a message')
     args, unknown = parser.parse_known_args(argv)
 
     folder = args.folder
-    message = args.message
-    request = args.request
+    message = args.message or args.request  # Use request as message if provided
     append_request = args.append_request
 
     if folder is None:
@@ -364,10 +364,8 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     folder_path = os.path.abspath(folder)
     logger.info(f"Working with folder: {folder_path}")
 
-    # If request is provided, use it as the message
-    if request:
-        message = request
-        logger.info(f"Using request as message: {message}")
+    if message:
+        logger.info(f"Using message: {message}")
 
     # Create the io object
     io = InputOutput(
