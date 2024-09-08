@@ -7,7 +7,7 @@ import asyncio
 
 import streamlit as st
 import discord
-import telegram
+from telegram.ext import Application
 from playwright.async_api import async_playwright
 
 from aider import urls
@@ -111,13 +111,15 @@ class GUI:
         await client.start(token)
 
     async def send_telegram_message(self, token, chat_id, message):
-        bot = telegram.Bot(token=token)
-        await bot.send_message(chat_id=chat_id, text=message)
+        application = Application.builder().token(token).build()
+        async with application:
+            await application.bot.send_message(chat_id=chat_id, text=message)
 
     async def get_telegram_messages(self, token, chat_id):
-        bot = telegram.Bot(token=token)
-        updates = await bot.get_updates()
-        messages = [update.message.text for update in updates if update.message.chat.id == chat_id]
+        application = Application.builder().token(token).build()
+        async with application:
+            updates = await application.bot.get_updates()
+            messages = [update.message.text for update in updates if update.message.chat.id == chat_id]
         return messages
 
     async def scrape_webpage(self, url):
@@ -504,7 +506,7 @@ class GUI:
 
         while prompt:
             with self.messages.chat_message("assistant"):
-                res = st.write_stream(self.coder.run_stream(prompt))
+                res = await self.run_stream_async(prompt)
                 self.state.messages.append({"role": "assistant", "content": res})
                 # self.cost()
 
@@ -559,6 +561,9 @@ class GUI:
 
         # re-render the UI for the non-prompt_pending state
         st.rerun()
+
+    async def run_stream_async(self, prompt):
+        return await asyncio.to_thread(self.coder.run_stream, prompt)
 
     def info(self, message, echo=True):
         info = dict(role="info", content=message)
