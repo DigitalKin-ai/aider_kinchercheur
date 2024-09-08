@@ -399,28 +399,28 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     logger.info("InputOutput object created")
 
     try:
-        # Check if the message is already present in the folder
-        message_file = Path(folder_path) / 'message.md'
-        if message_file.exists():
-            logger.info(f"Message file exists: {message_file}")
+        # Check if the request is already present in the folder
+        request_file = Path(folder_path) / 'request.md'
+        if request_file.exists():
+            logger.info(f"Request file exists: {request_file}")
             try:
-                with open(message_file, 'r', encoding='utf-8') as f:
-                    existing_message = f.read().strip()
-                if message is None:
-                    message = existing_message
-                    logger.info("Using existing message")
-                elif message.strip() == existing_message:
-                    io.tool_output("The message is identical to the one already present. No need to regenerate the specifications.")
-                    logger.info("Message is identical, skipping regeneration")
+                with open(request_file, 'r', encoding='utf-8') as f:
+                    existing_request = f.read().strip()
+                if request is None:
+                    request = existing_request
+                    logger.info("Using existing request")
+                elif request.strip() == existing_request:
+                    io.tool_output("The request is identical to the one already present. No need to regenerate the specifications.")
+                    logger.info("Request is identical, skipping regeneration")
                 else:
-                    # Save the new message
-                    with open(message_file, 'w', encoding='utf-8') as f:
-                        f.write(message)
-                    io.tool_output(f"New message saved to {message_file}")
-                    logger.info(f"New message saved to {message_file}")
+                    # Save the new request
+                    with open(request_file, 'w', encoding='utf-8') as f:
+                        f.write(request)
+                    io.tool_output(f"New request saved to {request_file}")
+                    logger.info(f"New request saved to {request_file}")
                     # Import generation module here to avoid circular import
                     from .generation import generate_specifications
-                    specifications, todolist, prompt = generate_specifications(folder_path, message)
+                    specifications, todolist, prompt = generate_specifications(folder_path, request)
                     io.tool_output(f"Specifications, task list, and prompt generated for the folder: {folder_path}")
                     logger.info("Specifications, task list, and prompt generated")
             except Exception as e:
