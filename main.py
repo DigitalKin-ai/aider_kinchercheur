@@ -180,8 +180,8 @@ def check_streamlit_install(io):
 
 
 def launch_gui(args):
-    from streamlit.web import cli
-
+    import streamlit.web.cli as stcli
+    import sys
     from aider import gui
 
     print()
@@ -189,26 +189,23 @@ def launch_gui(args):
 
     target = gui.__file__
 
-    st_args = ["run", target]
-
-    st_args += [
+    sys.argv = ["streamlit", "run", target]
+    sys.argv += [
         "--browser.gatherUsageStats=false",
         "--runner.magicEnabled=false",
         "--server.runOnSave=false",
     ]
 
-    if "-dev" in __version__:
-        print("Watching for file changes.")
-    else:
-        st_args += [
+    if "-dev" not in __version__:
+        sys.argv += [
             "--global.developmentMode=false",
             "--server.fileWatcherType=none",
-            "--client.toolbarMode=viewer",  # minimal?
+            "--client.toolbarMode=viewer",
         ]
 
-    st_args += ["--"] + args
+    sys.argv += ["--"] + args
 
-    cli.main(st_args)
+    sys.exit(stcli.main())
 
     # from click.testing import CliRunner
     # runner = CliRunner()
