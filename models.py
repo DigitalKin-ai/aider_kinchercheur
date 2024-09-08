@@ -12,7 +12,7 @@ from typing import Optional
 import yaml
 from PIL import Image
 
-from aider import urls
+from . import urls
 from aider.dump import dump  # noqa: F401
 from aider.llm import aider_APP_NAME, aider_SITE_URL, litellm
 

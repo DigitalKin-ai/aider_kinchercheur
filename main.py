@@ -8,7 +8,7 @@ import logging
 import traceback
 
 from aider import __version__, utils
-import models
+from . import models
 import git
 from dotenv import load_dotenv
 from prompt_toolkit.enums import EditingMode
