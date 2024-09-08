@@ -10,7 +10,7 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-def generate_specifications(folder_path, request):
+def generer_cdc(folder_path, request):
     logger.info(f"Starting the generation of specifications for the folder: {folder_path}")
     logger.info(f"Received request: {request}")
 
@@ -326,7 +326,7 @@ if __name__ == "__main__":
     # Définir folder_path ici
     folder_path = os.path.abspath(folder)
     
-    specifications, todolist, prompt = generate_specifications(folder_path, request)
+    specifications, todolist, prompt = generer_cdc(folder_path, request)
     logger.info(f"Generation completed for folder: {folder_path}")
     
     print(f"Specifications generated and saved in {os.path.join(folder_path, 'specifications.md')}")
@@ -620,7 +620,7 @@ Please generate an optimized prompt based on this information.
     return response, todolist_response, prompt_response
 
 # Usage example:
-# specifications, todolist, prompt = generate_specifications("my_folder", "Create a task management application for a small business")
+# specifications, todolist, prompt = generer_cdc("my_folder", "Create a task management application for a small business")
 # print(specifications)
 # print(todolist)
 # print(prompt)
