@@ -11,6 +11,9 @@ from aider import __version__, models, utils
 import git
 from dotenv import load_dotenv
 from prompt_toolkit.enums import EditingMode
+import discord
+import asyncio
+import telegram
 
 DEFAULT_MODEL_NAME = "gpt-4o"  # or the default model you want to use
 
@@ -326,6 +329,27 @@ def register_litellm_models(git_root, model_metadata_fname, io, verbose=False):
     except Exception as e:
         io.tool_error(f"Error loading model metadata models: {e}")
         return 1
+
+async def send_discord_message(token, channel_id, message):
+    client = discord.Client(intents=discord.Intents.default())
+    
+    @client.event
+    async def on_ready():
+        channel = client.get_channel(channel_id)
+        await channel.send(message)
+        await client.close()
+
+    await client.start(token)
+
+async def send_telegram_message(token, chat_id, message):
+    bot = telegram.Bot(token=token)
+    await bot.send_message(chat_id=chat_id, text=message)
+
+async def get_telegram_messages(token, chat_id):
+    bot = telegram.Bot(token=token)
+    updates = await bot.get_updates()
+    messages = [update.message.text for update in updates if update.message.chat.id == chat_id]
+    return messages
 
 def main(argv=None, input=None, output=None, force_git_root=None, return_coder=False):
     logger.info("Starting main function")
@@ -705,8 +729,38 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
 
             3. After each task, provide a brief summary of actions taken and progress made.
 
+            4. Send a new message on Discord to introduce the band members:
+               - Use the Discord token: os.getenv('DISCORD_BOT_TOKEN')
+               - Use the channel ID: 1279332180077842495
+               - Craft an appropriate introduction message for the band members
+
+            5. Send a message in the Telegram group:
+               - Use the Telegram bot token (you need to set this in the .env file)
+               - Use the chat ID: -1001699255893
+               - Craft an appropriate message for the Telegram group
+
+            6. Retrieve and save messages from the Telegram group
+
             Remember: Avoid hallucinations. Only report on actions you've actually taken and results you can verify.
             """)
+
+            # Send Discord message
+            discord_token = os.getenv('DISCORD_BOT_TOKEN')
+            discord_channel_id = 1279332180077842495
+            discord_message = "Hello everyone! We're excited to introduce the members of our band: [List band members here]"
+            asyncio.run(send_discord_message(discord_token, discord_channel_id, discord_message))
+
+            # Send Telegram message
+            telegram_token = os.getenv('TELEGRAM_BOT_TOKEN')
+            telegram_chat_id = -1001699255893
+            telegram_message = "Greetings from our band! We have some exciting news to share: [Your message here]"
+            asyncio.run(send_telegram_message(telegram_token, telegram_chat_id, telegram_message))
+
+            # Get and save Telegram messages
+            telegram_messages = asyncio.run(get_telegram_messages(telegram_token, telegram_chat_id))
+            with open(f"{folder}/telegram_messages.txt", "w") as f:
+                for message in telegram_messages:
+                    f.write(f"{message}\n")
             logger.info("Task execution process completed")
 
             logger.info("Performing mission completion check")
