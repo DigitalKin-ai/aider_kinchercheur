@@ -654,19 +654,25 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
                     file_path = Path(role) / filename
                 else:
                     file_path = Path(folder) / filename
-                if file_path.exists():
-                    with open(file_path, 'r', encoding='utf-8') as f:
-                        file_contents[key] = f.read()
-                else:
-                    if filename == 'output.md':
-                        # Create output.md if it doesn't exist
-                        with open(file_path, 'w', encoding='utf-8') as f:
-                            f.write("")  # Create an empty file
-                        file_contents[key] = ""
-                        io.tool_output(f"Created empty {filename} in the folder {folder}.")
+                try:
+                    if file_path.exists():
+                        with open(file_path, 'r', encoding='utf-8') as f:
+                            file_contents[key] = f.read()
                     else:
-                        io.tool_error(f"The file {filename} doesn't exist in the folder {folder}.")
-                        file_contents[key] = f"Content of {filename} not available"
+                        if filename == 'output.md':
+                            # Create output.md if it doesn't exist
+                            with open(file_path, 'w', encoding='utf-8') as f:
+                                f.write("")  # Create an empty file
+                            file_contents[key] = ""
+                            io.tool_output(f"Created empty {filename} in the folder {folder}.")
+                        else:
+                            io.tool_error(f"The file {filename} doesn't exist in the folder {folder}.")
+                            file_contents[key] = f"Content of {filename} not available"
+                            logger.error(f"File not found: {file_path}")
+                except Exception as e:
+                    io.tool_error(f"Error reading file {filename}: {str(e)}")
+                    file_contents[key] = f"Error reading content of {filename}"
+                    logger.error(f"Error reading file {file_path}: {str(e)}")
         
             # Execute the detailed loop
             coder.run(with_message=f"""
