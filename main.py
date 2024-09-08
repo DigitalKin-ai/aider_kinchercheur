@@ -334,12 +334,12 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     default_config_files = list(map(str, default_config_files))
 
     parser = get_parser(default_config_files, git_root)
-    parser.add_argument('--append-message', help='Append a message to the message file')
+    parser.add_argument('--append-request', help='Append a request to the message file')
     args, unknown = parser.parse_known_args(argv)
 
     folder = args.folder
     message = args.message
-    append_message = args.append_message
+    append_request = args.append_request
 
     if folder is None:
         print("Usage: python -m aider --folder <folder> [--message <message>] [--append-message <append_message>]")
@@ -400,11 +400,11 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     specifications, todolist, prompt = generate_specifications(folder_path, message)
     io.tool_output(f"Specifications, task list, and prompt generated for the folder: {folder_path}")
 
-    # Add the append_message to the end of the message file if it's present
-    if append_message:
+    # Add the append_request to the end of the message file if it's present
+    if append_request:
         with open(message_file, 'a', encoding='utf-8') as f:
-            f.write(f"\n\n{append_message}")
-        io.tool_output(f"Append message added to the end of the message file: {message_file}")
+            f.write(f"\n\n{append_request}")
+        io.tool_output(f"Append request added to the end of the message file: {message_file}")
 
     if args.verbose:
         print("Config files search order, if no --config:")
