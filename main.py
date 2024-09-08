@@ -329,7 +329,7 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
 
     # Check if --gui argument is present
     if argv is not None and '--gui' in argv:
-        return launch_gui(argv)
+        return await launch_gui(argv)
 
     if force_git_root:
         git_root = force_git_root
