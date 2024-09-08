@@ -831,7 +831,7 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
             {coder.get_repo_map()}
 
             Choose a terminal command that would be most helpful for progressing the project.
-            The command should be in the format 'python <script>.py [arguments]' or any other appropriate shell command.
+            The command should be an appropriate shell command for the current operating system.
             Provide a brief explanation of why you chose this command.
 
             Your response should be in the format:
@@ -851,18 +851,21 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
                 io.tool_output(f"Executing command: {chosen_command}")
                 try:
                     import subprocess
-                    # Utilisation de sys.executable pour obtenir le chemin de l'interpréteur Python
-                    import sys
-                    python_executable = sys.executable
-                    # Modification de la commande pour utiliser le chemin de l'interpréteur Python
-                    modified_command = f'"{python_executable}" {chosen_command.strip("`")}'
-                    result = subprocess.run(modified_command, shell=True, check=True, capture_output=True, text=True, cwd=folder_path)
+                    import shlex
+                    
+                    # Split the command into arguments, respecting quoted strings
+                    command_args = shlex.split(chosen_command)
+                    
+                    # Execute the command
+                    result = subprocess.run(command_args, check=True, capture_output=True, text=True, cwd=folder_path)
                     io.tool_output(f"Command output:\n{result.stdout}")
                     if result.stderr:
                         io.tool_error(f"Command error output:\n{result.stderr}")
                 except subprocess.CalledProcessError as e:
                     io.tool_error(f"Command execution failed: {e}")
                     io.tool_error(f"Error output:\n{e.stderr}")
+                except Exception as e:
+                    io.tool_error(f"An error occurred while executing the command: {str(e)}")
             else:
                 io.tool_error("No valid command was chosen.")
 
