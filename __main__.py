@@ -1,4 +1,7 @@
+import asyncio
+import tracemalloc
 from main import main
 
 if __name__ == "__main__":
-    main()
+    tracemalloc.start()
+    asyncio.run(main())
