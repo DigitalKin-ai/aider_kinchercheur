@@ -436,9 +436,10 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         if request is not None:
             try:
                 from .generation import generate_specifications
-                specifications, todolist, prompt = generate_specifications(folder_path, request)
-                io.tool_output(f"Specifications, task list, and prompt generated for the folder: {folder_path}")
-                logger.info("Specifications, task list, and prompt generated")
+                logger.info("Generating specifications, todolist, prompt and toolbox...")
+                specifications, todolist, prompt, toolbox = generate_specifications(folder_path, request)
+                io.tool_output(f"Specifications, todolist, prompt and toolbox generated for the folder: {folder_path}")
+                logger.info("Specifications, todolist, prompt and toolbox generated")
             except Exception as e:
                 logger.error(f"Error generating specifications: {e}")
                 io.tool_error(f"Error generating specifications: {e}")
@@ -558,7 +559,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         io.tool_output(f"Main folder already exists: {folder_path}")
 
     # Add specific files from the folder
-    specific_files = ['todolist.md', 'specifications.md', 'prompt.md']
+    specific_files = ['todolist.md', 'specifications.md', 'prompt.md', 'toolbox.py']
     added_files = []
 
     for file in specific_files:
@@ -640,6 +641,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
                 'specifications': 'specifications.md',
                 'todolist': 'todolist.md',
                 'prompt': 'prompt.md',
+                'toolbox': 'toolbox.py',
                 'output': 'output.md'
             }
             file_contents = {}
@@ -671,8 +673,11 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             List of tasks to be completed ({folder}/todolist.md):
             {file_contents['todolist']}
 
-            General Prompt ({folder}/output.md):
+            General Prompt ({folder}/prompt.md):
             {file_contents['prompt']}
+
+            Available Toolbox ({folder}/toolbox.py):
+            {file_contents['toolbox']}
 
             Current content of the mission output ({folder}/output.md):
             {file_contents['output']}
@@ -682,11 +687,14 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             For the next item of the todolist of the todolist that is not yet completed, apply the following process:
             1. If the prompt is not created, create a prompt.md file in a mirror directory structure of the steps presented in {folder}/todolist.md. This file should contain the prompt to execute the step in question.
             2. If the step is too complex for a single prompt, create a sub-folder with sub-steps.
-            3. Execute the step following the prompt for the step. Make sure to actually do the work necessary to complete the step.
-            4. Verify that the work done meets the specifications criteria for the step.
-            5. If the criteria are not met, redo the step or break it down into sub-steps.
-            6. Once the criteria are met, update the status of the step in {folder}/todolist.md.
-            7. Repeat this process until all criteria of the global specifications are met (rendered in the file {folder}/`output.md`).
+            3. If a toolbox is required to complete the step, make the necessary changes to the toolbox. Write EXPLICITELY between backquotes the command that you want to call, with arguments.
+            4. Command Hallucination verification step: Verify that you can actually see the results of the command. If you don't see the results, the command hasn't been called.
+            5. Execute the step using the prompt for the step. Make sure to actually do the work necessary to complete the step.
+            6. Text Hallucination verification step: Verify that you can actually see in the text the work being done (LLMs' natural tendency is to just cross the item off the todolist, without actually doing the work). 
+            7. Verify that the work done meets the specifications criteria for the step.
+            8. If the criteria are not met, redo the step or break it down into sub-steps.
+            9. Once the criteria are met, update the status of the step in {folder}/todolist.md.
+            10. Repeat this process until all criteria of the global specifications are met (rendered in the file {folder}/`output.md`).
             """)
 
             # Check if the mission is completed
