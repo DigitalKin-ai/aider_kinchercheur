@@ -1,5 +1,6 @@
 import os
 import logging
+import traceback
 from dotenv import load_dotenv
 from .sendchat import simple_send_with_retries
 
