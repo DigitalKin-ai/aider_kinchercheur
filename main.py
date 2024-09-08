@@ -7,7 +7,8 @@ from pathlib import Path
 import logging
 import traceback
 
-from aider import __version__, models, utils
+from aider import __version__, utils
+import models
 import git
 from dotenv import load_dotenv
 from prompt_toolkit.enums import EditingMode

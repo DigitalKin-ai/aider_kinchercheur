@@ -1,9 +1,9 @@
 import asyncio
 import tracemalloc
-from aider.main import main
+from main import main
 
 async def run_main():
-    await main()
+    return await main()
 
 if __name__ == "__main__":
     tracemalloc.start()
