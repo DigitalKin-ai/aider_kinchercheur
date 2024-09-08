@@ -5,8 +5,10 @@ import sys
 import tempfile
 import time
 from pathlib import Path
+import asyncio
 
 import git
+from playwright.async_api import async_playwright
 
 from aider.dump import dump  # noqa: F401
 
@@ -202,40 +204,37 @@ def get_pip_install(args):
     return cmd
 
 
-def run_install(cmd):
+async def run_install(cmd):
     print()
     print("Installing: ", " ".join(cmd))
 
     try:
-        output = []
-        process = subprocess.Popen(
-            cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            bufsize=1,
-            universal_newlines=True,
+        process = await asyncio.create_subprocess_exec(
+            *cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.STDOUT
         )
+        
+        output = []
         spinner = Spinner("Installing...")
 
         while True:
-            char = process.stdout.read(1)
-            if not char:
+            line = await process.stdout.readline()
+            if not line:
                 break
-
-            output.append(char)
+            output.append(line.decode().strip())
             spinner.step()
 
         spinner.end()
-        return_code = process.wait()
-        output = "".join(output)
+        await process.wait()
+        output = "\n".join(output)
 
-        if return_code == 0:
+        if process.returncode == 0:
             print("Installation complete.")
             print()
             return True, output
 
-    except subprocess.CalledProcessError as e:
+    except Exception as e:
         print(f"\nError running pip install: {e}")
 
     print("\nInstallation failed.\n")
@@ -276,7 +275,7 @@ import os
 from pathlib import Path
 import fnmatch
 
-def check_pip_install_extra(io, module, prompt, pip_install_cmd):
+async def check_pip_install_extra(io, module, prompt, pip_install_cmd):
     try:
         __import__(module)
         return True
@@ -291,7 +290,7 @@ def check_pip_install_extra(io, module, prompt, pip_install_cmd):
     if not io.confirm_ask("Run pip install?", default="y"):
         return
 
-    success, output = run_install(cmd)
+    success, output = await run_install(cmd)
     if success:
         try:
             __import__(module)
