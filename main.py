@@ -802,7 +802,9 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
                 io.tool_output(f"Executing command: {chosen_command}")
                 try:
                     import subprocess
-                    result = subprocess.run(chosen_command, shell=True, check=True, capture_output=True, text=True, cwd=folder_path)
+                    # Modification de la commande pour utiliser python explicitement
+                    modified_command = f"python {chosen_command.strip('`')}"
+                    result = subprocess.run(modified_command, shell=True, check=True, capture_output=True, text=True, cwd=folder_path)
                     io.tool_output(f"Command output:\n{result.stdout}")
                     if result.stderr:
                         io.tool_error(f"Command error output:\n{result.stderr}")
