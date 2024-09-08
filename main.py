@@ -350,8 +350,8 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
 
     folder = args.folder
     message = args.message
-    request = args.request
-    append_request = args.append_request
+    request = getattr(args, 'request', None)
+    append_request = getattr(args, 'append_request', None)
 
     if folder is None:
         logger.error("Folder not specified")
