@@ -1,4 +1,4 @@
-website = "https://aider.chat/"
+website = "https://nlr.ai/"
 add_all_files = "https://aider.chat/docs/faq.html#how-can-i-add-all-the-files-to-the-chat"
 edit_errors = "https://aider.chat/docs/troubleshooting/edit-errors.html"
 git = "https://aider.chat/docs/git.html"

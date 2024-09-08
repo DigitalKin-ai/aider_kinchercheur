@@ -4,6 +4,7 @@ import os
 import random
 import sys
 import asyncio
+import webbrowser
 
 import streamlit as st
 import discord
@@ -11,14 +12,23 @@ from telegram.ext import Application
 from playwright.async_api import async_playwright
 from playwright.async_api import async_playwright
 
-from aider import urls
+# Add the parent directory to sys.path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, parent_dir)
+
+# Now import from aider.coders
 from aider.coders import Coder
 from aider.dump import dump  # noqa: F401
 from aider.io import InputOutput
 from aider import __version__, models, utils
 from aider.scrape import Scraper
+from aider.args import get_parser
 
-# Remove the self-import of launch_gui
+# Add the parent directory to sys.path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, parent_dir)
 
 
 class CaptureIO(InputOutput):
@@ -105,10 +115,28 @@ class GUI:
         self.state = None
         self.playwright = None
         self.browser = None
+        self.messages = None
 
     async def initialize(self):
         self.coder = await get_coder()
         self.state = get_state()
+
+        # Parse command-line arguments
+        parser = get_parser()
+        args = parser.parse_args()
+
+        # Apply the arguments to your coder or GUI setup
+        # For example:
+        if args.cache_prompts:
+            self.coder.cache_prompts = True
+        if args.map_refresh:
+            self.coder.map_refresh = args.map_refresh
+        if args.auto_test:
+            self.coder.auto_test = args.auto_test
+        if args.test_cmd:
+            self.coder.test_cmd = args.test_cmd
+        if args.role:
+            self.coder.role = args.role
 
         # Force the coder to cooperate, regardless of cmd line args
         self.coder.yield_stream = True
@@ -496,54 +524,6 @@ class GUI:
 
         return st.button(args, **kwargs)
 
-    async def __init__(self):
-        self.coder = await get_coder()
-        self.state = get_state()
-
-        # Force the coder to cooperate, regardless of cmd line args
-        self.coder.yield_stream = True
-        self.coder.stream = True
-        self.coder.pretty = False
-
-        self.initialize_state()
-
-        self.do_messages_container()
-        self.do_sidebar()
-
-        user_inp = st.chat_input("Say something")
-        if user_inp:
-            self.prompt = user_inp
-
-        if self.prompt_pending():
-            await self.process_chat()
-
-        if not self.prompt:
-            return
-
-        self.state.prompt = self.prompt
-
-        if self.prompt_as == "user":
-            self.coder.io.add_to_input_history(self.prompt)
-
-        self.state.input_history.append(self.prompt)
-
-        if self.prompt_as:
-            self.state.messages.append({"role": self.prompt_as, "content": self.prompt})
-        if self.prompt_as == "user":
-            with self.messages.chat_message("user"):
-                st.write(self.prompt)
-        elif self.prompt_as == "text":
-            line = self.prompt.splitlines()[0]
-            line += "??"
-            with self.messages.expander(line):
-                st.text(self.prompt)
-
-        # Initialize Playwright browser
-        await self.initialize_playwright()
-
-        # re-render the UI for the prompt_pending state
-        st.rerun()
-
     async def initialize_playwright(self):
         self.playwright = await async_playwright().start()
         self.browser = await self.playwright.chromium.launch()
@@ -692,15 +672,16 @@ class GUI:
             self.prompt = reply
 
 
-async def gui_main():
+async def gui_main(argv=None):
+    webbrowser.open_new_tab("http://localhost:8501")
+    st.title("Kins")
     st.set_page_config(
         layout="wide",
-        page_title="aider",
-        page_icon=urls.favicon,
+        page_title="kins",
+        page_icon="🌌",
         menu_items={
-            "Get Help": urls.website,
-            "Report a bug": "https://github.com/paul-gauthier/aider/issues",
-            "About": "# aider\nAI pair programming in your browser.",
+            "Report a bug": "https://github.com/lesterpaintstheworld/aider/issues",
+            "About": "# Kins\nAutonomous multi-agents AI on your computer.",
         },
     )
 
@@ -709,6 +690,6 @@ async def gui_main():
     return 0
 
 if __name__ == "__main__":
+    import sys
     import asyncio
-    status = asyncio.run(gui_main())
-    sys.exit(status)
+    asyncio.run(gui_main(sys.argv[1:]))
