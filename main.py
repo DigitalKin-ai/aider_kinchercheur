@@ -620,9 +620,11 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             Répondez uniquement par Mission terminée ? : OUI ou NON, suivi d'une explication détaillée.
             """)
 
-            #TODO: ajouter la réponse oui non au chat
+            # Ajouter la réponse OUI/NON au chat
+            completion_response = "OUI" if "OUI" in completion_check.upper() else "NON"
+            coder.cur_messages.append({"role": "assistant", "content": f"Mission terminée ? : {completion_response}"})
 
-            if "OUI" in completion_check.upper():
+            if completion_response == "OUI":
                 io.tool_output("Mission terminée selon les critères du CDC.")
                 break
             else:
