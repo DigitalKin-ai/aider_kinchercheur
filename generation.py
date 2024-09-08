@@ -421,6 +421,12 @@ Request from which to generate the specifications:
     with open(specifications_file, "w", encoding="utf-8") as f:
         f.write(response)
     logger.info(f"Specifications saved in: {specifications_file}")
+
+    # Save the specifications in the cdc.md file as well
+    cdc_file = os.path.join(folder_path, "cdc.md")
+    with open(cdc_file, "w", encoding="utf-8") as f:
+        f.write(response)
+    logger.info(f"CDC saved in: {cdc_file}")
     
     # Generate the todolist
     todolist_prompt = f"""# Prompt for KinDecomposer
@@ -505,7 +511,7 @@ File paths:
         f.write(todolist_response)
     logger.info(f"Task list saved in: {todolist_file}")
     
-    logger.info("Generation of specifications and task list completed")
+    logger.info("Generation of specifications, CDC, and task list completed")
 
     # Generate the optimized prompt
     prompt_prompt = f"""# Prompt for KinPromptGenerator
