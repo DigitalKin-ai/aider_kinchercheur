@@ -383,17 +383,21 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             cdc, todolist, prompt = generer_cdc(folder_path, demande)
             io.tool_output(f"Specifications, task list, and prompt generated for the folder: {folder_path}")
     elif demande is None:
-        io.tool_error("Error: No request provided and no existing request in the folder.")
-        return 1
-    else:
-        # Save the new demande
+        # Create an empty demande.md file
         with open(demande_file, 'w', encoding='utf-8') as f:
-            f.write(demande)
-        io.tool_output(f"New request saved to {demande_file}")
-        # Import generation module here to avoid circular import
-        from .generation import generer_cdc
-        cdc, todolist, prompt = generer_cdc(folder_path, demande)
-        io.tool_output(f"Specifications, task list, and prompt generated for the folder: {folder_path}")
+            pass
+        io.tool_output(f"Created an empty request file: {demande_file}")
+        demande = ""
+    
+    # Save the new demande (empty or not)
+    with open(demande_file, 'w', encoding='utf-8') as f:
+        f.write(demande)
+    io.tool_output(f"Request saved to {demande_file}")
+    
+    # Import generation module here to avoid circular import
+    from .generation import generer_cdc
+    cdc, todolist, prompt = generer_cdc(folder_path, demande)
+    io.tool_output(f"Specifications, task list, and prompt generated for the folder: {folder_path}")
 
     # Add the message to the end of the request file if it's present
     if append_message:
