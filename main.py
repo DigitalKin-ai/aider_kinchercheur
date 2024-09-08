@@ -351,6 +351,8 @@ async def get_telegram_messages(token, chat_id):
     messages = [update.message.text for update in updates if update.message.chat.id == chat_id]
     return messages
 
+import sys
+
 async def main(argv=None, input=None, output=None, force_git_root=None, return_coder=False):
     logger.info("Starting main function")
     if argv is None:
