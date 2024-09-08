@@ -439,7 +439,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             try:
                 from .generation import generation
                 logger.info("Generating specifications, todolist, prompt and toolbox...")
-                specifications, todolist, prompt, toolbox = generation(folder_path, role="default")
+                specifications, todolist, prompt, toolbox = generation(folder_path, request, role="default")
                 io.tool_output(f"Specifications, todolist, prompt and toolbox generated for the folder: {folder_path}")
                 logger.info("Specifications, todolist, prompt and toolbox generated")
             except Exception as e:
