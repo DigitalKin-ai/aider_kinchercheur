@@ -15,7 +15,7 @@ from prompt_toolkit.enums import EditingMode
 DEFAULT_MODEL_NAME = "gpt-4o-mini"  # or the default model you want to use
 
 # Configure logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 # Add the parent directory to sys.path
