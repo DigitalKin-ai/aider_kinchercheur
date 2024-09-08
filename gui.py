@@ -8,6 +8,7 @@ import asyncio
 import streamlit as st
 import discord
 import telegram
+from playwright.async_api import async_playwright
 
 from aider import urls
 from aider.coders import Coder
