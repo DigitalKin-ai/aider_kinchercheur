@@ -650,7 +650,10 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             file_contents = {}
 
             for key, filename in files_to_read.items():
-                file_path = Path(folder) / filename #todo : special case : the path of todolist and role is <rolename>/filename, not folder/filename
+                if filename in ['todolist.md', 'role.md']:
+                    file_path = Path(folder) / role / filename
+                else:
+                    file_path = Path(folder) / filename
                 if file_path.exists():
                     with open(file_path, 'r', encoding='utf-8') as f:
                         file_contents[key] = f.read()
