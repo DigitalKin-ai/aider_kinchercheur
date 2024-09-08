@@ -22,7 +22,7 @@ def is_output(filename, folder):
     return re.search(r'output\.md', filename.lower()) is not None and is_in_correct_folder(filename, folder)
 
 def is_analysis(filename, folder):
-    return filename.lower().startswith('analyses/') and is_in_correct_folder(filename, os.path.join(folder, 'analyses'))
+    return filename.lower().startswith('analysis/') and is_in_correct_folder(filename, os.path.join(folder, 'analysis'))
 
 def is_text_file(filename):
     text_extensions = ['.md', '.txt', '.py', '.js', '.html', '.css', '.json', '.yml', '.yaml', '.ini', '.cfg']
@@ -46,9 +46,8 @@ def select_relevant_files(folder_or_files):
                 is_specifications(full_path, folder) or 
                 is_todolist(full_path, folder) or 
                 is_prompt(full_path, folder) or
-                is_output(full_path, folder)):
-                relevant_files.append(full_path)
-            elif is_analysis(full_path, folder):
+                is_output(full_path, folder) or
+                is_analysis(full_path, folder)):
                 relevant_files.append(full_path)
     
     print("DEBUG: Final selected files:")
