@@ -10,7 +10,7 @@ import git
 from dotenv import load_dotenv
 from prompt_toolkit.enums import EditingMode
 
-DEFAULT_MODEL_NAME = "gpt-4o-mini"  # ou le modèle par défaut que vous souhaitez utiliser
+DEFAULT_MODEL_NAME = "gpt-4o-mini"  # or the default model you want to use
 
 # Add the parent directory to sys.path
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -344,10 +344,10 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         print("Usage: python -m aider --folder <folder> [--demande <demande>] [--message <message>]")
         return 1
 
-    # Définir folder_path ici
+    # Define folder_path here
     folder_path = os.path.abspath(folder)
 
-    # Créer l'objet io
+    # Create the io object
     io = InputOutput(
         args.pretty,
         args.yes,
@@ -364,7 +364,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         editingmode=EditingMode.VI if args.vim else EditingMode.EMACS,
     )
 
-    # Vérifier si la demande est déjà présente dans le dossier
+    # Check if the request is already present in the folder
     demande_file = Path(folder_path) / 'demande.md'
     if demande_file.exists():
         with open(demande_file, 'r', encoding='utf-8') as f:
@@ -372,26 +372,26 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         if demande is None:
             demande = existing_demande
         elif demande.strip() == existing_demande:
-            io.tool_output("La demande est identique à celle déjà présente. Pas besoin de régénérer le CDC.")
+            io.tool_output("The request is identical to the one already present. No need to regenerate the CDC.")
         else:
             # Import generation module here to avoid circular import
             from .generation import generer_cdc
             cdc, todolist, prompt = generer_cdc(folder_path, demande)
-            io.tool_output(f"Cahier des charges, liste des tâches et prompt générés pour le dossier : {folder_path}")
+            io.tool_output(f"Specifications, task list, and prompt generated for the folder: {folder_path}")
     elif demande is None:
-        io.tool_error("Erreur : Aucune demande fournie et aucune demande existante dans le dossier.")
+        io.tool_error("Error: No request provided and no existing request in the folder.")
         return 1
     else:
         # Import generation module here to avoid circular import
         from .generation import generer_cdc
         cdc, todolist, prompt = generer_cdc(folder_path, demande)
-        io.tool_output(f"Cahier des charges, liste des tâches et prompt générés pour le dossier : {folder_path}")
+        io.tool_output(f"Specifications, task list, and prompt generated for the folder: {folder_path}")
 
-    # Ajouter le message à la fin du fichier de demande s'il est présent
+    # Add the message to the end of the request file if it's present
     if append_message:
         with open(demande_file, 'a', encoding='utf-8') as f:
             f.write(f"\n\n{append_message}")
-        io.tool_output(f"Message ajouté à la fin du fichier de demande : {demande_file}")
+        io.tool_output(f"Message added to the end of the request file: {demande_file}")
 
     if args.verbose:
         print("Config files search order, if no --config:")
@@ -449,19 +449,19 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         editingmode=editing_mode,
     )
 
-    # Créer l'objet coder
-    # Définir le modèle par défaut si aucun n'est spécifié
+    # Create the coder object
+    # Set the default model if none is specified
     model_name = args.model or DEFAULT_MODEL_NAME
     
     coder = Coder.create(
         main_model=models.Model(model_name),
         edit_format=args.edit_format,
         io=io,
-        repo=None,  # Nous n'utilisons pas de repo Git ici
-        fnames=[],  # Nous ajouterons les fichiers plus tard
+        repo=None,  # We're not using a Git repo here
+        fnames=[],  # We'll add the files later
         read_only_fnames=[],
         show_diffs=args.show_diffs,
-        auto_commits=False,  # Pas de commits automatiques
+        auto_commits=False,  # No automatic commits
         dirty_commits=False,
         dry_run=args.dry_run,
         map_tokens=args.map_tokens,
@@ -484,14 +484,14 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         cache_prompts=args.cache_prompts,
     )
 
-    # S'assurer que le dossier principal existe
+    # Ensure the main folder exists
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
-        io.tool_output(f"Dossier principal créé: {folder_path}")
+        io.tool_output(f"Main folder created: {folder_path}")
     else:
-        io.tool_output(f"Dossier principal existant: {folder_path}")
+        io.tool_output(f"Main folder already exists: {folder_path}")
 
-    # Ajout des fichiers spécifiques du dossier
+    # Add specific files from the folder
     specific_files = ['todolist.md', 'cdc.md', 'prompt.md']
     added_files = []
 
@@ -500,22 +500,22 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         if file_path.exists():
             coder.add_rel_fname(str(file_path))
             added_files.append(str(file_path))
-            io.tool_output(f"Fichier {file} ajouté au chat.")
+            io.tool_output(f"File {file} added to the chat.")
         else:
-            io.tool_output(f"Fichier {file} non trouvé dans le dossier.")
+            io.tool_output(f"File {file} not found in the folder.")
 
     if added_files:
-        io.tool_output("Fichiers ajoutés au chat : " + ", ".join(added_files))
+        io.tool_output("Files added to the chat: " + ", ".join(added_files))
     else:
-        io.tool_output("Aucun fichier spécifique n'a été trouvé dans le dossier.")
+        io.tool_output("No specific files were found in the folder.")
 
-    # Sélection des fichiers pertinents
+    # Select relevant files
     relevant_files = select_relevant_files(folder)
     for file in relevant_files:
         if file not in added_files:
             coder.add_rel_fname(file)
             added_files.append(file)
-            io.tool_output(f"Fichier pertinent ajouté au chat : {file}")
+            io.tool_output(f"Relevant file added to the chat: {file}")
 
     def check_file_modified(file_path, last_modified_times):
         try:
@@ -525,50 +525,50 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
                 return True
             return False
         except OSError as e:
-            io.tool_error(f"Erreur lors de la vérification du fichier {file_path}: {str(e)}")
+            io.tool_error(f"Error while checking file {file_path}: {str(e)}")
             return False
 
     def add_analyses_files(coder, io, analyses_folder, last_modified_times):
         if analyses_folder.exists() and analyses_folder.is_dir():
             analyses_files = [f for f in analyses_folder.iterdir() if f.is_file()]
-            io.tool_output("Ajout/Mise à jour des fichiers du dossier 'analyses':")
+            io.tool_output("Adding/Updating files from the 'analyses' folder:")
             for file in analyses_files:
                 try:
                     if check_file_modified(str(file), last_modified_times):
-                        io.tool_output(f"Ajout/Mise à jour de {file}")
+                        io.tool_output(f"Adding/Updating {file}")
                         coder.add_file(str(file))
                 except Exception as e:
-                    io.tool_error(f"Erreur lors de l'ajout/mise à jour du fichier {file}: {str(e)}")
+                    io.tool_error(f"Error while adding/updating file {file}: {str(e)}")
         else:
-            io.tool_output("Le dossier 'analyses' n'existe pas ou n'est pas un répertoire. Continuons sans.")
+            io.tool_output("The 'analyses' folder doesn't exist or is not a directory. Continuing without it.")
 
-    # Création du dossier 'analyses' s'il n'existe pas
+    # Create the 'analyses' folder if it doesn't exist
     analyses_folder = Path(folder_path) / 'analyses'
     if not analyses_folder.exists():
         analyses_folder.mkdir(parents=True, exist_ok=True)
-        io.tool_output(f"Dossier 'analyses' créé: {analyses_folder}")
+        io.tool_output(f"'analyses' folder created: {analyses_folder}")
     else:
-        io.tool_output(f"Dossier 'analyses' existant: {analyses_folder}")
+        io.tool_output(f"'analyses' folder already exists: {analyses_folder}")
     
-    # Ajout de tous les fichiers du dossier 'analyses' au chat
+    # Add all files from the 'analyses' folder to the chat
     last_modified_times = {}
     try:
         add_analyses_files(coder, io, analyses_folder, last_modified_times)
     except Exception as e:
-        io.tool_error(f"Erreur lors de l'ajout des fichiers d'analyses : {str(e)}")
+        io.tool_error(f"Error while adding analysis files: {str(e)}")
 
-    # Vérification des nouveaux fichiers
+    # Check for new files
     try:
-        # Vérification des nouveaux fichiers
+        # Check for new files
         new_files = coder.check_for_new_files()
         if new_files:
-            io.tool_output("Nouveaux fichiers détectés et ajoutés au chat.")
+            io.tool_output("New files detected and added to the chat.")
     except Exception as e:
-        io.tool_error(f"Erreur lors de la vérification des nouveaux fichiers : {str(e)}")
+        io.tool_error(f"Error while checking for new files: {str(e)}")
         
     try:
         while True:
-            # Lire le contenu des fichiers
+            # Read the content of the files
             files_to_read = {
                 'demande': 'demande.md',
                 'cdc': 'cdc.md',
@@ -584,62 +584,62 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
                     with open(file_path, 'r', encoding='utf-8') as f:
                         file_contents[key] = f.read()
                 else:
-                    io.tool_error(f"Le fichier {filename} n'existe pas dans le dossier {folder}.")
-                    file_contents[key] = f"Contenu de {filename} non disponible"
+                    io.tool_error(f"The file {filename} doesn't exist in the folder {folder}.")
+                    file_contents[key] = f"Content of {filename} not available"
         
-            # Exécuter la boucle détaillée
+            # Execute the detailed loop
             coder.run(with_message=f"""
-            Contexte de la demande initiale ({folder}/demande.md) :
+            Context of the initial request ({folder}/demande.md):
             {file_contents['demande']}
 
-            Cahier des Charges global ({folder}/cdc.md) :
+            Global Specifications ({folder}/cdc.md):
             {file_contents['cdc']}
 
-            Liste des tâches à réaliser ({folder}/todolist.md) :
+            List of tasks to be completed ({folder}/todolist.md):
             {file_contents['todolist']}
 
-            Prompt Général ({folder}/sortie.md) :
+            General Prompt ({folder}/sortie.md):
             {file_contents['prompt']}
 
-            Contenu actuel de la sortie de la mission ({folder}/sortie.md) :
+            Current content of the mission output ({folder}/sortie.md):
             {file_contents['sortie']}
 
-            Pour chaque étape du de la todolist encore non-complétée, applique le processus suivant:
-            1. Pour les prompts non-crées, crée un fichier prompt.md dans une arborescence miroir des étapes présentées dans {folder}/todolist.md. Ce fichier doit contenir le prompt pour exécuter l'étape en question.
-            2. Si l'étape est trop complexe pour un seul prompt, crée un sous-dossier avec des sous-étapes
-            3. Exécute l'étape en suivant le prompt de l'étape. Assure-toi de vraiment réaliser le travail nécessaire à la completion de l'étape
-            4. Vérifie que le travail effectué remplit bien les critères du CDC pour l'étape
-            5. Si les critères ne sont pas remplis, recommence l'étape ou décompose-la en sous-étapes
-            6. Une fois les critères remplis, mets à jour le statut de l'étape dans {folder}/todolist.md
-            7. Répète ce processus jusqu'à ce que tous les critères du CDC global soient remplis (rendu dans le fichier {folder}/`sortie.md`)
+            For each step of the todolist that is not yet completed, apply the following process:
+            1. For prompts not created, create a prompt.md file in a mirror directory structure of the steps presented in {folder}/todolist.md. This file should contain the prompt to execute the step in question.
+            2. If the step is too complex for a single prompt, create a sub-folder with sub-steps.
+            3. Execute the step following the prompt for the step. Make sure to actually do the work necessary to complete the step.
+            4. Verify that the work done meets the CDC criteria for the step.
+            5. If the criteria are not met, redo the step or break it down into sub-steps.
+            6. Once the criteria are met, update the status of the step in {folder}/todolist.md.
+            7. Repeat this process until all criteria of the global CDC are met (rendered in the file {folder}/`sortie.md`).
             """)
 
-            # Vérifier si la mission est terminée
+            # Check if the mission is completed
             completion_check = coder.run(with_message=f"""
-            Cahier des charges (CDC) :
+            Specifications (CDC):
             {file_contents['cdc']}
 
-            Sortie actuelle :
+            Current output:
             {file_contents['sortie']}
 
-            En vous basant sur le CDC et la sortie actuelle, la mission est-elle terminée selon les critères du CDC ?
-            Répondez uniquement par Mission terminée ? : OUI ou NON, suivi d'une explication détaillée, et d'une demande de mettre à jour la todolist.
+            Based on the CDC and the current output, is the mission completed according to the CDC criteria?
+            Answer only with Mission completed?: YES or NO, followed by a detailed explanation, and a request to update the todolist.
             """)
 
-            # Ajouter la réponse OUI/NON au chat
-            completion_response = "OUI" if "OUI" in completion_check.upper() else "NON"
-            coder.cur_messages.append({"role": "assistant", "content": f"Mission terminée ? : {completion_response}"})
+            # Add the YES/NO response to the chat
+            completion_response = "YES" if "YES" in completion_check.upper() else "NO"
+            coder.cur_messages.append({"role": "assistant", "content": f"Mission completed?: {completion_response}"})
 
-            if completion_response == "OUI":
-                io.tool_output("Mission terminée selon les critères du CDC.")
+            if completion_response == "YES":
+                io.tool_output("Mission completed according to the CDC criteria.")
                 break
             else:
-                io.tool_output("La mission n'est pas encore terminée. Continuation du processus.")
+                io.tool_output("The mission is not yet completed. Continuing the process.")
 
-        io.tool_output("Processus terminé.")
+        io.tool_output("Process completed.")
 
     except Exception as e:
-        io.tool_error(f"Une erreur s'est produite : {str(e)}")
+        io.tool_error(f"An error occurred: {str(e)}")
     except SwitchCoder as switch:
         kwargs = dict(io=io, from_coder=coder)
         kwargs.update(switch.kwargs)
@@ -651,7 +651,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         if switch.kwargs.get("show_announcements") is not False:
             coder.show_announcements()
     except Exception as e:
-        io.tool_error(f"Une erreur s'est produite : {str(e)}")
+        io.tool_error(f"An error occurred: {str(e)}")
 
     return coder if return_coder else 0
 
