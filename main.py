@@ -574,7 +574,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         io.tool_output(f"Main folder already exists: {folder_path}")
 
     # Add specific files from the folder
-    specific_files = ['todolist.md', 'cdc.md', 'prompt.md']
+    specific_files = ['todolist.md', 'specifications.md', 'prompt.md']
     added_files = []
 
     for file in specific_files:
@@ -652,11 +652,11 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         while True:
             # Read the content of the files
             files_to_read = {
-                'demande': 'demande.md',
-                'cdc': 'cdc.md',
+                'request': 'request.md',
+                'specifications': 'specifications.md',
                 'todolist': 'todolist.md',
                 'prompt': 'prompt.md',
-                'sortie': 'sortie.md'
+                'output': 'output.md'
             }
             file_contents = {}
 
@@ -671,42 +671,42 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         
             # Execute the detailed loop
             coder.run(with_message=f"""
-            Context of the initial request ({folder}/demande.md):
-            {file_contents['demande']}
+            Context of the initial request ({folder}/request.md):
+            {file_contents['request']}
 
-            Global Specifications ({folder}/cdc.md):
-            {file_contents['cdc']}
+            Global Specifications ({folder}/specifications.md):
+            {file_contents['specifications']}
 
             List of tasks to be completed ({folder}/todolist.md):
             {file_contents['todolist']}
 
-            General Prompt ({folder}/sortie.md):
+            General Prompt ({folder}/output.md):
             {file_contents['prompt']}
 
-            Current content of the mission output ({folder}/sortie.md):
-            {file_contents['sortie']}
+            Current content of the mission output ({folder}/output.md):
+            {file_contents['output']}
 
-            0. Take into account the user feedback in demande if present, or the mission completion feedback if present.
+            0. Take into account the user feedback in request if present, or the mission completion feedback if present.
 
             For the next item of the todolist of the todolist that is not yet completed, apply the following process:
             1. If the prompt is not created, create a prompt.md file in a mirror directory structure of the steps presented in {folder}/todolist.md. This file should contain the prompt to execute the step in question.
             2. If the step is too complex for a single prompt, create a sub-folder with sub-steps.
             3. Execute the step following the prompt for the step. Make sure to actually do the work necessary to complete the step.
-            4. Verify that the work done meets the CDC criteria for the step.
+            4. Verify that the work done meets the specifications criteria for the step.
             5. If the criteria are not met, redo the step or break it down into sub-steps.
             6. Once the criteria are met, update the status of the step in {folder}/todolist.md.
-            7. Repeat this process until all criteria of the global CDC are met (rendered in the file {folder}/`sortie.md`).
+            7. Repeat this process until all criteria of the global specifications are met (rendered in the file {folder}/`output.md`).
             """)
 
             # Check if the mission is completed
             completion_check = coder.run(with_message=f"""
-            Specifications (CDC):
-            {file_contents['cdc']}
+            Specifications (specifications):
+            {file_contents['specifications']}
 
             Current output:
-            {file_contents['sortie']}
+            {file_contents['output']}
 
-            Based on the CDC and the current output, is the mission completed according to the CDC criteria?
+            Based on the specifications and the current output, is the mission completed according to the specifications criteria?
             Answer only with Mission completed?: YES or NO, followed by a detailed explanation, and a request to update the todolist.
             """)
 
@@ -715,7 +715,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             coder.cur_messages.append({"role": "assistant", "content": f"Mission completed?: {completion_response}"})
 
             if completion_response == "YES":
-                io.tool_output("Mission completed according to the CDC criteria.")
+                io.tool_output("Mission completed according to the specifications criteria.")
                 break
             else:
                 io.tool_output("The mission is not yet completed. Continuing the process.")
