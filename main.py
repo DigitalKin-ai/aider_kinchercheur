@@ -23,22 +23,29 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 
-try:
-    from .file_selector import select_relevant_files
-    from aider.args import get_parser
-    from aider.coders import Coder
-    from aider.commands import Commands, SwitchCoder
-    from aider.history import ChatSummary
-    from aider.io import InputOutput
-    from .llm import litellm  # noqa: F401; properly init litellm on launch
-    from .repo import GitRepo
-    from .versioncheck import check_version
-    from .dump import dump  # noqa: F401
-    # Import the launch_gui function conditionally to avoid circular import
-except ImportError as e:
-    logger.error(f"Error importing modules: {e}")
-    logger.error(traceback.format_exc())
-    sys.exit(1)
+def import_modules():
+    try:
+        from .file_selector import select_relevant_files
+        from aider.args import get_parser
+        from aider.coders import Coder
+        from aider.commands import Commands, SwitchCoder
+        from aider.history import ChatSummary
+        from aider.io import InputOutput
+        from .llm import litellm  # noqa: F401; properly init litellm on launch
+        from .repo import GitRepo
+        from .versioncheck import check_version
+        from .dump import dump  # noqa: F401
+        # Import the launch_gui function conditionally to avoid circular import
+        return (select_relevant_files, get_parser, Coder, Commands, SwitchCoder, 
+                ChatSummary, InputOutput, GitRepo, check_version)
+    except ImportError as e:
+        logger.error(f"Error importing modules: {e}")
+        logger.error(traceback.format_exc())
+        sys.exit(1)
+
+# Import modules
+(select_relevant_files, get_parser, Coder, Commands, SwitchCoder, 
+ ChatSummary, InputOutput, GitRepo, check_version) = import_modules()
 
 
 def get_git_root():
@@ -656,58 +663,93 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
                     logger.error(f"Error reading file {file_path}: {str(e)}")
         
             # Execute the detailed loop
+            logger.info("Starting task execution process")
             coder.run(with_message=f"""
-            Your role ({role}/role.md):
+            You are an expert developer and writer tasked with completing a project. Your role and context are defined in the following files:
+
+            1. Role ({role}/role.md):
             {file_contents['role']}          
 
-            Context of the initial request ({folder}/request.md):
+            2. Initial Request ({folder}/request.md):
             {file_contents['request']}
 
-            Global Specifications ({folder}/specifications.md):
+            3. Global Specifications ({folder}/specifications.md):
             {file_contents['specifications']}
 
-            List of tasks to be completed ({folder}/todolist.md):
+            4. Tasks to Complete ({folder}/todolist.md):
             {file_contents['todolist']}
 
-            General Prompt ({folder}/prompt.md):
+            5. General Prompt ({folder}/prompt.md):
             {file_contents['prompt']}
 
-            Available Toolbox ({folder}/toolbox.py):
+            6. Available Toolbox ({folder}/toolbox.py):
             {file_contents['toolbox']}
 
-            Current content of the mission output ({folder}/output.md):
+            7. Current Mission Output ({folder}/output.md):
             {file_contents['output']}
 
-            0. Take into account the user feedback in request if present, or the mission completion feedback if present.
+            Process for completing tasks:
 
-            For the next item of the todolist of the todolist that is not yet completed, apply the following process:
-            1. If the prompt is not created, create a prompt.md file in a mirror directory structure of the steps presented in {folder}/todolist.md. This file should contain the prompt to execute the step in question.
-            2. If the step is too complex for a single prompt, create a sub-folder with sub-steps.
-            3. If a toolbox is required to complete the step, make the necessary changes to the toolbox. Write EXPLICITELY between backquotes the command that you want to call, with arguments. Ensure that it is called from main.py
-            4. Command Hallucination verification step: Verify that you can actually see the results of the command. If you don't see the results, the command hasn't been called.
-            5. Execute the step using the prompt for the step. Make sure to actually do the work necessary to complete the step.
-            6. Text Hallucination verification step: Verify that you can actually see in the text the work being done (LLMs' natural tendency is to just cross the item off the todolist, without actually doing the work). 
-            7. Verify that the outcome (result) defined in the specifications of the step is achieved, and that you can see the work leading to it.
-            8. If the outcome is not achieved, or the visibility of the work not 100% explicit, redo the step or break it down into sub-steps.
-            9. Once the criteria are met, update the status of the step in {folder}/todolist.md.
-            10. Repeat this process until all criteria of the global specifications are met (rendered in the file {folder}/`output.md`).
+            0. Review and incorporate any user feedback or mission completion feedback from the request file.
+
+            1. For each uncompleted task in the todolist:
+               a. Create a prompt.md file in a mirrored directory structure of {folder}/todolist.md if it doesn't exist.
+               b. If the task is complex, break it down into sub-tasks in a new sub-folder.
+               c. Update the toolbox.py if necessary, explicitly writing commands between backticks. Ensure main.py calls these commands.
+               d. Verify command execution by checking for visible results.
+               e. Execute the task using the prompt, ensuring all necessary work is completed.
+               f. Verify the work is explicitly visible in the output, not just marked as complete.
+               g. Confirm the outcome matches the task specifications and the work process is visible.
+               h. If the outcome is not achieved or work is not fully visible, revise the task or break it down further.
+               i. Update the task status in {folder}/todolist.md upon successful completion.
+
+            2. Repeat this process until all global specifications are met and reflected in {folder}/output.md.
+
+            3. After each task, provide a brief summary of actions taken and progress made.
+
+            Remember: Avoid hallucinations. Only report on actions you've actually taken and results you can verify.
             """)
+            logger.info("Task execution process completed")
 
-            # Check if the mission is completed
+            logger.info("Performing mission completion check")
             completion_check = coder.run(with_message=f"""
-            Specifications (specifications):
+            Conduct a thorough mission completion check:
+
+            1. Review the specifications:
             {file_contents['specifications']}
 
-            Current output:
+            2. Analyze the current output:
             {file_contents['output']}
 
-            Based on the outcome defined in the specifications and the current output, is the mission completed according to the specifications criteria?
-            Give a detailed explanation being critic and suspicious (you need evidence of the work being done to validate, then answer with YES or NO.
-            Then request to update the todolist.
+            3. Evaluation criteria:
+               a. Does the output fully meet all specifications?
+               b. Is there clear evidence of all required work being completed?
+               c. Are there any discrepancies or missing elements?
+
+            4. Provide a detailed, critical analysis of the mission status:
+               - Highlight specific areas where criteria are met
+               - Identify any shortcomings or areas needing improvement
+               - Be suspicious and look for any potential oversights
+
+            5. Conclusion:
+               - State whether the mission is completed (YES) or not (NO)
+               - If NO, briefly outline what remains to be done
+
+            6. Todolist update:
+               - Suggest specific updates to the todolist based on your analysis
+
+            Format your response as follows:
+            Analysis: [Your detailed analysis]
+            Conclusion: [YES/NO]
+            Remaining Tasks: [List of tasks if NO, or "None" if YES]
+            Todolist Updates: [Specific update suggestions]
             """)
 
-            # Add the YES/NO response to the chat
-            completion_response = "YES" if "YES" in completion_check.upper() else "NO"
+            # Extract the YES/NO response and log it
+            completion_response = "YES" if "Conclusion: YES" in completion_check else "NO"
+            logger.info(f"Mission completion status: {completion_response}")
+
+            # Add the response to the chat
             coder.cur_messages.append({"role": "assistant", "content": f"Mission completed?: {completion_response}"})
 
             # Append the completion check to the request file
@@ -717,9 +759,10 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
 
             if completion_response == "YES":
                 io.tool_output("Mission completed according to the specifications criteria.")
-                #break
+                logger.info("Mission completed successfully")
             else:
                 io.tool_output("The mission is not yet completed. Continuing the process.")
+                logger.info("Mission incomplete, continuing execution")
 
             # Choose and run a terminal command
             command_choice = coder.run(with_message=f"""
