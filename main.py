@@ -665,6 +665,9 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
                                 f.write("")  # Create an empty file
                             file_contents[key] = ""
                             io.tool_output(f"Created empty {filename} in the folder {folder}.")
+                        elif filename == 'role.md':
+                            file_contents[key] = "Act as an expert developer and writer."
+                            io.tool_output(f"Default content set for {filename} as it doesn't exist in the folder {folder}.")
                         else:
                             io.tool_error(f"The file {filename} doesn't exist in the folder {folder}.")
                             file_contents[key] = f"Content of {filename} not available"
