@@ -355,8 +355,6 @@ import sys
 
 async def main(argv=None, input=None, output=None, force_git_root=None, return_coder=False):
     logger.info("Starting main function")
-    if argv is None:
-        argv = sys.argv[1:]
 
     # Check if --gui argument is present
     if '--gui' in argv:
