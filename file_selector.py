@@ -6,8 +6,8 @@ import os
 def is_in_correct_folder(filename, folder):
     return os.path.dirname(filename) == folder
 
-def is_request(filename, folder):
-    return re.search(r'request\.md', filename.lower()) is not None and is_in_correct_folder(filename, folder)
+def is_message(filename, folder):
+    return re.search(r'message\.md', filename.lower()) is not None and is_in_correct_folder(filename, folder)
 
 def is_specifications(filename, folder):
     return re.search(r'specifications\.md', filename.lower()) is not None and is_in_correct_folder(filename, folder)
@@ -42,7 +42,7 @@ def select_relevant_files(folder_or_files):
         file = os.path.basename(full_path)
         folder = os.path.dirname(full_path)
         if is_text_file(file):
-            if (is_request(full_path, folder) or 
+            if (is_message(full_path, folder) or 
                 is_specifications(full_path, folder) or 
                 is_todolist(full_path, folder) or 
                 is_prompt(full_path, folder) or

@@ -337,11 +337,11 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     args, unknown = parser.parse_known_args(argv)
 
     folder = args.folder
-    request = args.request
-    append_message = args.append_request
+    request = args.message
+    append_message = args.append_message
 
     if folder is None:
-        print("Usage: python -m aider --folder <folder> [--request <request>] [--message <message>]")
+        print("Usage: python -m aider --folder <folder> [--message <message>] [--append-message <append_message>]")
         return 1
 
     # Define folder_path here
@@ -364,46 +364,46 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         editingmode=EditingMode.VI if args.vim else EditingMode.EMACS,
     )
 
-    # Check if the request is already present in the folder
-    request_file = Path(folder_path) / 'request.md'
-    if request_file.exists():
-        with open(request_file, 'r', encoding='utf-8') as f:
-            existing_request = f.read().strip()
-        if request is None:
-            request = existing_request
-        elif request.strip() == existing_request:
-            io.tool_output("The request is identical to the one already present. No need to regenerate the specifications.")
+    # Check if the message is already present in the folder
+    message_file = Path(folder_path) / 'message.md'
+    if message_file.exists():
+        with open(message_file, 'r', encoding='utf-8') as f:
+            existing_message = f.read().strip()
+        if message is None:
+            message = existing_message
+        elif message.strip() == existing_message:
+            io.tool_output("The message is identical to the one already present. No need to regenerate the specifications.")
         else:
-            # Save the new request
-            with open(request_file, 'w', encoding='utf-8') as f:
-                f.write(request)
-            io.tool_output(f"New request saved to {request_file}")
+            # Save the new message
+            with open(message_file, 'w', encoding='utf-8') as f:
+                f.write(message)
+            io.tool_output(f"New message saved to {message_file}")
             # Import generation module here to avoid circular import
             from .generation import generate_specifications
-            specifications, todolist, prompt = generate_specifications(folder_path, request)
+            specifications, todolist, prompt = generate_specifications(folder_path, message)
             io.tool_output(f"Specifications, task list, and prompt generated for the folder: {folder_path}")
-    elif request is None:
-        # Create a request.md file with default text
-        request = "Set a coherent mission from the information available"
-        with open(request_file, 'w', encoding='utf-8') as f:
-            f.write(request)
-        io.tool_output(f"Created a request file with default text: {request_file}")
+    elif message is None:
+        # Create a message.md file with default text
+        message = "Set a coherent mission from the information available"
+        with open(message_file, 'w', encoding='utf-8') as f:
+            f.write(message)
+        io.tool_output(f"Created a message file with default text: {message_file}")
     
-    # Save the new request (empty or not)
-    with open(request_file, 'w', encoding='utf-8') as f:
-        f.write(request)
-    io.tool_output(f"Request saved to {request_file}")
+    # Save the new message (empty or not)
+    with open(message_file, 'w', encoding='utf-8') as f:
+        f.write(message)
+    io.tool_output(f"Message saved to {message_file}")
     
     # Import generation module here to avoid circular import
     from .generation import generate_specifications
-    specifications, todolist, prompt = generate_specifications(folder_path, request)
+    specifications, todolist, prompt = generate_specifications(folder_path, message)
     io.tool_output(f"Specifications, task list, and prompt generated for the folder: {folder_path}")
 
-    # Add the message to the end of the request file if it's present
+    # Add the append_message to the end of the message file if it's present
     if append_message:
-        with open(request_file, 'a', encoding='utf-8') as f:
+        with open(message_file, 'a', encoding='utf-8') as f:
             f.write(f"\n\n{append_message}")
-        io.tool_output(f"Message added to the end of the request file: {request_file}")
+        io.tool_output(f"Append message added to the end of the message file: {message_file}")
 
     if args.verbose:
         print("Config files search order, if no --config:")

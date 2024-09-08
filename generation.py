@@ -10,9 +10,9 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-def generate_specifications(folder_path, request):
+def generate_specifications(folder_path, message):
     logger.info(f"Starting the generation of specifications for the folder: {folder_path}")
-    logger.info(f"Received request: {request}")
+    logger.info(f"Received message: {message}")
     
     # Ensure that the folder exists
     if not os.path.exists(folder_path):
@@ -89,8 +89,8 @@ For each section and subsection:
 4. Present the complete specifications followed by the summary table in your response.
 5. Do not interact further with the user unless clarifications are absolutely necessary.
 
-Request from which to generate the specifications:
-{request}
+Message from which to generate the specifications:
+{message}
 """
     model_name = "claude-3-5-sonnet-20240620"  # Vous pouvez ajuster le modèle selon vos besoins
     messages = [{"role": "user", "content": prompt}]
@@ -167,8 +167,8 @@ Use the following markup system to structure your response:
 ## Action
 Perform a complete decomposition according to the process described above. Present the final result in a [CONTENT] tag, using clearly identified subsections for each step of the process.
 
-Request to decompose:
-{request}
+Message to decompose:
+{message}
 
 Generated specifications:
 {response}
@@ -251,8 +251,8 @@ The generated prompt should follow this structure:
 3. Ensure the prompt covers all aspects necessary to achieve the specified objectives.
 4. Present the generated prompt in your response, using a clear structure and well-defined sections.
 
-Initial request:
-{request}
+Initial message:
+{message}
 
 Specifications to respect:
 {response}
@@ -613,15 +613,15 @@ if __name__ == "__main__":
         sys.exit(1)
     
     folder = sys.argv[1]
-    request = sys.argv[2]
+    message = sys.argv[2]
     
     logger.info(f"Starting the script with folder: {folder}")
-    logger.info(f"Request: {request}")
+    logger.info(f"Message: {message}")
     
     # Define folder_path here
     folder_path = os.path.abspath(folder)
     
-    specifications, todolist, prompt = generate_specifications(folder_path, request)
+    specifications, todolist, prompt = generate_specifications(folder_path, message)
     logger.info(f"Generation completed for folder: {folder_path}")
     
     print(f"Specifications generated and saved in {os.path.join(folder_path, 'specifications.md')}")
