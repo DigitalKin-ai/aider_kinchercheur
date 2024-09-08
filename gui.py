@@ -15,10 +15,9 @@ from aider.coders import Coder
 from aider.dump import dump  # noqa: F401
 from aider.io import InputOutput
 from aider import __version__, models, utils
-from aider.coders import Coder
-from aider.io import InputOutput
 from aider.scrape import Scraper
-from aider.gui import launch_gui
+
+# Remove the self-import of launch_gui
 
 
 class CaptureIO(InputOutput):
@@ -647,6 +646,9 @@ def gui_main():
 
     GUI()
 
+
+def launch_gui(argv):
+    return gui_main()
 
 def launch_gui(argv):
     return gui_main()
