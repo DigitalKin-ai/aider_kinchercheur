@@ -337,7 +337,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     args, unknown = parser.parse_known_args(argv)
 
     folder = args.folder
-    request = args.message
+    message = args.message
     append_message = args.append_message
 
     if folder is None:
