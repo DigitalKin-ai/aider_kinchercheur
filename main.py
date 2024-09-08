@@ -338,7 +338,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
 
     folder = args.folder
     demande = args.demande
-    append_demande = args.append_demande
+    append_message = args.append_message
 
     if folder is None:
         print("Usage: python -m aider --folder <folder> [--demande <demande>] [--message <message>]")
