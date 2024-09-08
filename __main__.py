@@ -1,6 +1,6 @@
 import asyncio
 import tracemalloc
-from main import main
+from aider.main import main
 
 async def run_main():
     return await main()
