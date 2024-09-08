@@ -595,45 +595,6 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             added_files.append(file)
             io.tool_output(f"Relevant file added to the chat: {file}")
 
-    def check_file_modified(file_path, last_modified_times):
-        try:
-            current_mtime = os.path.getmtime(file_path)
-            if file_path not in last_modified_times or current_mtime > last_modified_times[file_path]:
-                last_modified_times[file_path] = current_mtime
-                return True
-            return False
-        except OSError as e:
-            io.tool_error(f"Error while checking file {file_path}: {str(e)}")
-            return False
-
-    def add_analyses_files(coder, io, analyses_folder, last_modified_times):
-        if analyses_folder and analyses_folder.exists() and analyses_folder.is_dir():
-            analyses_files = [f for f in analyses_folder.iterdir() if f.is_file()]
-            io.tool_output("Adding/Updating files from the 'analyses' folder:")
-            for file in analyses_files:
-                try:
-                    if check_file_modified(str(file), last_modified_times):
-                        io.tool_output(f"Adding/Updating {file}")
-                        coder.add_rel_fname(str(file))
-                except Exception as e:
-                    io.tool_error(f"Error while adding/updating file {file}: {str(e)}")
-        else:
-            io.tool_output("The 'analyses' folder doesn't exist or is not a directory. Continuing without it.")
-
-    # Create the 'analyses' folder if it doesn't exist
-    analyses_folder = Path(folder_path) / 'analyses'
-    if not analyses_folder.exists():
-        analyses_folder.mkdir(parents=True, exist_ok=True)
-        io.tool_output(f"'analyses' folder created: {analyses_folder}")
-    else:
-        io.tool_output(f"'analyses' folder already exists: {analyses_folder}")
-    
-    # Add all files from the 'analyses' folder to the chat
-    last_modified_times = {}
-    try:
-        add_analyses_files(coder, io, analyses_folder, last_modified_times)
-    except Exception as e:
-        io.tool_error(f"Error while adding analysis files: {str(e)}")
 
     # Check for new files
     try:
