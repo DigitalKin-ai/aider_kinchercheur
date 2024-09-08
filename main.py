@@ -338,7 +338,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
 
     folder = args.folder
     demande = args.demande
-    append_message = args.append_message
+    append_demande = args.append_demande
 
     if folder is None:
         print("Usage: python -m aider --folder <folder> [--demande <demande>] [--message <message>]")
@@ -388,9 +388,9 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         io.tool_output(f"Cahier des charges, liste des tâches et prompt générés pour le dossier : {folder_path}")
 
     # Ajouter le message à la fin du fichier de demande s'il est présent
-    if append_message:
+    if append_demande:
         with open(demande_file, 'a', encoding='utf-8') as f:
-            f.write(f"\n\n{append_message}")
+            f.write(f"\n\n{append_demande}")
         io.tool_output(f"Message ajouté à la fin du fichier de demande : {demande_file}")
 
     if args.verbose:

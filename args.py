@@ -525,7 +525,7 @@ def get_parser(default_config_files, git_root):
         default=False,
     )
     group.add_argument(
-        "--append-message",
+        "--append-demande",
         type=str,
         help='Message to add at the end of the demand file'
     )
