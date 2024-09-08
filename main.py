@@ -651,7 +651,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
 
             for key, filename in files_to_read.items():
                 if filename in ['todolist.md', 'role.md']:
-                    file_path = Path(folder) / role / filename
+                    file_path = Path(role) / filename
                 else:
                     file_path = Path(folder) / filename
                 if file_path.exists():
