@@ -20,6 +20,7 @@ import telegram
 from playwright.async_api import async_playwright
 import streamlit as st
 from aider.args import get_parser
+from aider.__main__ import main as aider_main
 
 # Remove the import of launch_gui from here
 
@@ -836,7 +837,14 @@ async def async_operations(coder, io, folder):
     logger.info("Async operations completed")
 
 
+async def run_once():
+    print("Debug: Starting run_once function")
+    result = await aider_main(sys.argv[1:])
+    print("Debug: Finished run_once function")
+    return result
+
 if __name__ == "__main__":
-    import asyncio
-    status = asyncio.run(main())
-    sys.exit(status)
+    print("Debug: Starting main.py")
+    result = asyncio.run(run_once())
+    print("Debug: Exiting main.py")
+    sys.exit(result)
