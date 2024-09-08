@@ -330,7 +330,8 @@ def generate_specifications(folder_path, request):
     logger.info(f"Starting the generation of specifications for the folder: {folder_path}")
     logger.info(f"Received request: {request}")
 
-    prompt = f"""# Prompt for the Specifications Generator (KinSpecifier)
+    try:
+        prompt = f"""# Prompt for the Specifications Generator (KinSpecifier)
 
 ## Identity and Role
 You are KinSpecifier, an AI assistant specialized in generating detailed and structured specifications. Your expertise lies in transforming usage intentions into clear and complete functional specifications.
@@ -598,6 +599,10 @@ Please generate an optimized prompt based on this information.
     
     logger.info("Generation of specifications, task list, and optimized prompt completed")
     return response, todolist_response, prompt_response
+    except Exception as e:
+        logger.error(f"Error in generate_specifications: {e}")
+        logger.error(traceback.format_exc())
+        raise
 
 # Usage example:
 # specifications, todolist, prompt = generer_cdc("my_folder", "Create a task management application for a small business")

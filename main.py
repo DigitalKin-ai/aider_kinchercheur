@@ -4,6 +4,8 @@ import re
 import sys
 import threading
 from pathlib import Path
+import logging
+import traceback
 
 from aider import __version__, models, utils
 import git
@@ -12,21 +14,30 @@ from prompt_toolkit.enums import EditingMode
 
 DEFAULT_MODEL_NAME = "gpt-4o-mini"  # or the default model you want to use
 
+# Configure logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
 # Add the parent directory to sys.path
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 
-from .file_selector import select_relevant_files
-from aider.args import get_parser
-from aider.coders import Coder
-from aider.commands import Commands, SwitchCoder
-from aider.history import ChatSummary
-from aider.io import InputOutput
-from .llm import litellm  # noqa: F401; properly init litellm on launch
-from .repo import GitRepo
-from .versioncheck import check_version
-from .dump import dump  # noqa: F401
+try:
+    from .file_selector import select_relevant_files
+    from aider.args import get_parser
+    from aider.coders import Coder
+    from aider.commands import Commands, SwitchCoder
+    from aider.history import ChatSummary
+    from aider.io import InputOutput
+    from .llm import litellm  # noqa: F401; properly init litellm on launch
+    from .repo import GitRepo
+    from .versioncheck import check_version
+    from .dump import dump  # noqa: F401
+except ImportError as e:
+    logger.error(f"Error importing modules: {e}")
+    logger.error(traceback.format_exc())
+    sys.exit(1)
 
 
 def get_git_root():
@@ -315,102 +326,141 @@ def register_litellm_models(git_root, model_metadata_fname, io, verbose=False):
 import sys
 
 def main(argv=None, input=None, output=None, force_git_root=None, return_coder=False):
-    if argv is None:
-        argv = sys.argv[1:]
+    try:
+        logger.info("Starting main function")
+        if argv is None:
+            argv = sys.argv[1:]
 
-    if force_git_root:
-        git_root = force_git_root
-    else:
-        git_root = get_git_root()
-
-    conf_fname = Path(".aider.conf.yml")
-
-    default_config_files = [conf_fname.resolve()]  # CWD
-    if git_root:
-        git_conf = Path(git_root) / conf_fname  # git root
-        if git_conf not in default_config_files:
-            default_config_files.append(git_conf)
-    default_config_files.append(Path.home() / conf_fname)  # homedir
-    default_config_files = list(map(str, default_config_files))
-
-    parser = get_parser(default_config_files, git_root)
-    parser.add_argument('--request', help='Specify a request')
-    parser.add_argument('--append-request', help='Append a request to the message file')
-    args, unknown = parser.parse_known_args(argv)
-
-    folder = args.folder
-    message = args.message
-    request = args.request
-    append_request = args.append_request
-
-    if folder is None:
-        print("Usage: python -m aider --folder <folder> [--message <message>] [--request <request>] [--append-request <append_request>]")
-        return 1
-
-    # Define folder_path here
-    folder_path = os.path.abspath(folder)
-
-    # If request is provided, use it as the message
-    if request:
-        message = request
-
-    # Create the io object
-    io = InputOutput(
-        args.pretty,
-        args.yes,
-        args.input_history_file,
-        args.chat_history_file,
-        input=input,
-        output=output,
-        user_input_color=args.user_input_color,
-        tool_output_color=args.tool_output_color,
-        tool_error_color=args.tool_error_color,
-        dry_run=args.dry_run,
-        encoding=args.encoding,
-        llm_history_file=args.llm_history_file,
-        editingmode=EditingMode.VI if args.vim else EditingMode.EMACS,
-    )
-
-    # Check if the message is already present in the folder
-    message_file = Path(folder_path) / 'message.md'
-    if message_file.exists():
-        with open(message_file, 'r', encoding='utf-8') as f:
-            existing_message = f.read().strip()
-        if message is None:
-            message = existing_message
-        elif message.strip() == existing_message:
-            io.tool_output("The message is identical to the one already present. No need to regenerate the specifications.")
+        if force_git_root:
+            git_root = force_git_root
         else:
-            # Save the new message
+            git_root = get_git_root()
+
+        conf_fname = Path(".aider.conf.yml")
+
+        default_config_files = [conf_fname.resolve()]  # CWD
+        if git_root:
+            git_conf = Path(git_root) / conf_fname  # git root
+            if git_conf not in default_config_files:
+                default_config_files.append(git_conf)
+        default_config_files.append(Path.home() / conf_fname)  # homedir
+        default_config_files = list(map(str, default_config_files))
+
+        parser = get_parser(default_config_files, git_root)
+        parser.add_argument('--request', help='Specify a request')
+        parser.add_argument('--append-request', help='Append a request to the message file')
+        args, unknown = parser.parse_known_args(argv)
+
+        folder = args.folder
+        message = args.message
+        request = args.request
+        append_request = args.append_request
+
+        if folder is None:
+            logger.error("Folder not specified")
+            print("Usage: python -m aider --folder <folder> [--message <message>] [--request <request>] [--append-request <append_request>]")
+            return 1
+
+        # Define folder_path here
+        folder_path = os.path.abspath(folder)
+        logger.info(f"Working with folder: {folder_path}")
+
+        # If request is provided, use it as the message
+        if request:
+            message = request
+            logger.info(f"Using request as message: {message}")
+
+        # Create the io object
+        io = InputOutput(
+            args.pretty,
+            args.yes,
+            args.input_history_file,
+            args.chat_history_file,
+            input=input,
+            output=output,
+            user_input_color=args.user_input_color,
+            tool_output_color=args.tool_output_color,
+            tool_error_color=args.tool_error_color,
+            dry_run=args.dry_run,
+            encoding=args.encoding,
+            llm_history_file=args.llm_history_file,
+            editingmode=EditingMode.VI if args.vim else EditingMode.EMACS,
+        )
+        logger.info("InputOutput object created")
+
+    try:
+        # Check if the message is already present in the folder
+        message_file = Path(folder_path) / 'message.md'
+        if message_file.exists():
+            logger.info(f"Message file exists: {message_file}")
+            try:
+                with open(message_file, 'r', encoding='utf-8') as f:
+                    existing_message = f.read().strip()
+                if message is None:
+                    message = existing_message
+                    logger.info("Using existing message")
+                elif message.strip() == existing_message:
+                    io.tool_output("The message is identical to the one already present. No need to regenerate the specifications.")
+                    logger.info("Message is identical, skipping regeneration")
+                else:
+                    # Save the new message
+                    with open(message_file, 'w', encoding='utf-8') as f:
+                        f.write(message)
+                    io.tool_output(f"New message saved to {message_file}")
+                    logger.info(f"New message saved to {message_file}")
+                    # Import generation module here to avoid circular import
+                    from .generation import generate_specifications
+                    specifications, todolist, prompt = generate_specifications(folder_path, message)
+                    io.tool_output(f"Specifications, task list, and prompt generated for the folder: {folder_path}")
+                    logger.info("Specifications, task list, and prompt generated")
+            except Exception as e:
+                logger.error(f"Error reading or writing message file: {e}")
+                io.tool_error(f"Error processing message file: {e}")
+        elif message is None:
+            # Create a message.md file with default text
+            message = "Set a coherent mission from the information available"
+            try:
+                with open(message_file, 'w', encoding='utf-8') as f:
+                    f.write(message)
+                io.tool_output(f"Created a message file with default text: {message_file}")
+                logger.info(f"Created default message file: {message_file}")
+            except Exception as e:
+                logger.error(f"Error creating default message file: {e}")
+                io.tool_error(f"Error creating default message file: {e}")
+        
+        # Save the new message (empty or not)
+        try:
             with open(message_file, 'w', encoding='utf-8') as f:
                 f.write(message)
-            io.tool_output(f"New message saved to {message_file}")
-            # Import generation module here to avoid circular import
+            io.tool_output(f"Message saved to {message_file}")
+            logger.info(f"Message saved to {message_file}")
+        except Exception as e:
+            logger.error(f"Error saving message to file: {e}")
+            io.tool_error(f"Error saving message to file: {e}")
+        
+        # Import generation module here to avoid circular import
+        try:
             from .generation import generate_specifications
             specifications, todolist, prompt = generate_specifications(folder_path, message)
             io.tool_output(f"Specifications, task list, and prompt generated for the folder: {folder_path}")
-    elif message is None:
-        # Create a message.md file with default text
-        message = "Set a coherent mission from the information available"
-        with open(message_file, 'w', encoding='utf-8') as f:
-            f.write(message)
-        io.tool_output(f"Created a message file with default text: {message_file}")
-    
-    # Save the new message (empty or not)
-    with open(message_file, 'w', encoding='utf-8') as f:
-        f.write(message)
-    io.tool_output(f"Message saved to {message_file}")
-    
-    # Import generation module here to avoid circular import
-    from .generation import generate_specifications
-    specifications, todolist, prompt = generate_specifications(folder_path, message)
-    io.tool_output(f"Specifications, task list, and prompt generated for the folder: {folder_path}")
+            logger.info("Specifications, task list, and prompt generated")
+        except Exception as e:
+            logger.error(f"Error generating specifications: {e}")
+            io.tool_error(f"Error generating specifications: {e}")
 
-    # Add the append_request to the end of the message file if it's present
-    if append_request:
-        with open(message_file, 'a', encoding='utf-8') as f:
-            f.write(f"\n\n{append_request}")
-        io.tool_output(f"Append request added to the end of the message file: {message_file}")
+        # Add the append_request to the end of the message file if it's present
+        if append_request:
+            try:
+                with open(message_file, 'a', encoding='utf-8') as f:
+                    f.write(f"\n\n{append_request}")
+                io.tool_output(f"Append request added to the end of the message file: {message_file}")
+                logger.info(f"Append request added to {message_file}")
+            except Exception as e:
+                logger.error(f"Error appending request to message file: {e}")
+                io.tool_error(f"Error appending request to message file: {e}")
+    except Exception as e:
+        logger.error(f"Unexpected error in file operations: {e}")
+        io.tool_error(f"An unexpected error occurred: {e}")
 
     if args.verbose:
         print("Config files search order, if no --config:")
