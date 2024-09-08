@@ -10,7 +10,7 @@ from aider.main import (
     generate_search_path_list, parse_lint_cmds, format_settings, scrub_sensitive_info,
     check_gitignore, setup_git, guessed_wrong_repo, get_parser, import_modules,
     InputOutput, Coder, Commands, ChatSummary, Path, models, utils, DEFAULT_MODEL_NAME,
-    EditingMode, select_relevant_files, SwitchCoder, load_slow_imports,
+    EditingMode, select_relevant_files, SwitchCoder,
     send_discord_message, send_telegram_message, get_telegram_messages
 )
 from aider.gui import gui_main
