@@ -484,6 +484,13 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         cache_prompts=args.cache_prompts,
     )
 
+    # S'assurer que le dossier principal existe
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+        io.tool_output(f"Dossier principal créé: {folder_path}")
+    else:
+        io.tool_output(f"Dossier principal existant: {folder_path}")
+
     # Ajout des fichiers spécifiques du dossier
     specific_files = ['todolist.md', 'cdc.md', 'prompt.md']
     added_files = []
@@ -534,14 +541,6 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
                     io.tool_error(f"Erreur lors de l'ajout/mise à jour du fichier {file}: {str(e)}")
         else:
             io.tool_output("Le dossier 'analyses' n'existe pas ou n'est pas un répertoire. Continuons sans.")
-
-    # S'assurer que le dossier principal existe
-    if not os.path.exists(folder_path):
-        os.makedirs(folder_path)
-        io.tool_output(f"Dossier principal créé: {folder_path}")
-    else:
-        io.tool_output(f"Dossier principal existant: {folder_path}")
-
 
     # Création du dossier 'analyses' s'il n'existe pas
     analyses_folder = Path(folder_path) / 'analyses'
@@ -624,7 +623,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             {file_contents['sortie']}
 
             En vous basant sur le CDC et la sortie actuelle, la mission est-elle terminée selon les critères du CDC ?
-            Répondez uniquement par Mission terminée ? : OUI ou NON, suivi d'une explication détaillée.
+            Répondez uniquement par Mission terminée ? : OUI ou NON, suivi d'une explication détaillée, et d'une demande de mettre à jour la todolist.
             """)
 
             # Ajouter la réponse OUI/NON au chat
