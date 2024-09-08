@@ -330,6 +330,8 @@ def register_litellm_models(git_root, model_metadata_fname, io, verbose=False):
 
 import sys
 
+import sys
+
 def main(argv=None, input=None, output=None, force_git_root=None, return_coder=False):
     logger.info("Starting main function")
     if argv is None:
