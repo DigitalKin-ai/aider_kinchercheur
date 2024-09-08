@@ -383,11 +383,11 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             cdc, todolist, prompt = generer_cdc(folder_path, demande)
             io.tool_output(f"Specifications, task list, and prompt generated for the folder: {folder_path}")
     elif demande is None:
-        # Create an empty demande.md file
+        # Create a demande.md file with default text
+        demande = "Set a coherent mission from the informations available"
         with open(demande_file, 'w', encoding='utf-8') as f:
-            pass
-        io.tool_output(f"Created an empty request file: {demande_file}")
-        demande = ""
+            f.write(demande)
+        io.tool_output(f"Created a request file with default text: {demande_file}")
     
     # Save the new demande (empty or not)
     with open(demande_file, 'w', encoding='utf-8') as f:
