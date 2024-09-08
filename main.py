@@ -616,9 +616,10 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             Current content of the mission output ({folder}/sortie.md):
             {file_contents['sortie']}
 
-            For each step of the todolist that is not yet completed, apply the following process:
             0. Take into account the user feedback in demande if present, or the mission completion feedback if present.
-            1. For prompts not created, create a prompt.md file in a mirror directory structure of the steps presented in {folder}/todolist.md. This file should contain the prompt to execute the step in question.
+
+            For the next item of the todolist of the todolist that is not yet completed, apply the following process:
+            1. If the prompt is not created, create a prompt.md file in a mirror directory structure of the steps presented in {folder}/todolist.md. This file should contain the prompt to execute the step in question.
             2. If the step is too complex for a single prompt, create a sub-folder with sub-steps.
             3. Execute the step following the prompt for the step. Make sure to actually do the work necessary to complete the step.
             4. Verify that the work done meets the CDC criteria for the step.
