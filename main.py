@@ -593,10 +593,13 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         io.tool_output(f"Using folder path: {folder_path}")
         relevant_files = select_relevant_files(folder_path, role="default")
         for file in relevant_files:
-            if file not in added_files:
-                coder.add_rel_fname(file)
-                added_files.append(file)
-                io.tool_output(f"Relevant file added to the chat: {file}")
+            if file and file not in added_files:
+                try:
+                    coder.add_rel_fname(str(file))
+                    added_files.append(file)
+                    io.tool_output(f"Relevant file added to the chat: {file}")
+                except Exception as e:
+                    io.tool_error(f"Error adding file {file}: {str(e)}")
     else:
         io.tool_error("Folder is not specified. Cannot select relevant files.")
 

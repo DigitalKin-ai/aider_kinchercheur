@@ -53,6 +53,9 @@ def select_relevant_files(folder_or_files, role):
         print(f"ERROR: Unexpected type for folder_or_files: {type(folder_or_files)}")
         return []
     
+    # Vérification supplémentaire pour s'assurer que tous les éléments de all_files sont des chaînes
+    all_files = [str(file) for file in all_files if file is not None]
+    
     print(f"DEBUG: all_files: {all_files}")
     
     relevant_files = []
