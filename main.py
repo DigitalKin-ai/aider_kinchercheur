@@ -34,7 +34,7 @@ try:
     from .repo import GitRepo
     from .versioncheck import check_version
     from .dump import dump  # noqa: F401
-    from .gui import launch_gui  # Import the launch_gui function
+    # Import the launch_gui function conditionally to avoid circular import
 except ImportError as e:
     logger.error(f"Error importing modules: {e}")
     logger.error(traceback.format_exc())
@@ -327,6 +327,11 @@ def register_litellm_models(git_root, model_metadata_fname, io, verbose=False):
 import sys
 
 def main(argv=None, input=None, output=None, force_git_root=None, return_coder=False):
+    # Check if --gui argument is present
+    if '--gui' in (argv or []):
+        # Import the launch_gui function here to avoid circular import
+        from .gui import launch_gui
+        return launch_gui(argv)
     logger.info("Starting main function")
     if argv is None:
         argv = sys.argv[1:]

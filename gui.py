@@ -10,7 +10,9 @@ from aider import urls
 from aider.coders import Coder
 from aider.dump import dump  # noqa: F401
 from aider.io import InputOutput
-from aider.main import main as cli_main
+from aider import __version__, models, utils
+from aider.coders import Coder
+from aider.io import InputOutput
 from aider.scrape import Scraper
 
 
@@ -64,6 +66,7 @@ def get_state():
 
 @st.cache_resource
 def get_coder():
+    from aider.main import main as cli_main
     coder = cli_main(return_coder=True)
     if not isinstance(coder, Coder):
         raise ValueError(coder)
