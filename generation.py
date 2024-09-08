@@ -21,7 +21,13 @@ def generation(folder_path, request, role="default"):
 
     model_name = "claude-3-5-sonnet-20240620"  # You can adjust the model according to your needs
 
-    roleText = ""; # TODO: lire le contenu du fichier <nomdurole>/role.md
+    role_file_path = os.path.join(folder_path, f"{role}/role.md")
+    try:
+        with open(role_file_path, 'r', encoding='utf-8') as role_file:
+            roleText = role_file.read()
+    except FileNotFoundError:
+        logger.warning(f"Role file not found: {role_file_path}")
+        roleText = ""
 
     # Generate specifications
     specifications = generate_content(model_name, roleText, "specifications", request, folder_path)
