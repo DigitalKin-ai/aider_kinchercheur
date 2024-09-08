@@ -549,6 +549,16 @@ def get_parser(default_config_files, git_root):
         ),
     )
     group.add_argument(
+        "--request",
+        metavar="REQUEST",
+        help="Specify a request to process",
+    )
+    group.add_argument(
+        "--append-request",
+        metavar="APPEND_REQUEST",
+        help="Specify a request to append to the message file",
+    )
+    group.add_argument(
         "--encoding",
         default="utf-8",
         help="Specify the encoding for input and output (default: utf-8)",
