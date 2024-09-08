@@ -357,7 +357,7 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
     logger.info("Starting main function")
 
     # Check if --gui argument is present
-    if '--gui' in argv:
+    if argv is not None and '--gui' in argv:
         try:
             # Import the launch_gui function here to avoid circular import
             from .gui import launch_gui
