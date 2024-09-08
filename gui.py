@@ -119,6 +119,24 @@ class GUI:
         messages = [update.message.text for update in updates if update.message.chat.id == chat_id]
         return messages
 
+    async def scrape_webpage(self, url):
+        async with async_playwright() as p:
+            browser = await p.chromium.launch()
+            page = await browser.new_page()
+            await page.goto(url)
+            content = await page.content()
+            await browser.close()
+            return content
+
+    async def scrape_webpage(self, url):
+        async with async_playwright() as p:
+            browser = await p.chromium.launch()
+            page = await browser.new_page()
+            await page.goto(url)
+            content = await page.content()
+            await browser.close()
+            return content
+
     def announce(self):
         lines = self.coder.get_announcements()
         lines = "  \n".join(lines)
@@ -547,7 +565,7 @@ class GUI:
         if echo:
             self.messages.info(message)
 
-    def do_web(self):
+    async def do_web(self):
         st.markdown("Add the text content of a web page to the chat")
 
         if not self.web_content_empty:
@@ -569,10 +587,7 @@ class GUI:
 
         url = self.web_content
 
-        if not self.state.scraper:
-            self.scraper = Scraper(print_error=self.info)
-
-        content = self.scraper.scrape(url) or ""
+        content = await self.scrape_webpage(url) or ""
         if content.strip():
             content = f"{url}\n\n" + content
             self.prompt = content

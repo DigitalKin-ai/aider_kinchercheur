@@ -14,6 +14,8 @@ from prompt_toolkit.enums import EditingMode
 import discord
 import asyncio
 import telegram
+from playwright.async_api import async_playwright
+from playwright.async_api import async_playwright
 from aider.gui import launch_gui
 
 DEFAULT_MODEL_NAME = "gpt-4o-mini"  # or the default model you want to use
