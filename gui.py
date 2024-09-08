@@ -9,6 +9,7 @@ import streamlit as st
 import discord
 from telegram.ext import Application
 from playwright.async_api import async_playwright
+from playwright.async_api import async_playwright
 
 from aider import urls
 from aider.coders import Coder
@@ -98,6 +99,58 @@ class GUI:
     last_undo_empty = None
     recent_msgs_empty = None
     web_content_empty = None
+
+    async def __init__(self):
+        self.coder = await get_coder()
+        self.state = get_state()
+
+        # Force the coder to cooperate, regardless of cmd line args
+        self.coder.yield_stream = True
+        self.coder.stream = True
+        self.coder.pretty = False
+
+        self.initialize_state()
+
+        self.do_messages_container()
+        self.do_sidebar()
+
+        user_inp = st.chat_input("Say something")
+        if user_inp:
+            self.prompt = user_inp
+
+        if self.prompt_pending():
+            await self.process_chat()
+
+        if not self.prompt:
+            return
+
+        self.state.prompt = self.prompt
+
+        if self.prompt_as == "user":
+            self.coder.io.add_to_input_history(self.prompt)
+
+        self.state.input_history.append(self.prompt)
+
+        if self.prompt_as:
+            self.state.messages.append({"role": self.prompt_as, "content": self.prompt})
+        if self.prompt_as == "user":
+            with self.messages.chat_message("user"):
+                st.write(self.prompt)
+        elif self.prompt_as == "text":
+            line = self.prompt.splitlines()[0]
+            line += "??"
+            with self.messages.expander(line):
+                st.text(self.prompt)
+
+        # Initialize Playwright browser
+        await self.initialize_playwright()
+
+        # re-render the UI for the prompt_pending state
+        st.rerun()
+
+    async def initialize_playwright(self):
+        self.playwright = await async_playwright().start()
+        self.browser = await self.playwright.chromium.launch()
 
     async def send_discord_message(self, token, channel_id, message):
         client = discord.Client(intents=discord.Intents.default())
