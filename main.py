@@ -28,6 +28,7 @@ from aider.gui import gui_main
 from aider.io import InputOutput
 
 DEFAULT_MODEL_NAME = "gpt-4o-mini"  # or the default model you want to use
+
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -333,16 +334,16 @@ def sanity_check_repo(repo, io):
 
 def import_modules():
     try:
-        from .file_selector import select_relevant_files
+        from file_selector import select_relevant_files
         from aider.args import get_parser
         from aider.coders import Coder
         from aider.commands import Commands, SwitchCoder
         from aider.history import ChatSummary
         from aider.io import InputOutput
-        from .llm import litellm  # noqa: F401; properly init litellm on launch
-        from .repo import GitRepo
-        from .versioncheck import check_version
-        from .dump import dump  # noqa: F401
+        from aider.llm import litellm  # noqa: F401; properly init litellm on launch
+        from aider.repo import GitRepo
+        from aider.versioncheck import check_version
+        from aider.dump import dump  # noqa: F401
         # Import the launch_gui function conditionally to avoid circular import
         return (select_relevant_files, get_parser, Coder, Commands, SwitchCoder, 
                 ChatSummary, InputOutput, GitRepo, check_version)
@@ -389,20 +390,18 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
     args, unknown = parser.parse_known_args(argv)
 
     role = getattr(args, 'role', None)
-    folder = args.folder
     message = args.message
     request = getattr(args, 'request', None)
     append_request = getattr(args, 'append_request', None)
     new_request_provided = request is not None
 
-    if folder is None:
-        logger.error("Folder not specified")
-        print("Usage: python -m aider --folder <folder> [--role <role>] [--request <request>] [--append-request <append_request>]")
-        return 1
-
-    # Define folder_path here
-    folder_path = os.path.abspath(folder)
-    logger.info(f"Working with folder: {folder_path}")
+    if argv is not None and '--folder' in argv:
+        folder = args.folder
+        folder_path = os.path.abspath(folder)
+        print(f"Working with folder: {folder_path}")
+    else:
+        print("No specific folder provided. Working in the current directory.")
+        folder_path = os.getcwd()
 
     if message:
         logger.info(f"Using message: {message}")
@@ -597,16 +596,6 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
 
     try:
         while True:
-
-            # Check for new files
-            try:
-                # Check for new files
-                new_files = coder.check_for_new_files()
-                if new_files:
-                    io.tool_output("New files detected and added to the chat.")
-            except Exception as e:
-                io.tool_error(f"Error while checking for new files: {str(e)}")
-
             # Add specific files from the folder
             specific_files = ['todolist.md', 'specifications.md', 'prompt.md', 'toolbox.py']
             added_files = []
