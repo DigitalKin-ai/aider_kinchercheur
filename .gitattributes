@@ -1,0 +1,2 @@
+build/aider/aider.pkg filter=lfs diff=lfs merge=lfs -text
+dist/aider.exe filter=lfs diff=lfs merge=lfs -text
