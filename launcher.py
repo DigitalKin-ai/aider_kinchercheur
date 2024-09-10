@@ -343,6 +343,7 @@ def main():
                 else:
                     window['-API_KEY-'].update('*' * len(api_key))
                     window['-API_KEY-'].update(password_char='*')
+                window['-API_KEY-'].update(visible=True)
             elif event == '-CHANGE_API-':
                 new_api_key = APIKeyManager.prompt_for_api_key(api_key)
                 if new_api_key:
