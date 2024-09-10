@@ -244,6 +244,9 @@ def main():
                 if sg.popup_yes_no("No API key provided. Do you want to exit?") == 'Yes':
                     return
         
+        # Assurez-vous que la clé API est correctement initialisée dans l'interface
+        window['-API_KEY-'].update('*' * len(api_key))
+        
         base_cmd = AiderRunner.get_base_command(python_cmd)
         saved_role, saved_request, saved_folder = SettingsManager.load_settings()
 
@@ -343,7 +346,6 @@ def main():
                 else:
                     window['-API_KEY-'].update('*' * len(api_key))
                     window['-API_KEY-'].update(password_char='*')
-                window['-API_KEY-'].update(visible=True)
             elif event == '-CHANGE_API-':
                 new_api_key = APIKeyManager.prompt_for_api_key(api_key)
                 if new_api_key:
