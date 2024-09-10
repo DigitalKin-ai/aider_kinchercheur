@@ -1,0 +1,8 @@
+2024-09-09 06:38:36,970 - __main__ - INFO - Script started
+2024-09-09 06:38:36,971 - __main__ - INFO - Starting main function
+2024-09-09 06:38:36,972 - __main__ - INFO - Tracemalloc started
+2024-09-09 06:38:36,972 - __main__ - INFO - Executing main logic
+2024-09-09 06:38:36,972 - __main__ - INFO - Current memory usage is 0.0MB; Peak was 0.002591MB
+2024-09-09 06:38:36,972 - __main__ - INFO - Tracemalloc stopped
+2024-09-09 06:38:36,972 - __main__ - INFO - Main function completed
+2024-09-09 06:38:36,972 - __main__ - INFO - Script completed

@@ -26,13 +26,37 @@ class LazyLiteLLM:
         if self._lazy_module is not None:
             return
 
-        self._lazy_module = importlib.import_module("litellm")
+        try:
+            self._lazy_module = importlib.import_module("litellm")
+            self._lazy_module.suppress_debug_info = True
+            self._lazy_module.set_verbose = False
+            self._lazy_module.drop_params = True
+        except ImportError as e:
+            print(f"Erreur lors de l'importation de litellm: {e}")
+            raise
 
-        self._lazy_module.suppress_debug_info = True
-        self._lazy_module.set_verbose = False
-        self._lazy_module.drop_params = True
+    def exceptions(self):
+        self._load_litellm()
+        return self._lazy_module.exceptions
 
 
 litellm = LazyLiteLLM()
 
-__all__ = [litellm]
+def retry_exceptions():
+    return (
+        litellm.exceptions.OpenAIError,
+        #litellm.exceptions.AzureOpenAIError,
+        #litellm.exceptions.AnthropicError,
+        litellm.exceptions.BingAIError,
+        litellm.exceptions.GooglePalmError,
+        litellm.exceptions.HuggingfaceError,
+        litellm.exceptions.ReplicateError,
+        litellm.exceptions.TogetherAIError,
+        litellm.exceptions.AlephAlphaError,
+        litellm.exceptions.NLPCloudError,
+        litellm.exceptions.VertexAIError,
+        litellm.exceptions.CohereBadRequestError,
+        litellm.exceptions.AnthropicRateLimitError,
+    )
+
+__all__ = [litellm, retry_exceptions]
