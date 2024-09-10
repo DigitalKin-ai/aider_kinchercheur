@@ -244,9 +244,6 @@ def main():
                 if sg.popup_yes_no("No API key provided. Do you want to exit?") == 'Yes':
                     return
         
-        # Assurez-vous que la clé API est correctement initialisée dans l'interface
-        window['-API_KEY-'].update('*' * len(api_key))
-        
         base_cmd = AiderRunner.get_base_command(python_cmd)
         saved_role, saved_request, saved_folder = SettingsManager.load_settings()
 
@@ -275,6 +272,9 @@ def main():
 
         window.maximize()
         window.user_data = {'process': None}
+
+        # Assurez-vous que la clé API est correctement initialisée dans l'interface
+        window['-API_KEY-'].update('*' * len(api_key))
 
         show_api_key = False
         aider_thread = None
