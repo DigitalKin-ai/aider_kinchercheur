@@ -235,14 +235,10 @@ def main():
             sg.popup_error("Python n'a pas été trouvé dans le PATH du système.")
             return
 
-        api_key = APIKeyManager.get_api_key()
-        while not api_key:
-            api_key = APIKeyManager.prompt_for_api_key()
-            if api_key:
-                APIKeyManager.save_api_key(api_key)
-            else:
-                if sg.popup_yes_no("No API key provided. Do you want to exit?") == 'Yes':
-                    return
+        api_key = ''
+        saved_api_key = APIKeyManager.get_api_key()
+        if saved_api_key:
+            api_key = saved_api_key
         
         base_cmd = AiderRunner.get_base_command(python_cmd)
         saved_role, saved_request, saved_folder = SettingsManager.load_settings()
@@ -250,9 +246,9 @@ def main():
         layout = [
             [sg.Text("KinOS: A team of autonomous agents on your computer", font=("Segoe UI", 20), pad=(0, 10))],
             [sg.Text("OpenAI API Key:", size=(10, 1)), 
-             sg.Input(default_text='*' * len(api_key), key='-API_KEY-', size=(40, 1), password_char='*'),
+             sg.Input(default_text=api_key, key='-API_KEY-', size=(40, 1), password_char='*'),
              sg.Button('Show/Hide', key='-TOGGLE_API-'), 
-             sg.Button('Change', key='-CHANGE_API-')],
+             sg.Button('Save', key='-SAVE_API-')],
             [sg.Text("Rôle:", size=(10, 1)), sg.Input(default_text=saved_role, key='-ROLE-', size=(50, 1), font=("Segoe UI", 10))],
             [sg.Text("Requête:", size=(10, 1)), sg.Multiline(default_text=saved_request, key='-REQUEST-', size=(50, 5), font=("Segoe UI", 10))],
             [sg.Text("Dossier:", size=(10, 1)), sg.Input(default_text=saved_folder, key='-FOLDER-', size=(40, 1), font=("Segoe UI", 10)), 
@@ -346,15 +342,17 @@ def main():
                 else:
                     window['-API_KEY-'].update('*' * len(api_key))
                     window['-API_KEY-'].update(password_char='*')
-            elif event == '-CHANGE_API-':
-                new_api_key = APIKeyManager.prompt_for_api_key(api_key)
+            elif event == '-SAVE_API-':
+                new_api_key = values['-API_KEY-']
                 if new_api_key:
                     api_key = new_api_key
                     APIKeyManager.save_api_key(api_key)
                     window['-API_KEY-'].update('*' * len(api_key))
                     window['-API_KEY-'].update(password_char='*')
                     show_api_key = False
-                    sg.popup("API key updated successfully", title="API Key Updated", button_color=('white', '#2196F3'))
+                    sg.popup("API key saved successfully", title="API Key Saved", button_color=('white', '#2196F3'))
+                else:
+                    sg.popup_error("Please enter an API key before saving", title="Error", button_color=('white', '#F44336'))
             elif event == '-PROGRESS-UPDATE-':
                 if window['-PROGRESS-'].visible:
                     window['-PROGRESS-'].update(values[event])
