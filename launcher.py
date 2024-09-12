@@ -8,14 +8,24 @@ import io
 import time
 
 def install_package(package):
-    subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+    try:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+        print(f"Successfully installed {package}")
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to install {package}. Error: {e}")
+        sys.exit(1)
 
+# Check if PySimpleGUI is installed, if not, install it
 try:
     import PySimpleGUI as sg
 except ImportError:
-    print("PySimpleGUI not found. Installing...")
+    print("PySimpleGUI not found. Attempting to install...")
     install_package("PySimpleGUI")
-    import PySimpleGUI as sg
+    try:
+        import PySimpleGUI as sg
+    except ImportError:
+        print("Failed to import PySimpleGUI even after installation attempt. Please install it manually.")
+        sys.exit(1)
 
 class EncodingSetup:
     @staticmethod
