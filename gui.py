@@ -1,28 +1,12 @@
 #!/usr/bin/env python
 
 import os
-import random
 import sys
 import asyncio
-import webbrowser
-
-import streamlit as st
-import discord
-from telegram.ext import Application
-from playwright.async_api import async_playwright
-from playwright.async_api import async_playwright
-
-# Add the parent directory to sys.path
-current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(current_dir)
-sys.path.insert(0, parent_dir)
-
-# Now import from aider.coders
+import PySimpleGUI as sg
 from aider.coders import Coder
-from aider.dump import dump  # noqa: F401
 from aider.io import InputOutput
 from aider import __version__, models, utils
-from aider.scrape import Scraper
 from aider.args import get_parser
 
 # Add the parent directory to sys.path
@@ -30,56 +14,25 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 
-
 class CaptureIO(InputOutput):
-    lines = []
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.output = []
 
     def tool_output(self, msg, log_only=False):
         if not log_only:
-            self.lines.append(msg)
+            self.output.append(msg)
         super().tool_output(msg, log_only=log_only)
 
     def tool_error(self, msg):
-        self.lines.append(msg)
+        self.output.append(msg)
         super().tool_error(msg)
 
-    def get_captured_lines(self):
-        lines = self.lines
-        self.lines = []
-        return lines
+    def get_output(self):
+        output = self.output
+        self.output = []
+        return output
 
-
-def search(text=None):
-    results = []
-    for root, _, files in os.walk("aider"):
-        for file in files:
-            path = os.path.join(root, file)
-            if not text or text in path:
-                results.append(path)
-    # dump(results)
-
-    return results
-
-
-# Keep state as a resource, which survives browser reloads (since Coder does too)
-class State:
-    keys = set()
-
-    def init(self, key, val=None):
-        if key in self.keys:
-            return
-
-        self.keys.add(key)
-        setattr(self, key, val)
-        return True
-
-
-@st.cache_resource
-def get_state():
-    return State()
-
-
-@st.cache_resource
 async def get_coder():
     from aider.main import main as cli_main
     coder = await cli_main(return_coder=True)
@@ -94,7 +47,6 @@ async def get_coder():
         dry_run=coder.io.dry_run,
         encoding=coder.io.encoding,
     )
-    # coder.io = io # this breaks the input_history
     coder.commands.io = io
 
     for line in coder.get_announcements():
@@ -102,594 +54,55 @@ async def get_coder():
 
     return coder
 
-
 class GUI:
-    prompt = None
-    prompt_as = "user"
-    last_undo_empty = None
-    recent_msgs_empty = None
-    web_content_empty = None
-
     def __init__(self):
         self.coder = None
-        self.state = None
-        self.playwright = None
-        self.browser = None
-        self.messages = None
+        self.window = None
 
     async def initialize(self):
         self.coder = await get_coder()
-        self.state = get_state()
+        self.create_window()
 
-        # Parse command-line arguments
-        parser = get_parser()
-        args = parser.parse_args()
-
-        # Apply the arguments to your coder or GUI setup
-        # For example:
-        if args.cache_prompts:
-            self.coder.cache_prompts = True
-        if args.map_refresh:
-            self.coder.map_refresh = args.map_refresh
-        if args.auto_test:
-            self.coder.auto_test = args.auto_test
-        if args.test_cmd:
-            self.coder.test_cmd = args.test_cmd
-        if args.role:
-            self.coder.role = args.role
-
-        # Force the coder to cooperate, regardless of cmd line args
-        self.coder.yield_stream = True
-        self.coder.stream = True
-        self.coder.pretty = False
-
-        self.initialize_state()
-
-        self.do_messages_container()
-        self.do_sidebar()
-
-        user_inp = st.chat_input("Say something")
-        if user_inp:
-            self.prompt = user_inp
-
-        if self.prompt_pending():
-            await self.process_chat()
-
-        if not self.prompt:
-            return
-
-        self.state.prompt = self.prompt
-
-        if self.prompt_as == "user":
-            self.coder.io.add_to_input_history(self.prompt)
-
-        self.state.input_history.append(self.prompt)
-
-        if self.prompt_as:
-            self.state.messages.append({"role": self.prompt_as, "content": self.prompt})
-        if self.prompt_as == "user":
-            with self.messages.chat_message("user"):
-                st.write(self.prompt)
-        elif self.prompt_as == "text":
-            line = self.prompt.splitlines()[0]
-            line += "??"
-            with self.messages.expander(line):
-                st.text(self.prompt)
-
-        # Initialize Playwright browser
-        await self.initialize_playwright()
-
-        # re-render the UI for the prompt_pending state
-        st.rerun()
-
-    async def initialize_playwright(self):
-        self.playwright = await async_playwright().start()
-        self.browser = await self.playwright.chromium.launch()
-
-    async def send_discord_message(self, token, channel_id, message):
-        client = discord.Client(intents=discord.Intents.default())
-        
-        @client.event
-        async def on_ready():
-            channel = client.get_channel(channel_id)
-            await channel.send(message)
-            await client.close()
-
-        await client.start(token)
-
-    async def send_telegram_message(self, token, chat_id, message):
-        application = Application.builder().token(token).build()
-        async with application:
-            await application.bot.send_message(chat_id=chat_id, text=message)
-
-    async def get_telegram_messages(self, token, chat_id):
-        application = Application.builder().token(token).build()
-        async with application:
-            updates = await application.bot.get_updates()
-            messages = [update.message.text for update in updates if update.message.chat.id == chat_id]
-        return messages
-
-    async def scrape_webpage(self, url):
-        async with async_playwright() as p:
-            browser = await p.chromium.launch()
-            page = await browser.new_page()
-            await page.goto(url)
-            content = await page.content()
-            await browser.close()
-            return content
-
-    def announce(self):
-        lines = self.coder.get_announcements()
-        lines = "  \n".join(lines)
-        return lines
-
-    def show_edit_info(self, edit):
-        commit_hash = edit.get("commit_hash")
-        commit_message = edit.get("commit_message")
-        diff = edit.get("diff")
-        fnames = edit.get("fnames")
-        if fnames:
-            fnames = sorted(fnames)
-
-        if not commit_hash and not fnames:
-            return
-
-        show_undo = False
-        res = ""
-        if commit_hash:
-            res += f"Commit `{commit_hash}`: {commit_message}  \n"
-            if commit_hash == self.coder.last_aider_commit_hash:
-                show_undo = True
-
-        if fnames:
-            fnames = [f"`{fname}`" for fname in fnames]
-            fnames = ", ".join(fnames)
-            res += f"Applied edits to {fnames}."
-
-        if diff:
-            with st.expander(res):
-                st.code(diff, language="diff")
-                if show_undo:
-                    self.add_undo(commit_hash)
-        else:
-            with st.container(border=True):
-                st.write(res)
-                if show_undo:
-                    self.add_undo(commit_hash)
-
-    def add_undo(self, commit_hash):
-        if self.last_undo_empty:
-            self.last_undo_empty.empty()
-
-        self.last_undo_empty = st.empty()
-        undone = self.state.last_undone_commit_hash == commit_hash
-        if not undone:
-            with self.last_undo_empty:
-                if self.button(f"Undo commit `{commit_hash}`", key=f"undo_{commit_hash}"):
-                    self.do_undo(commit_hash)
-
-    def do_sidebar(self):
-        with st.sidebar:
-            st.title("aider")
-            # self.cmds_tab, self.settings_tab = st.tabs(["Commands", "Settings"])
-
-            # self.do_recommended_actions()
-            self.do_add_to_chat()
-            self.do_recent_msgs()
-            self.do_clear_chat_history()
-            # st.container(height=150, border=False)
-            # st.write("### Experimental")
-
-            st.warning(
-                "This browser version of aider is experimental. Please share feedback in [GitHub"
-                " issues](https://github.com/paul-gauthier/aider/issues)."
-            )
-
-    def do_settings_tab(self):
-        pass
-
-    def do_recommended_actions(self):
-        text = "aider works best when your code is stored in a git repo.  \n"
-        text += f"[See the FAQ for more info]({urls.git})"
-
-        with st.expander("Recommended actions", expanded=True):
-            with st.popover("Create a git repo to track changes"):
-                st.write(text)
-                self.button("Create git repo", key=random.random(), help="?")
-
-            with st.popover("Update your `.gitignore` file"):
-                st.write("It's best to keep aider's internal files out of your git repo.")
-                self.button("Add `.aider*` to `.gitignore`", key=random.random(), help="?")
-
-    def do_add_to_chat(self):
-        # with st.expander("Add to the chat", expanded=True):
-        self.do_add_files()
-        self.do_add_web_page()
-
-    def do_add_files(self):
-        all_files = self.coder.get_all_relative_files()
-        current_files = self.coder.get_inchat_relative_files()
-        
-        fnames = st.multiselect(
-            "Add files to the chat",
-            all_files,
-            default=current_files,
-            placeholder="Files to edit",
-            disabled=self.prompt_pending(),
-            help=(
-                "Select the files that might need to be edited for the task you are working on. "
-                "For smaller models, it's recommended to add more files to provide better context."
-            ),
-        )
-
-        added_files = set(fnames) - set(current_files)
-        removed_files = set(current_files) - set(fnames)
-
-        if added_files or removed_files:
-            self.state.file_changes_pending = True
-            self.state.files_to_add = added_files
-            self.state.files_to_remove = removed_files
-
-        if self.state.file_changes_pending and not self.prompt_pending():
-            self.apply_file_changes()
-
-    def apply_file_changes(self):
-        for fname in self.state.files_to_add:
-            self.coder.add_rel_fname(fname)
-            self.info(f"Added {fname} to the chat")
-
-        for fname in self.state.files_to_remove:
-            self.coder.drop_rel_fname(fname)
-            self.info(f"Removed {fname} from the chat")
-
-        # Update the initial_inchat_files to reflect the current state
-        self.state.initial_inchat_files = self.coder.get_inchat_relative_files()
-        
-        # Reset the pending changes
-        self.state.file_changes_pending = False
-        self.state.files_to_add = set()
-        self.state.files_to_remove = set()
-
-        # Trigger a chat message to inform the model about the file changes
-        file_change_message = self.generate_file_change_message()
-        if file_change_message:
-            self.prompt = file_change_message
-            self.prompt_as = "system"
-            self.process_chat()
-
-    def generate_file_change_message(self):
-        added = list(self.state.files_to_add)
-        removed = list(self.state.files_to_remove)
-        if not added and not removed:
-            return None
-
-        message = "File changes have been made to the chat context:\n"
-        if added:
-            message += f"Added files: {', '.join(added)}\n"
-        if removed:
-            message += f"Removed files: {', '.join(removed)}\n"
-        message += "Please consider these changes in your responses and suggest edits to newly added files if necessary."
-        return message
-
-    def do_add_web_page(self):
-        with st.popover("Add a web page to the chat"):
-            self.do_web()
-
-    def do_add_image(self):
-        with st.popover("Add image"):
-            st.markdown("Hello World 👋")
-            st.file_uploader("Image file", disabled=self.prompt_pending())
-
-    def do_run_shell(self):
-        with st.popover("Run shell commands, tests, etc"):
-            st.markdown(
-                "Run a shell command and optionally share the output with the LLM. This is"
-                " a great way to run your program or run tests and have the LLM fix bugs."
-            )
-            st.text_input("Command:")
-            st.radio(
-                "Share the command output with the LLM?",
-                [
-                    "Review the output and decide whether to share",
-                    "Automatically share the output on non-zero exit code (ie, if any tests fail)",
-                ],
-            )
-            st.selectbox(
-                "Recent commands",
-                [
-                    "my_app.py --doit",
-                    "my_app.py --cleanup",
-                ],
-                disabled=self.prompt_pending(),
-            )
-
-    def do_tokens_and_cost(self):
-        with st.expander("Tokens and costs", expanded=True):
-            pass
-
-    def do_show_token_usage(self):
-        with st.popover("Show token usage"):
-            st.write("hi")
-
-    def do_clear_chat_history(self):
-        text = "Saves tokens, reduces confusion"
-        if self.button("Clear chat history", help=text):
-            self.coder.done_messages = []
-            self.coder.cur_messages = []
-            self.info("Cleared chat history. Now the LLM can't see anything before this line.")
-
-    def do_show_metrics(self):
-        st.metric("Cost of last message send & reply", "$0.0019", help="foo")
-        st.metric("Cost to send next message", "$0.0013", help="foo")
-        st.metric("Total cost this session", "$0.22")
-
-    def do_git(self):
-        with st.expander("Git", expanded=False):
-            # st.button("Show last diff")
-            # st.button("Undo last commit")
-            self.button("Commit any pending changes")
-            with st.popover("Run git command"):
-                st.markdown("## Run git command")
-                st.text_input("git", value="git ")
-                self.button("Run")
-                st.selectbox(
-                    "Recent git commands",
-                    [
-                        "git checkout -b experiment",
-                        "git stash",
-                    ],
-                    disabled=self.prompt_pending(),
-                )
-
-    def do_recent_msgs(self):
-        if not self.recent_msgs_empty:
-            self.recent_msgs_empty = st.empty()
-
-        if self.prompt_pending():
-            self.recent_msgs_empty.empty()
-            self.state.recent_msgs_num += 1
-
-        with self.recent_msgs_empty:
-            self.old_prompt = st.selectbox(
-                "Resend a recent chat message",
-                self.state.input_history,
-                placeholder="Choose a recent chat message",
-                # label_visibility="collapsed",
-                index=None,
-                key=f"recent_msgs_{self.state.recent_msgs_num}",
-                disabled=self.prompt_pending(),
-            )
-            if self.old_prompt:
-                self.prompt = self.old_prompt
-
-    def do_messages_container(self):
-        self.messages = st.container()
-
-        # stuff a bunch of vertical whitespace at the top
-        # to get all the chat text to the bottom
-        # self.messages.container(height=300, border=False)
-
-        with self.messages:
-            for msg in self.state.messages:
-                role = msg["role"]
-
-                if role == "edit":
-                    self.show_edit_info(msg)
-                elif role == "info":
-                    st.info(msg["content"])
-                elif role == "text":
-                    text = msg["content"]
-                    line = text.splitlines()[0]
-                    with self.messages.expander(line):
-                        st.text(text)
-                elif role in ("user", "assistant"):
-                    with st.chat_message(role):
-                        st.write(msg["content"])
-                        # self.cost()
-                else:
-                    st.dict(msg)
-
-    def initialize_state(self):
-        messages = [
-            dict(role="info", content=self.announce()),
-            dict(role="assistant", content="How can I help you?"),
+    def create_window(self):
+        layout = [
+            [sg.Text("Kins - Autonomous multi-agents AI on your computer", font=("Helvetica", 20))],
+            [sg.Multiline(size=(80, 20), key="-OUTPUT-", disabled=True)],
+            [sg.Input(key="-INPUT-", size=(70, 1)), sg.Button("Send", bind_return_key=True)],
+            [sg.Button("Clear"), sg.Button("Exit")]
         ]
+        self.window = sg.Window("Kins", layout, finalize=True)
 
-        self.state.init("messages", messages)
-        self.state.init("last_aider_commit_hash", self.coder.last_aider_commit_hash)
-        self.state.init("last_undone_commit_hash")
-        self.state.init("recent_msgs_num", 0)
-        self.state.init("web_content_num", 0)
-        self.state.init("prompt")
-        self.state.init("scraper")
+    async def run(self):
+        while True:
+            event, values = self.window.read(timeout=100)
+            if event == sg.WINDOW_CLOSED or event == "Exit":
+                break
+            elif event == "Send":
+                user_input = values["-INPUT-"]
+                if user_input:
+                    self.window["-INPUT-"].update("")
+                    await self.process_input(user_input)
+            elif event == "Clear":
+                self.window["-OUTPUT-"].update("")
 
-        self.state.init("initial_inchat_files", self.coder.get_inchat_relative_files())
-        self.state.init("file_changes_pending", False)
-        self.state.init("files_to_add", set())
-        self.state.init("files_to_remove", set())
+        self.window.close()
 
-        if "input_history" not in self.state.keys:
-            input_history = list(self.coder.io.get_input_history())
-            seen = set()
-            input_history = [x for x in input_history if not (x in seen or seen.add(x))]
-            self.state.input_history = input_history
-            self.state.keys.add("input_history")
+    async def process_input(self, user_input):
+        self.window["-OUTPUT-"].print(f"User: {user_input}")
+        response = await self.coder.run_stream(user_input)
+        self.window["-OUTPUT-"].print(f"Assistant: {response}")
 
-    def button(self, args, **kwargs):
-        "Create a button, disabled if prompt pending"
-
-        # Force everything to be disabled if there is a prompt pending
-        if self.prompt_pending():
-            kwargs["disabled"] = True
-
-        return st.button(args, **kwargs)
-
-    async def initialize_playwright(self):
-        self.playwright = await async_playwright().start()
-        self.browser = await self.playwright.chromium.launch()
-
-    def prompt_pending(self):
-        return self.state.prompt is not None
-
-    def cost(self):
-        cost = random.random() * 0.003 + 0.001
-        st.caption(f"${cost:0.4f}")
-
-    async def process_chat(self):
-        prompt = self.state.prompt
-        self.state.prompt = None
-
-        # This duplicates logic from within Coder
-        self.num_reflections = 0
-        self.max_reflections = 3
-
-        while prompt:
-            with self.messages.chat_message("assistant"):
-                res = await self.run_stream_async(prompt)
-                self.state.messages.append({"role": "assistant", "content": res})
-                # self.cost()
-
-            prompt = None
-            if self.coder.reflected_message:
-                if self.num_reflections < self.max_reflections:
-                    self.num_reflections += 1
-                    self.info(self.coder.reflected_message)
-                    prompt = self.coder.reflected_message
-
-        with self.messages:
-            edit = dict(
-                role="edit",
-                fnames=self.coder.aider_edited_files,
-            )
-            if self.state.last_aider_commit_hash != self.coder.last_aider_commit_hash:
-                edit["commit_hash"] = self.coder.last_aider_commit_hash
-                edit["commit_message"] = self.coder.last_aider_commit_message
-                commits = f"{self.coder.last_aider_commit_hash}~1"
-                diff = self.coder.repo.diff_commits(
-                    self.coder.pretty,
-                    commits,
-                    self.coder.last_aider_commit_hash,
-                )
-                edit["diff"] = diff
-                self.state.last_aider_commit_hash = self.coder.last_aider_commit_hash
-
-            self.state.messages.append(edit)
-            self.show_edit_info(edit)
-
-        # Send Discord message
-        discord_token = os.getenv('DISCORD_BOT_TOKEN')
-        discord_channel_id = 1279332180077842495
-        discord_message = "Hello everyone! We're excited to introduce the members of our band: [List band members here]"
-        await self.send_discord_message(discord_token, discord_channel_id, discord_message)
-
-        # Send Telegram message
-        telegram_token = os.getenv('TELEGRAM_BOT_TOKEN')
-        telegram_chat_id = -1001699255893
-        telegram_message = "Greetings from our band! We have some exciting news to share: [Your message here]"
-        await self.send_telegram_message(telegram_token, telegram_chat_id, telegram_message)
-
-        # Get and save Telegram messages
-        telegram_messages = await self.get_telegram_messages(telegram_token, telegram_chat_id)
-        with open(f"{self.coder.repo.root}/telegram_messages.txt", "w") as f:
-            for message in telegram_messages:
-                f.write(f"{message}\n")
-
-        # Close Playwright browser
-        await self.browser.close()
-        await self.playwright.stop()
-
-        # re-render the UI for the non-prompt_pending state
-        st.rerun()
-
-    async def run_stream_async(self, prompt):
-        return await asyncio.to_thread(self.coder.run_stream, prompt)
-
-    def info(self, message, echo=True):
-        info = dict(role="info", content=message)
-        self.state.messages.append(info)
-
-        # We will render the tail of the messages array after this call
-        if echo:
-            self.messages.info(message)
-
-    def do_web(self):
-        st.markdown("Add the text content of a web page to the chat")
-
-        if not self.web_content_empty:
-            self.web_content_empty = st.empty()
-
-        if self.prompt_pending():
-            self.web_content_empty.empty()
-            self.state.web_content_num += 1
-
-        with self.web_content_empty:
-            self.web_content = st.text_input(
-                "URL",
-                placeholder="https://...",
-                key=f"web_content_{self.state.web_content_num}",
-            )
-
-        if not self.web_content:
-            return
-
-        url = self.web_content
-
-        async def fetch_content():
-            content = await self.scrape_webpage(url) or ""
-            if content.strip():
-                content = f"{url}\n\n" + content
-                self.prompt = content
-                self.prompt_as = "text"
-            else:
-                self.info(f"No web content found for `{url}`.")
-                self.web_content = None
-
-        asyncio.run(fetch_content())
-
-    def do_undo(self, commit_hash):
-        self.last_undo_empty.empty()
-
-        if (
-            self.state.last_aider_commit_hash != commit_hash
-            or self.coder.last_aider_commit_hash != commit_hash
-        ):
-            self.info(f"Commit `{commit_hash}` is not the latest commit.")
-            return
-
-        self.coder.commands.io.get_captured_lines()
-        reply = self.coder.commands.cmd_undo(None)
-        lines = self.coder.commands.io.get_captured_lines()
-
-        lines = "\n".join(lines)
-        lines = lines.splitlines()
-        lines = "  \n".join(lines)
-        self.info(lines, echo=False)
-
-        self.state.last_undone_commit_hash = commit_hash
-
-        if reply:
-            self.prompt_as = None
-            self.prompt = reply
-
+        # Display any captured output
+        output = self.coder.commands.io.get_output()
+        if output:
+            self.window["-OUTPUT-"].print("\n".join(output))
 
 async def gui_main(argv=None):
-    webbrowser.open_new_tab("http://localhost:8501")
-    st.title("Kins")
-    st.set_page_config(
-        layout="wide",
-        page_title="kins",
-        page_icon="🌌",
-        menu_items={
-            "Report a bug": "https://github.com/lesterpaintstheworld/aider/issues",
-            "About": "# Kins\nAutonomous multi-agents AI on your computer.",
-        },
-    )
-
     gui = GUI()
     await gui.initialize()
+    await gui.run()
     return 0
 
 if __name__ == "__main__":
     import sys
-    import asyncio
     asyncio.run(gui_main(sys.argv[1:]))
