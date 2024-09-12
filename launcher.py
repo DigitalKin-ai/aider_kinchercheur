@@ -1,4 +1,3 @@
-import PySimpleGUI as sg
 import subprocess
 import sys
 import os
@@ -7,6 +6,16 @@ import queue
 import re
 import io
 import time
+
+def install_package(package):
+    subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+
+try:
+    import PySimpleGUI as sg
+except ImportError:
+    print("PySimpleGUI not found. Installing...")
+    install_package("PySimpleGUI")
+    import PySimpleGUI as sg
 
 class EncodingSetup:
     @staticmethod
