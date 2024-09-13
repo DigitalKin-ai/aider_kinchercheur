@@ -86,6 +86,12 @@ def simple_send_with_retries(
             raise ValueError("Bad Request: " + str(e))
         else:
             raise
+
+def send_with_retries(
+    model_name: str, 
+    messages: List[Dict[str, Any]], 
+    extra_headers: Optional[Dict[str, str]] = None,
+    **kwargs
 ) -> str:
     max_retries = 5
     retry_delay = 1
