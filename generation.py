@@ -110,7 +110,7 @@ Specifications should be detailed, structured, and clear. Include a summary tabl
 2. HTML summary table (if applicable)
 
 Specifications to respect:
-{specifications}
+{specifications if specifications else "No specifications provided yet."}
 """
     elif content_type == "todolist":
         base_prompt += f"""
