@@ -199,7 +199,8 @@ if __name__ == "__main__":
         logger.info(f"Generation completed for folder: {folder_path}")
         
         for content_type in ["specifications", "todolist", "prompt", "toolbox"]:
-            print(f"{content_type.capitalize()} generated and saved in {os.path.join(folder_path, f'{content_type}.{'py' if content_type == 'toolbox' else 'md'}')}")
+            file_extension = 'py' if content_type == 'toolbox' else 'md'
+            print(f"{content_type.capitalize()} generated and saved in {os.path.join(folder_path, f'{content_type}.{file_extension}')}")
         
         for content_type, content in [("Specifications", specifications), ("Todolist", todolist), ("Prompt", prompt), ("Toolbox", toolbox)]:
             print(f"\n{content_type} content:")
