@@ -27,7 +27,7 @@ from playwright.async_api import async_playwright
 from aider.gui import gui_main
 from aider.io import InputOutput
 
-DEFAULT_MODEL_NAME = "gpt-4o"  # or the default model you want to use
+DEFAULT_MODEL_NAME = "o1-mini"
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -700,9 +700,9 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
                 For the first uncompleted task of the todolist:
                 1. If needed, create a prompt.md file in a mirrored directory structure of {folder}/todolist.md if it doesn't exist.
                 2. If the task is complex, break it down into sub-tasks in a new sub-folder.
-                3. Update the toolbox.py if necessary, explicitly writing commands between backticks. Ensure main.py calls these commands.
+                3. Update the toolbox.py ONLY if necessary, explicitly writing commands between backticks. Ensure main.py calls these commands.
                 4. Verify command execution by checking for visible results.
-                5. **Execute the task** using the prompt, ensuring all necessary work is completed.
+                5. **Execute the task** using the prompt, using the SEARCH / REPLACE formet.
                 6. Verify the work is explicitly visible in the output, not just marked as complete.
                 7. Confirm the outcome matches the task specifications and the work process is visible.
                 8. If the outcome is not achieved or work is not fully visible, revise the task or break it down further.

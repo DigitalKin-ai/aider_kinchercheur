@@ -19,7 +19,7 @@ def generation(folder_path, request, role="default"):
     os.makedirs(folder_path, exist_ok=True)
     logger.info(f"Using folder: {folder_path}")
 
-    model_name = "claude-3-5-sonnet-20240620"  # You can adjust the model according to your needs
+    model_name = "o1-mini"  # You can adjust the model according to your needs
 
     role_file_path = os.path.join(folder_path, role, "role.md")
     try:
