@@ -81,6 +81,8 @@ def simple_send_with_retries(
             extra_headers=extra_headers,
             **kwargs
         )
+    except litellm.BadRequestError as e:
+        raise ValueError("Bad Request: " + str(e))
     except Exception as e:
         if hasattr(e, 'status_code') and e.status_code == 400:
             raise ValueError("Bad Request: " + str(e))
