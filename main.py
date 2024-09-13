@@ -27,7 +27,7 @@ from playwright.async_api import async_playwright
 from aider.gui import gui_main
 from aider.io import InputOutput
 
-DEFAULT_MODEL_NAME = "o1-mini"
+DEFAULT_MODEL_NAME = "gpt-4o-mini"
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
