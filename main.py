@@ -28,7 +28,12 @@ import asyncio
 import subprocess
 import sys
 
+# Configure logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
 async def install_playwright():
+    logger.info("Starting Playwright installation")
     try:
         print("Installing Playwright...")
         # First, install the playwright package
@@ -397,27 +402,34 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
 
         # Check if Playwright is installed
         if async_playwright:
+            logger.info("Playwright is available, proceeding with installation")
             # Install Playwright
             await install_playwright()
 
             # Initialize Playwright
+            logger.info("Initializing Playwright")
             async with async_playwright() as p:
                 browser = await p.chromium.launch()
                 page = await browser.new_page()
+            logger.info("Playwright initialized successfully")
         else:
             logger.warning("Playwright is not installed. Some features may not be available.")
 
         # Check if --gui argument is present
         if argv is not None and '--gui' in argv:
+            logger.info("GUI argument detected")
             if check_streamlit_install(InputOutput(pretty=True, yes=True)):
+                logger.info("Launching GUI")
                 return await launch_gui(argv)
             else:
+                logger.warning("Streamlit not installed, cannot launch GUI")
                 return 1
 
         if force_git_root:
             git_root = force_git_root
         else:
             git_root = get_git_root()
+        logger.info(f"Git root: {git_root}")
 
         conf_fname = Path(".aider.conf.yml")
 
@@ -428,9 +440,12 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
                 default_config_files.append(git_conf)
         default_config_files.append(Path.home() / conf_fname)  # homedir
         default_config_files = list(map(str, default_config_files))
+        logger.debug(f"Default config files: {default_config_files}")
 
         parser = get_parser(default_config_files, git_root)
         args, unknown = parser.parse_known_args(argv)
+        logger.debug(f"Parsed arguments: {args}")
+        logger.debug(f"Unknown arguments: {unknown}")
 
         role = getattr(args, 'role', None)
         message = args.message
@@ -441,9 +456,9 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
         if argv is not None and '--folder' in argv:
             folder = args.folder
             folder_path = os.path.abspath(folder)
-            print(f"Working with folder: {folder_path}")
+            logger.info(f"Working with folder: {folder_path}")
         else:
-            print("No specific folder provided. Working in the current directory.")
+            logger.info("No specific folder provided. Working in the current directory.")
             folder_path = os.getcwd()
             folder = "./"
 

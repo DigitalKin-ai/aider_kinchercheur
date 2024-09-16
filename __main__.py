@@ -14,6 +14,7 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(leve
 logger = logging.getLogger(__name__)
 
 async def run_main():
+    logger.info("Starting run_main function")
     if '--gui' in sys.argv:
         logger.debug("GUI argument detected")
         io = InputOutput(pretty=True, yes=True)
@@ -28,26 +29,36 @@ async def run_main():
         return await main(sys.argv[1:])
 
 def main_wrapper():
+    logger.info("Starting main_wrapper function")
     try:
         tracemalloc.start()
         logger.debug(f"Command line arguments: {sys.argv}")
         
-        return asyncio.run(run_main())
+        result = asyncio.run(run_main())
+        logger.info(f"run_main completed with result: {result}")
+        return result
     except Exception as e:
         logger.error(f"An error occurred: {e}")
         logger.error(f"Error details: {traceback.format_exc()}")
         return 1
     finally:
         tracemalloc.stop()
+        logger.info("main_wrapper function completed")
 
 def check_streamlit_install(io):
+    logger.info("Checking Streamlit installation")
     try:
         import streamlit
+        logger.info("Streamlit is installed")
         return True
     except ImportError:
+        logger.warning("Streamlit is not installed")
         io.tool_error("Streamlit is not installed. Please install it to use the GUI feature.")
         io.tool_output("You can install it by running: pip install streamlit")
         return False
 
 if __name__ == "__main__":
-    sys.exit(main_wrapper())
+    logger.info("Script started")
+    exit_code = main_wrapper()
+    logger.info(f"Script completed with exit code: {exit_code}")
+    sys.exit(exit_code)
