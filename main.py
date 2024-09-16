@@ -67,7 +67,12 @@ except ImportError:
     async_playwright = None
     logger.warning("Playwright is not installed. Some features may not be available.")
 
-from aider.gui import gui_main
+try:
+    from aider.gui import gui_main
+except ImportError:
+    gui_main = None
+    print("PySimpleGUI is not installed. To use the GUI feature, please install it using:")
+    print("pip install PySimpleGUI")
 from aider.io import InputOutput
 
 DEFAULT_MODEL_NAME = "o1-mini"
@@ -889,13 +894,13 @@ async def async_main():
         if '--gui' in sys.argv:
             print("Debug: GUI argument detected")  # Debug print
             io = InputOutput(pretty=True, yes=True)
-            if check_streamlit_install(io):
-                print("Debug: Streamlit is installed, launching GUI")  # Debug print
+            if gui_main is None:
+                print("Error: PySimpleGUI is not installed. Please install it to use the GUI feature.")
+                return 1
+            else:
+                print("Debug: PySimpleGUI is installed, launching GUI")  # Debug print
                 # Run the GUI
                 return await launch_gui(sys.argv)
-            else:
-                print("Debug: Streamlit is not installed")  # Debug print
-                return 1
         else:
             print("Debug: Running CLI version")  # Debug print
             # Run the regular CLI version
