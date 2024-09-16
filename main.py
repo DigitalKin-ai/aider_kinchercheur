@@ -81,7 +81,7 @@ except ImportError:
     logging.warning("PySimpleGUI is not installed. GUI features will be disabled.")
 from aider.io import InputOutput
 
-DEFAULT_MODEL_NAME = "o1-mini"
+DEFAULT_MODEL_NAME = "gpt-4o-mini"
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -550,10 +550,10 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
             if new_request_provided:
                 try:
                     from .generation import generation
-                    logger.info("Generating specifications, todolist, prompt and toolbox...")
-                    specifications, todolist, prompt, toolbox = generation(folder_path, request, role="default")
-                    io.tool_output(f"Specifications, todolist, prompt and toolbox generated for the folder: {folder_path}")
-                    logger.info("Specifications, todolist, prompt and toolbox generated")
+                    logger.info("Generating specifications, todolist...")
+                    specifications, todolist = generation(folder_path, request, role="default")
+                    io.tool_output(f"Specifications, todolist generated for the folder: {folder_path}")
+                    logger.info("Specifications, todolist generated")
                 except Exception as e:
                     logger.error(f"Error generating specifications: {e}")
                     io.tool_error(f"Error generating specifications: {e}")
@@ -676,7 +676,7 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
         try:
             while True:
                 # Add specific files from the folder
-                specific_files = ['todolist.md', 'specifications.md', 'prompt.md', 'toolbox.py']
+                specific_files = ['todolist.md', 'specifications.md']
                 added_files = []
 
                 for file in specific_files:
@@ -715,8 +715,6 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
                     'role': 'role.md',
                     'specifications': 'specifications.md',
                     'todolist': 'todolist.md',
-                    'prompt': 'prompt.md',
-                    'toolbox': 'toolbox.py',
                     'output': 'output.md'
                 }
                 file_contents = {}
@@ -753,28 +751,20 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
                 logger.info("Starting task execution process")
                 result = coder.run(with_message=f"""
                 You are an expert developer and writer tasked with completing a project. Your role and context are defined in the following files:
-                1. Role ({role}/role.md):
+                I) Role ({role}/role.md):
                 {file_contents['role']}          
-                2. Initial Request ({folder}/request.md):
+                II) Initial Request ({folder}/request.md):
                 {file_contents['request']}
-                3. Global Specifications ({folder}/specifications.md):
+                III) Global Specifications ({folder}/specifications.md):
                 {file_contents['specifications']}
-                4. Tasks to Complete ({folder}/todolist.md):
+                IV) Tasks to Complete ({folder}/todolist.md):
                 {file_contents['todolist']}
-                5. General Prompt ({folder}/prompt.md):
-                {file_contents['prompt']}
-                6. Available Toolbox ({folder}/toolbox.py):
-                {file_contents['toolbox']}
-                7. Current Mission Output ({folder}/output.md):
+                V) Current Mission Output ({folder}/output.md):
                 {file_contents['output']}
                 Process for completing tasks. YOU MUST EXECUTE ALL ACTIONS IN ONE RESPONSE:
                 0. Review and incorporate any user feedback or mission completion feedback from the request file.
                 For the first uncompleted task of the todolist:
-                1. If needed, create a prompt.md file in a mirrored directory structure of {folder}/todolist.md if it doesn't exist.
-                2. If the task is complex, break it down into sub-tasks in a new sub-folder.
-                3. Update the toolbox.py ONLY if necessary, explicitly writing commands between backticks. Ensure main.py calls these commands.
-                4. Verify command execution by checking for visible results.
-                5. **Execute the task** using the prompt, using the SEARCH / REPLACE formet.
+                5. **Execute the task**, using the SEARCH / REPLACE format.
                 6. Verify the work is explicitly visible in the output, not just marked as complete.
                 7. Confirm the outcome matches the task specifications and the work process is visible.
                 8. If the outcome is not achieved or work is not fully visible, revise the task or break it down further.
@@ -790,8 +780,6 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
                 Request: {file_contents['request']}
                 Specifications: {file_contents['specifications']}
                 Todolist: {file_contents['todolist']}
-                Prompt: {file_contents['prompt']}
-                Toolbox: {file_contents['toolbox']}
                 Current output: {file_contents['output']}
                 Repository structure:
                 {coder.get_repo_map()}

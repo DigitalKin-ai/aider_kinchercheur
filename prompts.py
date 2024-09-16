@@ -5,7 +5,7 @@
 
 # Conventional Commits text adapted from:
 # https://www.conventionalcommits.org/en/v1.0.0/#summary
-commit_system = """You are an expert software engineer.
+commit_system = """You are an expert software engineer and writer.
 Review the provided context and diffs which are about to be committed to a git repo.
 Review the diffs carefully.
 Generate a commit message for those changes.

@@ -19,7 +19,7 @@ def generation(folder_path, request, role="default"):
     os.makedirs(folder_path, exist_ok=True)
     logger.info(f"Using folder: {folder_path}")
 
-    model_name = "o1-mini"  # You can adjust the model according to your needs
+    model_name = "gpt-4o-mini"  # You can adjust the model according to your needs
 
     role_file_path = os.path.join(folder_path, role, "role.md")
     try:
@@ -40,16 +40,10 @@ def generation(folder_path, request, role="default"):
     # Generate todolist
     todolist = generate_content(model_name, roleText, "todolist", request, folder_path, specifications)
 
-    # Generate optimized prompt
-    prompt = generate_content(model_name, roleText, "prompt", request, folder_path, specifications, todolist)
+    logger.info("Generation of specifications, task list and Toolbox completed")
+    return specifications, todolist
 
-    # Generate toolbox
-    toolbox = generate_content(model_name, roleText, "toolbox", request, folder_path, specifications, todolist, prompt)
-
-    logger.info("Generation of specifications, task list, optimized prompt, and Toolbox completed")
-    return specifications, todolist, prompt, toolbox
-
-def generate_content(model_name, role, content_type, request, folder_path, specifications=None, todolist=None, prompt=None):
+def generate_content(model_name, role, content_type, request, folder_path, specifications=None, todolist=None):
     file_name = f"{content_type}.{'py' if content_type == 'toolbox' else 'md'}"
     file_path = os.path.join(folder_path, file_name)
     
@@ -59,7 +53,7 @@ def generate_content(model_name, role, content_type, request, folder_path, speci
         with open(file_path, "r", encoding="utf-8") as f:
             existing_content = f.read()
     
-    prompt = get_prompt(content_type, request, specifications, todolist, prompt, folder_path, role, existing_content)
+    prompt = get_prompt(content_type, request, specifications, todolist, folder_path, role, existing_content)
     
     logger.info(f"Sending the request for {content_type} generation")
     messages = [{"role": "user", "content": prompt}]
@@ -73,7 +67,7 @@ def generate_content(model_name, role, content_type, request, folder_path, speci
     
     return response
 
-def get_prompt(content_type, request, specifications, todolist, prompt, folder_path, role, existing_content):
+def get_prompt(content_type, request, specifications, todolist, folder_path, role, existing_content):
     base_prompt = f"""# Role
 {role}
 
@@ -129,25 +123,6 @@ Use the following markup system to structure your response:
 Specifications to respect:
 {specifications}
 """
-    elif content_type == "prompt":
-        base_prompt += f"""
-## Additional Context
-Create a complete and effective prompt that will guide an AI assistant in executing the necessary steps to achieve the objectives specified in the specifications, following the process detailed in the todolist.
-
-## Output Format
-The generated prompt should follow this structure:
-1. Introduction and context
-2. Main objective
-3. Step-by-step instructions
-4. Guidelines for verification and validation
-5. Presentation format of the final result
-
-Specifications to respect:
-{specifications}
-
-Todolist to implement:
-{todolist}
-"""
     elif content_type == "toolbox":
         base_prompt += f"""
 ## Additional Context
@@ -166,9 +141,6 @@ Specifications to respect:
 
 Todolist to implement:
 {todolist}
-
-Optimized prompt to follow:
-{prompt}
 
 Please generate a complete Python script based on this information. Do not include any text, do not preface with "```python". The answer should be the functional python code only.
 """
@@ -195,13 +167,13 @@ if __name__ == "__main__":
     folder_path = os.path.abspath(folder)
     
     try:
-        specifications, todolist, prompt, toolbox = generation(folder_path, request, role)
+        specifications, todolist = generation(folder_path, request, role)
         logger.info(f"Generation completed for folder: {folder_path}")
         
-        for content_type in ["specifications", "todolist", "prompt", "toolbox"]:
+        for content_type in ["specifications", "todolist"]:
             print(f"{content_type.capitalize()} generated and saved in {os.path.join(folder_path, f'{content_type}.{'py' if content_type == 'toolbox' else 'md'}')}")
         
-        for content_type, content in [("Specifications", specifications), ("Todolist", todolist), ("Prompt", prompt), ("Toolbox", toolbox)]:
+        for content_type, content in [("Specifications", specifications), ("Todolist", todolist)]:
             print(f"\n{content_type} content:")
             print(content)
         
