@@ -131,3 +131,59 @@ projects like django, scikitlearn, matplotlib, etc.
 - *Hands down, this is the best AI coding assistant tool so far.* -- [IndyDevDan](https://www.youtube.com/watch?v=MPYFPvxfGZs)
 - *[aider] changed my daily coding workflows. It's mind-blowing how a single Python application can change your life.* -- [maledorak](https://discord.com/channels/1131200896827654144/1131200896827654149/1258453375620747264)
 - *Best agent for actual dev work in existing codebases.* -- [Nick Dobos](https://twitter.com/NickADobos/status/1690408967963652097?s=20)
+# Aider Project
+
+## Installation
+
+To install this project, follow these steps:
+
+1. Clone the repository:
+   ```
+   git clone https://github.com/yourusername/aider.git
+   cd aider
+   ```
+
+2. Create a virtual environment (optional but recommended):
+   ```
+   python -m venv venv
+   source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
+   ```
+
+3. Install the required packages:
+   ```
+   pip install -r requirements.txt
+   ```
+
+4. Install Playwright (for web scraping features):
+   ```
+   python -m playwright install
+   ```
+
+5. Install PySimpleGUI (for GUI features):
+   ```
+   pip install PySimpleGUI
+   ```
+
+6. Set up environment variables:
+   Create a `.env` file in the project root and add your OpenAI API key:
+   ```
+   OPENAI_API_KEY=your_api_key_here
+   ```
+
+7. Run the application:
+   ```
+   python -m aider
+   ```
+
+For GUI mode, use:
+```
+python -m aider --gui
+```
+
+## Requirements
+
+- Python 3.7+
+- Git
+- OpenAI API key
+
+See `requirements.txt` for a full list of Python package dependencies.
