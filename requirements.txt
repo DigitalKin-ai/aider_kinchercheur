@@ -220,3 +220,5 @@ yarl==1.9.4
     # via aiohttp
 zipp==3.20.0
     # via importlib-metadata
+openai==0.27.8
+litellm==0.1.590

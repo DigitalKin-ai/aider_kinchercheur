@@ -22,8 +22,15 @@ from aider.coders import Coder
 from aider.commands import Commands, SwitchCoder
 from aider.history import ChatSummary
 from aider.io import InputOutput
-from aider.llm import litellm  # noqa: F401; properly init litellm on launch
 from aider.repo import GitRepo
+
+# Handle potential import errors
+try:
+    from aider.llm import litellm  # noqa: F401; properly init litellm on launch
+except ImportError:
+    print("Error importing litellm. Please ensure you have the correct versions of openai and litellm installed.")
+    print("You can update them by running: pip install -r requirements.txt")
+    sys.exit(1)
 import asyncio
 import subprocess
 import sys
