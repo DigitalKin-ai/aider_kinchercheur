@@ -56,6 +56,10 @@ click==8.1.7
     # via
     #   aider-chat
     #   litellm
+colorama==0.4.6
+    # via
+    #   click
+    #   tqdm
 configargparse==1.7
     # via aider-chat
 diff-match-patch==20230430

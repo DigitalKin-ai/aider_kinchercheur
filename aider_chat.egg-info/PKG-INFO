@@ -59,7 +59,6 @@ Requires-Dist: mdurl==0.1.2
 Requires-Dist: multidict==6.0.5
 Requires-Dist: networkx==3.2.1
 Requires-Dist: numpy==1.26.4
-Requires-Dist: openai==1.41.0
 Requires-Dist: packaging==24.1
 Requires-Dist: pathspec==0.12.1
 Requires-Dist: pillow==10.4.0

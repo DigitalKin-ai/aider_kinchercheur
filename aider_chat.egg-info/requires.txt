@@ -40,7 +40,6 @@ mdurl==0.1.2
 multidict==6.0.5
 networkx==3.2.1
 numpy==1.26.4
-openai==1.41.0
 packaging==24.1
 pathspec==0.12.1
 pillow==10.4.0

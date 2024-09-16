@@ -32,4 +32,5 @@ aider*
 
 dist/
 build/
-cache/
+cache/**/*.pyc
+**/*.pyc
