@@ -17,6 +17,11 @@ async def run_main():
     logger.info("Starting run_main function")
     if '--gui' in sys.argv:
         logger.debug("GUI argument detected")
+        if gui_main is None:
+            logger.error("GUI mode requested but PySimpleGUI is not installed.")
+            print("Error: PySimpleGUI is not installed. Please install it to use the GUI feature.")
+            print("You can install it by running: pip install PySimpleGUI")
+            return 1
         io = InputOutput(pretty=True, yes=True)
         if check_streamlit_install(io):
             logger.debug("Streamlit is installed, launching GUI")
