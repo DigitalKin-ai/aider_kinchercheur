@@ -6,6 +6,7 @@ import queue
 import re
 import io
 import time
+import locale
 
 def install_package(package):
     try:
@@ -31,12 +32,25 @@ class EncodingSetup:
     @staticmethod
     def setup():
         try:
+            # Force UTF-8 encoding for input and output
+            sys.stdin = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8', errors='replace', line_buffering=True)
+            sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace', line_buffering=True)
+            sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace', line_buffering=True)
+
+            # Set the default encoding to UTF-8
+            sys.setdefaultencoding('utf-8')
+
+            # Set the locale to use UTF-8
+            locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
+
+            # Check if the terminal supports UTF-8
             if sys.stdout.encoding.lower() != 'utf-8':
-                sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace', line_buffering=True)
-            if sys.stderr.encoding.lower() != 'utf-8':
-                sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace', line_buffering=True)
+                print("Warning: Your terminal might not support UTF-8 encoding. Some characters may not display correctly.")
         except Exception as e:
             print(f"Error setting up encoding: {e}")
+        
+        # Test UTF-8 output
+        print("Testing UTF-8 output: é à ç ñ")
 
 class ColorHandler:
     COLORS = {

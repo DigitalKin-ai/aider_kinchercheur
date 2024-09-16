@@ -20,6 +20,9 @@ DEFAULT_MODEL_NAME = "gpt-4o"
 ANTHROPIC_BETA_HEADER = "max-tokens-3-5-sonnet-2024-07-15,prompt-caching-2024-07-31"
 
 OPENAI_MODELS = """
+o1-mini
+o1-preview
+o1
 gpt-4
 gpt-4o
 gpt-4o-2024-05-13
@@ -178,6 +181,34 @@ MODEL_SETTINGS = [
         "gpt-4o-mini",
         "whole",
         weak_model_name="gpt-4o-mini",
+        accepts_images=True,
+        lazy=True,
+        reminder_as_sys_msg=True,
+    ),
+    ModelSettings(
+        "o1-preview",
+        "diff",
+        weak_model_name="o1-mini",
+        use_repo_map=True,
+        send_undo_reply=True,
+        accepts_images=True,
+        lazy=True,
+        reminder_as_sys_msg=True,
+    ),
+    ModelSettings(
+        "o1",
+        "diff",
+        weak_model_name="o1-mini",
+        use_repo_map=True,
+        send_undo_reply=True,
+        accepts_images=True,
+        lazy=True,
+        reminder_as_sys_msg=True,
+    ),
+    ModelSettings(
+        "o1-mini",
+        "whole",
+        weak_model_name="o1-mini",
         accepts_images=True,
         lazy=True,
         reminder_as_sys_msg=True,
@@ -442,7 +473,7 @@ class Model:
         if max_input_tokens < 32 * 1024:
             self.max_chat_history_tokens = 1024
         else:
-            self.max_chat_history_tokens = 2 * 1024
+            self.max_chat_history_tokens = 3 * 1024
 
         self.configure_model_settings(model)
         if weak_model is False:
@@ -493,7 +524,7 @@ class Model:
             self.send_undo_reply = True
             return  # <--
 
-        if "gpt-4" in model or "claude-3-opus" in model:
+        if "gpt-4" in model or "claude-3-opus" or "o1" in model:
             self.edit_format = "diff"
             self.use_repo_map = True
             self.send_undo_reply = True

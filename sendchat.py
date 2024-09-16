@@ -73,6 +73,27 @@ def simple_send_with_retries(
     messages: List[Dict[str, Any]], 
     extra_headers: Optional[Dict[str, str]] = None,
     **kwargs
+) -> Dict[str, Any]:
+    try:
+        return litellm.completion(
+            model=model_name,
+            messages=messages,
+            extra_headers=extra_headers,
+            **kwargs
+        )
+    except litellm.BadRequestError as e:
+        raise ValueError("Bad Request: " + str(e))
+    except Exception as e:
+        if hasattr(e, 'status_code') and e.status_code == 400:
+            raise ValueError("Bad Request: " + str(e))
+        else:
+            raise
+
+def send_with_retries(
+    model_name: str, 
+    messages: List[Dict[str, Any]], 
+    extra_headers: Optional[Dict[str, str]] = None,
+    **kwargs
 ) -> str:
     max_retries = 5
     retry_delay = 1

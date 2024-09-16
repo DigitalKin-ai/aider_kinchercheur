@@ -104,7 +104,7 @@ Specifications should be detailed, structured, and clear. Include a summary tabl
 2. HTML summary table (if applicable)
 
 Specifications to respect:
-{specifications}
+{specifications if specifications else "No specifications provided yet."}
 """
     elif content_type == "todolist":
         base_prompt += f"""
@@ -171,8 +171,7 @@ if __name__ == "__main__":
         logger.info(f"Generation completed for folder: {folder_path}")
         
         for content_type in ["specifications", "todolist"]:
-            print(f"{content_type.capitalize()} generated and saved in {os.path.join(folder_path, f'{content_type}.{'py' if content_type == 'toolbox' else 'md'}')}")
-        
+            print(f"{content_type.capitalize()} generated and saved in {os.path.join(folder_path, f'{content_type}.{'py' if content_type == 'toolbox' else 'md'}')}")    
         for content_type, content in [("Specifications", specifications), ("Todolist", todolist)]:
             print(f"\n{content_type} content:")
             print(content)
