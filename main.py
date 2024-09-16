@@ -23,6 +23,26 @@ from aider.history import ChatSummary
 from aider.io import InputOutput
 from aider.llm import litellm  # noqa: F401; properly init litellm on launch
 from aider.repo import GitRepo
+import asyncio
+import subprocess
+import sys
+
+async def install_playwright():
+    try:
+        print("Installing Playwright...")
+        process = await asyncio.create_subprocess_exec(
+            sys.executable, '-m', 'playwright', 'install', '--with-deps', 'chromium',
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        stdout, stderr = await process.communicate()
+        if process.returncode == 0:
+            print("Playwright installed successfully.")
+        else:
+            print(f"Error installing Playwright: {stderr.decode()}")
+    except Exception as e:
+        print(f"An error occurred while installing Playwright: {e}")
+
 from playwright.async_api import async_playwright
 from aider.gui import gui_main
 from aider.io import InputOutput
