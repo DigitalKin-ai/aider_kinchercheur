@@ -61,7 +61,12 @@ async def install_playwright():
     except Exception as e:
         print(f"An error occurred while installing Playwright: {e}")
 
-from playwright.async_api import async_playwright
+try:
+    from playwright.async_api import async_playwright
+except ImportError:
+    async_playwright = None
+    logger.warning("Playwright is not installed. Some features may not be available.")
+
 from aider.gui import gui_main
 from aider.io import InputOutput
 
@@ -424,6 +429,10 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
             else:
                 logger.warning("Streamlit not installed, cannot launch GUI")
                 return 1
+
+        # If Playwright is not available, we can still continue with other functionalities
+        if not async_playwright:
+            logger.info("Continuing without Playwright. Some features may be limited.")
 
         if force_git_root:
             git_root = force_git_root
