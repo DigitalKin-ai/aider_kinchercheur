@@ -8,7 +8,11 @@ from pathlib import Path
 import asyncio
 
 import git
-from playwright.async_api import async_playwright
+
+try:
+    from playwright.async_api import async_playwright
+except ImportError:
+    async_playwright = None
 
 from aider.dump import dump  # noqa: F401
 

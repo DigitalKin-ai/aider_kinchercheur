@@ -395,8 +395,17 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
         tracemalloc.start()
         logger.debug(f"Command line arguments: {sys.argv}")
 
-        # Install Playwright
-        await install_playwright()
+        # Check if Playwright is installed
+        if async_playwright:
+            # Install Playwright
+            await install_playwright()
+
+            # Initialize Playwright
+            async with async_playwright() as p:
+                browser = await p.chromium.launch()
+                page = await browser.new_page()
+        else:
+            logger.warning("Playwright is not installed. Some features may not be available.")
 
         # Check if --gui argument is present
         if argv is not None and '--gui' in argv:
@@ -404,11 +413,6 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
                 return await launch_gui(argv)
             else:
                 return 1
-
-        # Initialize Playwright
-        async with async_playwright() as p:
-            browser = await p.chromium.launch()
-            page = await browser.new_page()
 
         if force_git_root:
             git_root = force_git_root
