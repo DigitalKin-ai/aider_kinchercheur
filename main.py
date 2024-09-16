@@ -854,15 +854,25 @@ async def install_playwright():
     try:
         print("Installing Playwright...")
         process = await asyncio.create_subprocess_exec(
-            sys.executable, '-m', 'playwright', 'install', '--with-deps', 'chromium',
+            sys.executable, '-m', 'pip', 'install', 'playwright',
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE
         )
         stdout, stderr = await process.communicate()
         if process.returncode == 0:
-            print("Playwright installed successfully.")
+            print("Playwright package installed successfully.")
+            process = await asyncio.create_subprocess_exec(
+                sys.executable, '-m', 'playwright', 'install', '--with-deps', 'chromium',
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE
+            )
+            stdout, stderr = await process.communicate()
+            if process.returncode == 0:
+                print("Playwright browser installed successfully.")
+            else:
+                print(f"Error installing Playwright browser: {stderr.decode()}")
         else:
-            print(f"Error installing Playwright: {stderr.decode()}")
+            print(f"Error installing Playwright package: {stderr.decode()}")
     except Exception as e:
         print(f"An error occurred while installing Playwright: {e}")
 
