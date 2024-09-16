@@ -146,8 +146,6 @@ pygments==2.18.0
     # via
     #   pypager
     #   rich
-playwright==1.42.0
-    # via -r requirements/requirements.in
 pypager==3.0.1
     # via -r requirements/requirements.in
 pypandoc==1.13
