@@ -71,8 +71,7 @@ try:
     from aider.gui import gui_main
 except ImportError:
     gui_main = None
-    print("PySimpleGUI is not installed. To use the GUI feature, please install it using:")
-    print("pip install PySimpleGUI")
+    logging.warning("PySimpleGUI is not installed. GUI features will be disabled.")
 from aider.io import InputOutput
 
 DEFAULT_MODEL_NAME = "o1-mini"
