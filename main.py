@@ -12,6 +12,7 @@ import threading
 from pathlib import Path
 
 import git
+from git.exc import GitCommandError
 from dotenv import load_dotenv
 from prompt_toolkit.enums import EditingMode
 
@@ -102,7 +103,7 @@ def make_new_repo(git_root, io):
     try:
         repo = git.Repo.init(git_root)
         check_gitignore(git_root, io, False)
-    except ANY_GIT_ERROR as err:  # issue #1233
+    except GitCommandError as err:  # issue #1233
         io.tool_error(f"Unable to create git repo in {git_root}")
         io.tool_output(str(err))
         return
@@ -160,7 +161,7 @@ def check_gitignore(git_root, io, ask=True):
         repo = git.Repo(git_root)
         if repo.ignored(".aider"):
             return
-    except ANY_GIT_ERROR:
+    except GitCommandError:
         pass
 
     pat = ".aider*"
@@ -347,7 +348,7 @@ def sanity_check_repo(repo, io):
     try:
         repo.get_tracked_files()
         return True
-    except ANY_GIT_ERROR as exc:
+    except GitCommandError as exc:
         error_msg = str(exc)
 
         if "version in (1, 2)" in error_msg:
