@@ -751,24 +751,41 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
                 logger.info("Starting task execution process")
                 result = coder.run(with_message=f"""
                 You are an expert developer and writer tasked with completing a project. Your role and context are defined in the following files:
+                                   
                 I) Role ({role}/role.md):
-                {file_contents['role']}          
+                ````
+                {file_contents['role']}
+                ````
+
                 II) Initial Request ({folder}/request.md):
+                ````
                 {file_contents['request']}
+                ````
+
                 III) Global Specifications ({folder}/specifications.md):
+                ````
                 {file_contents['specifications']}
+                ````
+
                 IV) Tasks to Complete ({folder}/todolist.md):
+                ````
                 {file_contents['todolist']}
+                ````
+
                 V) Current Mission Output ({folder}/output.md):
+                ````
                 {file_contents['output']}
-                Process for completing tasks. YOU MUST EXECUTE ALL ACTIONS IN ONE RESPONSE:
+                ````
+
+                Process for completing tasks. You must execute all actions in one response:
                 0. Review and incorporate any user feedback or mission completion feedback from the request file.
                 For the first uncompleted task of the todolist:
-                5. **Execute the task**, using the SEARCH / REPLACE format.
+                5. **Execute the task**, using the SEARCH / REPLACE format. The result of the mission must be put in {folder}/output.md
                 6. Verify the work is explicitly visible in the output, not just marked as complete.
                 7. Confirm the outcome matches the task specifications and the work process is visible.
                 8. If the outcome is not achieved or work is not fully visible, revise the task or break it down further.
                 9. Update the task status in {folder}/todolist.md upon successful completion.
+
                 Remember: Avoid hallucinations. Only report on actions you've actually taken and results you can verify.
                 """)
 
@@ -776,17 +793,42 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
                 command_choice = coder.run(with_message=f"""
                 Based on the current state of the project, choose a terminal command to run.
                 Consider the following context:
-                Role: {file_contents['role']}
-                Request: {file_contents['request']}
-                Specifications: {file_contents['specifications']}
-                Todolist: {file_contents['todolist']}
-                Current output: {file_contents['output']}
+                                           
+                I) Role ({role}/role.md):
+                ````
+                {file_contents['role']}
+                ````
+
+                II) Initial Request ({folder}/request.md):
+                ````
+                {file_contents['request']}
+                ````
+
+                III) Global Specifications ({folder}/specifications.md):
+                ````
+                {file_contents['specifications']}
+                ````
+
+                IV) Tasks to Complete ({folder}/todolist.md):
+                ````
+                {file_contents['todolist']}
+                ````
+
+                V) Current Mission Output ({folder}/output.md):
+                ````
+                {file_contents['output']}
+                ````
+
                 Repository structure:
                 {coder.get_repo_map()}
+
                 Choose a terminal command that would be most helpful for progressing the project.
-                The command should be an appropriate shell command for the current operating system.
-                Provide a brief explanation of why you chose this command.
-                Your response should be in the format:
+                Additional instructions:
+                - The command should be an appropriate shell command for the current operating system
+                - Do dot change the git branch
+                - If no command is needed, just echo relevant infos
+                - Provide a brief explanation of why you chose this command
+                - Your response should be in the format:
                 Command: <your_chosen_command>
                 Explanation: <your_explanation>
                 """)
