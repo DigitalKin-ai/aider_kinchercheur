@@ -6,7 +6,6 @@ import traceback
 import sys
 import logging
 from aider.main import main
-from aider.gui import gui_main
 from aider.io import InputOutput
 
 # Configuration du logging
@@ -17,7 +16,9 @@ async def run_main():
     logger.info("Starting run_main function")
     if '--gui' in sys.argv:
         logger.debug("GUI argument detected")
-        if gui_main is None:
+        try:
+            from aider.gui import gui_main
+        except ImportError:
             logger.error("GUI mode requested but PySimpleGUI is not installed.")
             print("Error: PySimpleGUI is not installed. Please install it to use the GUI feature.")
             print("You can install it by running: pip install PySimpleGUI")
