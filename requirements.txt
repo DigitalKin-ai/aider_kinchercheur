@@ -124,6 +124,8 @@ pathspec==0.12.1
     #   grep-ast
 pillow==10.4.0
     # via -r requirements/requirements.in
+playwright==1.42.0
+    # via -r requirements/requirements.in
 prompt-toolkit==3.0.47
     # via
     #   -r requirements/requirements.in
