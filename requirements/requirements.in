@@ -12,6 +12,7 @@ pathspec
 diskcache
 grep_ast
 packaging
+playwright
 sounddevice
 soundfile
 beautifulsoup4
