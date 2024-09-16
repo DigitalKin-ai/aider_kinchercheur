@@ -836,9 +836,9 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
             if switch.kwargs.get("show_announcements") is not False:
                 coder.show_announcements()
         except Exception as e:
-            logger.error(f"An error occurred in async_main: {str(e)}")
-            logger.error(traceback.format_exc())
-            return 1
+            print(f"An error occurred: {str(e)}", file=sys.stderr)
+            if 'io' in locals():
+                io.tool_error(f"An error occurred: {str(e)}")
         finally:
             tracemalloc.stop()
 

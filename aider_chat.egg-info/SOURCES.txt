@@ -3,6 +3,7 @@ README.md
 pyproject.toml
 requirements.txt
 setup.py
+./aider/__version__.py
 ./aider/aider/__init__.py
 ./aider/aider/__main__.py
 ./aider/aider/__version__.py
@@ -91,6 +92,7 @@ setup.py
 ./aider/tests/fixtures/sample-code-base/sample.py
 ./aider/tests/help/test_help.py
 ./aider/tests/scrape/test_scrape.py
+aider/__version__.py
 aider/aider/__init__.py
 aider/aider/__main__.py
 aider/aider/__version__.py
