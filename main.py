@@ -780,7 +780,7 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
                 Process for completing tasks. You must execute all actions in one response:
                 0. Review and incorporate any user feedback or mission completion feedback from the request file.
                 For the first uncompleted task of the todolist:
-                5. **Execute the task**, using the SEARCH / REPLACE format. The result of the mission must be put in {folder}/output.md
+                5. **Execute the task**, using the SEARCH / REPLACE format. All text necessary to complete the mission should be included in {folder}/output.md
                 6. Verify the work is explicitly visible in the output, not just marked as complete.
                 7. Confirm the outcome matches the task specifications and the work process is visible.
                 8. If the outcome is not achieved or work is not fully visible, revise the task or break it down further.
