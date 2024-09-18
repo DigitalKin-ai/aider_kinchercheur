@@ -361,7 +361,7 @@ def safe_read_files(fnames):
 
 async def litellm_completion(model, messages, **kwargs):
     """
-    Performs a LiteLLM completion with error handling and retry logic.
+    Performs a LiteLLM completion with enhanced error handling and retry logic.
     """
     async with httpx.AsyncClient() as client:
         url = "https://api.openai.com/v1/chat/completions"
@@ -375,9 +375,21 @@ async def litellm_completion(model, messages, **kwargs):
             **kwargs
         }
         
-        try:
-            response = await safe_http_request(client, "POST", url, json=data, headers=headers)
-            return response.json()
-        except Exception as e:
-            print(f"Error during LiteLLM completion: {e}")
-            return None
+        for attempt in range(MAX_RETRIES):
+            try:
+                response = await safe_http_request(client, "POST", url, json=data, headers=headers)
+                return response.json()
+            except httpx.ReadError as e:
+                if "ResponseEnded" in str(e):
+                    print(f"Attempt {attempt + 1}/{MAX_RETRIES}: Response ended prematurely. Retrying...")
+                    await asyncio.sleep(RETRY_DELAY * (attempt + 1))
+                else:
+                    raise
+            except Exception as e:
+                print(f"Error during LiteLLM completion: {e}")
+                if attempt == MAX_RETRIES - 1:
+                    return None
+                await asyncio.sleep(RETRY_DELAY * (attempt + 1))
+        
+        print("Max retries reached. Unable to complete the request.")
+        return None
