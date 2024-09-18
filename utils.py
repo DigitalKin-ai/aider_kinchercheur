@@ -6,6 +6,8 @@ import tempfile
 import time
 from pathlib import Path
 import asyncio
+import httpx
+import backoff
 
 import git
 
@@ -17,6 +19,9 @@ except ImportError:
 from aider.dump import dump  # noqa: F401
 
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif", ".bmp", ".tiff", ".webp"}
+
+MAX_RETRIES = 3
+RETRY_DELAY = 1
 
 
 class IgnorantTemporaryDirectory:
@@ -323,6 +328,23 @@ def is_ignored_file(file_path):
         return False
 
     return check_ignore_file('.gitignore') or check_ignore_file('.aiderignore')
+
+@backoff.on_exception(backoff.expo, httpx.HTTPError, max_tries=MAX_RETRIES)
+async def safe_http_request(client, method, url, **kwargs):
+    """
+    Performs an HTTP request with retry logic and error handling.
+    """
+    try:
+        response = await client.request(method, url, **kwargs)
+        response.raise_for_status()
+        return response
+    except httpx.HTTPError as e:
+        print(f"HTTP error occurred: {e}")
+        raise
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        raise
+
 def safe_read_files(fnames):
     """
     Lit en toute sécurité le contenu des fichiers spécifiés.
@@ -336,3 +358,26 @@ def safe_read_files(fnames):
         except Exception as e:
             print(f"Erreur lors de la lecture du fichier {fname}: {e}")
     return contents
+
+async def litellm_completion(model, messages, **kwargs):
+    """
+    Performs a LiteLLM completion with error handling and retry logic.
+    """
+    async with httpx.AsyncClient() as client:
+        url = "https://api.openai.com/v1/chat/completions"
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {os.environ.get('OPENAI_API_KEY')}"
+        }
+        data = {
+            "model": model,
+            "messages": messages,
+            **kwargs
+        }
+        
+        try:
+            response = await safe_http_request(client, "POST", url, json=data, headers=headers)
+            return response.json()
+        except Exception as e:
+            print(f"Error during LiteLLM completion: {e}")
+            return None
