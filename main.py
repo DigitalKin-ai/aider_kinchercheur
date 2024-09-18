@@ -471,7 +471,7 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
         message = args.message
         request = getattr(args, 'request', None)
         append_request = getattr(args, 'append_request', None)
-        new_request_provided = request is not None
+        new_request_provided = request is not None or append_request is not None
 
         if argv is not None and '--folder' in argv:
             folder = args.folder
@@ -526,6 +526,7 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
                     elif request.strip() == existing_request:
                         io.tool_output("The request is identical to the one already present. No need to regenerate the specifications.")
                         logger.info("Request is identical, skipping regeneration")
+                        new_request_provided = False
                     else:
                         # Save the new request
                         with open(request_file, 'w', encoding='utf-8') as f:
@@ -546,6 +547,25 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
                     logger.error(f"Error creating request file: {e}")
                     io.tool_error(f"Error creating request file: {e}")
 
+            # Add the append_request to the end of the request file if it's present
+            if append_request:
+                try:
+                    # Create the file if it doesn't exist
+                    if not request_file.exists():
+                        with open(request_file, 'w', encoding='utf-8') as f:
+                            f.write("")
+                        io.tool_output(f"Created a new request file: {request_file}")
+                        logger.info(f"Created new request file: {request_file}")
+                    
+                    # Append the request
+                    with open(request_file, 'a', encoding='utf-8') as f:
+                        f.write(f"\n\n{append_request}")
+                    io.tool_output(f"Append request added to the end of the request file: {request_file}")
+                    logger.info(f"Append request added to {request_file}")
+                except Exception as e:
+                    logger.error(f"Error appending request to request file: {e}")
+                    io.tool_error(f"Error appending request to request file: {e}")
+
             # Generate new only if a new request is provided via command line
             if new_request_provided:
                 try:
@@ -559,17 +579,6 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
                     io.tool_error(f"Error generating specifications: {e}")
             else:
                 logger.info("No new request provided via command line, skipping specification generation")
-
-            # Add the append_request to the end of the request file if it's present
-            if append_request:
-                try:
-                    with open(request_file, 'a', encoding='utf-8') as f:
-                        f.write(f"\n\n{append_request}")
-                    io.tool_output(f"Append request added to the end of the request file: {request_file}")
-                    logger.info(f"Append request added to {request_file}")
-                except Exception as e:
-                    logger.error(f"Error appending request to request file: {e}")
-                    io.tool_error(f"Error appending request to request file: {e}")
         except Exception as e:
             logger.error(f"Unexpected error in file operations: {e}")
             io.tool_error(f"An unexpected error occurred: {e}")
