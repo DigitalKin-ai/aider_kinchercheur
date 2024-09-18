@@ -790,7 +790,7 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
                 """)
 
                 # Choose and run a terminal command
-                command_choice = coder.run(with_message=f"""
+                '''command_choice = coder.run(with_message=f"""
                 Based on the current state of the project, choose a terminal command to run.
                 Consider the following context:
                                            
@@ -862,6 +862,7 @@ async def main(argv=None, input=None, output=None, force_git_root=None, return_c
                         io.tool_error(f"An error occurred while executing the command: {str(e)}")
                 else:
                     io.tool_error("No valid command was chosen.")
+                    '''
 
             io.tool_output("Process completed.")
 
